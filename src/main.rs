@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Result;
 
-// NESのROM(バイナリ)をわかりやすく構造体にしたもの。
+// NESのROM(バイナリ)情報を保存する構造体。
 // バイナリの構成については以下を参照l。
 // https://wiki.nesdev.org/w/index.php/INES
 // https://wiki.nesdev.org/w/index.php?title=NES_2.0
@@ -84,10 +84,12 @@ fn parse_nesrom(rom: &Vec<u8>) -> Box<NesRom>
     // 対応するファイルのフォーマットは NES2.0 とする(つまりiNESもサポート)。
     // https://wiki.nesdev.org/w/index.php?title=NES_2.0
 
+    const HEADER_LEN: usize = 16;
+
     // バイト 0-4
     let header = 
-        if rom.len() >= 16 {
-            &rom[..16]
+        if rom.len() >= HEADER_LEN {
+            &rom[..HEADER_LEN]
         } else {
             err_exit("header size is too short.");
         };
@@ -170,7 +172,6 @@ fn parse_nesrom(rom: &Vec<u8>) -> Box<NesRom>
         chr_nvram_size = chr_nv;
     }
 
-
     // バイト 12
     let cpu_timing = 
         if is_nes_2_0 {
@@ -190,7 +191,7 @@ fn parse_nesrom(rom: &Vec<u8>) -> Box<NesRom>
     
     // 当面は無視
     // バイト 14
-    let misc_rom_count =
+    let misc_rom_count = 
         if is_nes_2_0 {
             parse_flag14_v2(header[13])
         } else {
@@ -205,6 +206,22 @@ fn parse_nesrom(rom: &Vec<u8>) -> Box<NesRom>
         } else {
             0
         };
+
+    const TRAINLER_LEN: usize = 512;
+    let mut index = HEADER_LEN;
+
+    // トレーナー領域
+    let trainer: Option<&[u8]> = 
+        if has_trainer {
+            let start = index;
+            index += TRAINLER_LEN;
+            Some(&rom[start..TRAINLER_LEN])
+        } else {
+            None
+        };
+    
+    // PRG-ROM領域
+
 
     Box::new(NesRom {
         prg_rom: &[&[0]],
