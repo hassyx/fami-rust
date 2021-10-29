@@ -57,56 +57,15 @@ pub enum CPUTiming {
     Dendy,
 }
 
-pub fn load_from_file(path: &str) -> Result<&NesRom, Box<dyn Error>> {
-    /*
-    let file = File::open(path)?;
-    let mut buf = Vec::new();
+pub fn load_from_file(path: &str) -> Result<Box<NesRom>, Box<dyn Error>> {
+    
+    let mut file = File::open(path)?;
+    let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;
-    parse_nesrom(&buf)
-    */
-
-    let buf = || -> std::io::Result<Vec<u8>> {
-        let mut file = File::open(path)?;
-        let mut buf = Vec::new();
-        file.read_to_end(&mut buf)?;
-        Ok(buf)
-    }()?;
-
-    parse_nesrom(&buf)
+    Ok(parse_nesrom(&buf)?)
 }
 
-/*
-fn fuga() -> &Vec<i32> {
-    let v = Vec::new();
-    v.push(1);
-    let x = hoge(&v);
-    x
-}
-*/
-
-fn hoge<'a>(x: &Vec<i32>) -> &Vec<i32> {
-    let mut v = Vec::new();
-    v.push(1i32);
-    &v
-}
-
-/*
-fn hoge(x: &Vec<i32>) -> Box<Vec<i32>> {
-    let mut v = Vec::new();
-    v.push(1i32);
-    Box::new(v)
-}
-*/
-
-/*
-fn hoge() -> Box<Vec<i32>> {
-    let mut v = Vec::new();
-    v.push(1i32);
-    Box::new(v)
-}
-*/
-
-fn parse_nesrom(rom: &Vec<u8>) -> Result<&NesRom, Box<dyn Error>>
+fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>>
  {
     // NESファイルを読み込んで解析する
     // 対応するファイルのフォーマットは NES2.0 とする(つまりiNESもサポート)。
@@ -116,8 +75,8 @@ fn parse_nesrom(rom: &Vec<u8>) -> Result<&NesRom, Box<dyn Error>>
 
     // バイト 0-4
     let header = 
-        if rom.len() >= HEADER_LEN {
-            &rom[..HEADER_LEN]
+        if rom_bin.len() >= HEADER_LEN {
+            &rom_bin[..HEADER_LEN]
         } else {
             /*
             return Err(Box::new(std::io::Error::new(
@@ -250,7 +209,7 @@ fn parse_nesrom(rom: &Vec<u8>) -> Result<&NesRom, Box<dyn Error>>
         if has_trainer {
             let start = index;
             index += TRAINLER_LEN;
-            Some(&rom[start..TRAINLER_LEN])
+            Some(&rom_bin[start..TRAINLER_LEN])
         } else {
             None
         };
@@ -258,11 +217,12 @@ fn parse_nesrom(rom: &Vec<u8>) -> Result<&NesRom, Box<dyn Error>>
     // PRG-ROM領域
 
 
-    Result::Ok(&NesRom {
+
+    Result::Ok(Box::new(NesRom {
         prg_rom: &[&[0]],
         chr_rom: &[&[0]],
-    })
-}
+    }))
+ }
 
 fn parse_flag6(flags: u8) -> (NameTableMirroring, bool, bool, u8) {
     // Flags 6
