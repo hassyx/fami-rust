@@ -12,11 +12,10 @@ use crate::util;
 /// バイナリの構成については以下を参照。
 /// https://wiki.nesdev.org/w/index.php/INES
 /// https://wiki.nesdev.org/w/index.php?title=NES_2.0
-pub struct NesRom<'a> {
-    prg_rom: &'a[&'a[u8]],
-    chr_rom: &'a[&'a[u8]],
-    /*
-    trainer: &'a[u8],
+pub struct NesRom {
+    prg_rom: Vec<u8>,
+    chr_rom: Vec<u8>,
+    trainer: Option<Vec<u8>>,
     mirroring_type: NameTableMirroring,
     battery_backed: bool,
     console_type: ConsoleType,
@@ -29,7 +28,6 @@ pub struct NesRom<'a> {
     cpu_timing: CPUTiming,
     vssystem_type: u8,
     vshardware_type: u8,
-    */
 }
 
 pub enum NameTableMirroring {
@@ -65,7 +63,7 @@ pub fn load_from_file(path: &str) -> Result<Box<NesRom>, Box<dyn Error>> {
     Ok(parse_nesrom(&buf)?)
 }
 
-fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>>
+fn parse_nesrom(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
  {
     // NESファイルを読み込んで解析する
     // 対応するファイルのフォーマットは NES2.0 とする(つまりiNESもサポート)。
@@ -78,13 +76,6 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
         if rom_bin.len() >= HEADER_LEN {
             &rom_bin[..HEADER_LEN]
         } else {
-            /*
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::AddrInUse,
-                ""
-            )));
-            */
-
             return Err(Box::new(util::Error::Msg("header size is too short.".to_string())));
         };
 
@@ -104,7 +95,7 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
         has_trainer,
         mapper_lower) = parse_flag6(header[6]);
     // バイト 7
-    let (concole_type,
+    let (console_type,
         is_nes_2_0,
         mapper_middle) = parse_flag7(header[7]);
     
@@ -124,6 +115,7 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
     } else {
         // バイト 8
         prg_ram_size = parse_flag8(header[8]);
+        eeprom_size = 0;
         mapper_upper = 0;
         submapper = 0;
     }
@@ -136,25 +128,20 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
     };
     
     let tv_format: TvFormat;
-    let prg_rom_size: u32;
-    let chr_rom_size: u32;
+    let prg_rom_size: usize;
+    let chr_rom_size: usize;
     // バイト 9
     if is_nes_2_0 {
         let (prg_upper, chr_upper) = parse_flag9_v2(header[9]);
-        prg_rom_size =
-            if prg_upper == 0b0000_1111 {
-                // If the MSB nibble is $F, an exponent-multiplier notation is used:
-                let mm = (chr_lower & 0b0000_0011) as u32;
-                let exponent = ((chr_lower >> 2) & 0b0011_1111) as u32;
-                // 2^E *(MM*2+1) bytes.
-                2u32.pow(exponent) * (mm * 2 + 1)
-            } else {
-                (prg_upper as u32) << 8 | prg_lower as u32
-            };
+        prg_rom_size = calculate_rom_size(prg_upper, prg_lower);
+        chr_rom_size = calculate_rom_size(chr_upper, chr_lower);
+        tv_format = TvFormat::NTSC;
     } else  {
         tv_format = parse_flag9(header[9]);
-        prg_rom_size = (prg_lower as u32) * 0x4000;
-        chr_rom_size = (chr_lower as u32) * 0x2000;
+        const UNIT_OF_PRG: usize = 0x4000;
+        const UNIT_OF_CHR: usize = 0x2000;
+        prg_rom_size = (prg_lower as usize) * UNIT_OF_PRG;
+        chr_rom_size = (chr_lower as usize) * UNIT_OF_CHR;
     }
 
     let chr_ram_size: u32;
@@ -164,6 +151,9 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
         let (chr, chr_nv) = parse_flag11_v2(header[11]);
         chr_ram_size = chr;
         chr_nvram_size = chr_nv;
+    } else{
+        chr_ram_size = 0;
+        chr_nvram_size = 0;
     }
 
     // バイト 12
@@ -201,26 +191,58 @@ fn parse_nesrom<'a>(rom_bin: &Vec<u8>) -> Result<Box<NesRom<'a>>, Box<dyn Error>
             0
         };
 
-    const TRAINLER_LEN: usize = 512;
     let mut index = HEADER_LEN;
 
     // トレーナー領域
-    let trainer: Option<&[u8]> = 
+    let trainer: Option<Vec<u8>> = 
         if has_trainer {
+            const TRAINLER_LEN: usize = 512;
             let start = index;
             index += TRAINLER_LEN;
-            Some(&rom_bin[start..TRAINLER_LEN])
+            let mut dst = Vec::<u8>::with_capacity(TRAINLER_LEN);
+            dst.copy_from_slice(&rom_bin[start..TRAINLER_LEN]);
+            Some(dst)
         } else {
             None
         };
     
     // PRG-ROM領域
+    let prg_rom: Vec<u8> = {
+        let start = index;
+        index += prg_rom_size;
+        let mut dst = Vec::<u8>::with_capacity(prg_rom_size);
+        dst.copy_from_slice(&rom_bin[start..prg_rom_size]);
+        dst
+    };
+        
+    // CHR-ROM領域
+    let chr_rom: Vec<u8> = {
+        let start = index;
+        index += chr_rom_size;
+        let mut dst = Vec::<u8>::with_capacity(chr_rom_size);
+        dst.copy_from_slice(&rom_bin[start..chr_rom_size]);
+        dst
+    };
 
+    // これ以降はPlayChoice用のデータ等が存在する場合がある。
+    // ひとまず無視。
 
-
-    Result::Ok(Box::new(NesRom {
-        prg_rom: &[&[0]],
-        chr_rom: &[&[0]],
+    Ok(Box::new(NesRom {
+        prg_rom,
+        chr_rom,
+        trainer,
+        mirroring_type,
+        battery_backed,
+        console_type,
+        mapper_no,
+        prg_ram_size,
+        eeprom_size,
+        tv_format,
+        chr_ram_size,
+        chr_nvram_size,
+        cpu_timing,
+        vssystem_type,
+        vshardware_type,
     }))
  }
 
@@ -272,7 +294,7 @@ fn parse_flag7(flags: u8) -> (ConsoleType, bool, u8) {
     //   |||| ++--- NES 2.0 identifier
     //   ++++------ Mapper Number D4..D7
 
-    let concole_type = match flags & 0b0000_0011 {
+    let console_type = match flags & 0b0000_0011 {
         0b00 => ConsoleType::Nes,
         0b01 => ConsoleType::VsSystem,
         0b10 => ConsoleType::Playchoice10,
@@ -283,7 +305,7 @@ fn parse_flag7(flags: u8) -> (ConsoleType, bool, u8) {
     let is_nes_2_0 = ((flags & 0b0000_1100) >> 2) == 2;
     let mapper_upper = (flags & 0b1111_0000) >> 4;
 
-    (concole_type, is_nes_2_0, mapper_upper)
+    (console_type, is_nes_2_0, mapper_upper)
 }
 
 fn parse_flag8(flags: u8) -> u32 {
@@ -453,4 +475,17 @@ fn parse_flag15_v2(flags: u8) -> u8 {
     flags & 0b0011_1111
 }
 
-
+fn calculate_rom_size(upper: u8, lower: u8) -> usize {
+    let rom_size: usize =
+        if upper == 0b0000_1111 {
+            // If the MSB nibble is $F, an exponent-multiplier notation is used:
+            let mm = (lower & 0b0000_0011) as u32;
+            let exponent = ((lower >> 2) & 0b0011_1111) as u32;
+            // 2^E *(MM*2+1) bytes.
+            (2u32.pow(exponent) * (mm * 2 + 1)) as usize
+        } else {
+            (upper as usize) << 8 | (lower as usize)
+        };
+    
+    rom_size
+}
