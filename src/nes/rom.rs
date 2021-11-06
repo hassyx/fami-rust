@@ -60,10 +60,10 @@ pub fn load_from_file(path: &str) -> Result<Box<NesRom>, Box<dyn Error>> {
     let mut file = File::open(path)?;
     let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;
-    Ok(parse_nesrom(&buf)?)
+    Ok(parse(&buf)?)
 }
 
-fn parse_nesrom(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
+fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
  {
     // NESファイルを読み込んで解析する
     // 対応するファイルのフォーマットは NES2.0 とする(つまりiNESもサポート)。
@@ -200,7 +200,8 @@ fn parse_nesrom(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
             let start = index;
             index += TRAINLER_LEN;
             let mut dst = Vec::<u8>::with_capacity(TRAINLER_LEN);
-            dst.copy_from_slice(&rom_bin[start..TRAINLER_LEN]);
+            dst.resize(TRAINLER_LEN, 0);
+            dst.copy_from_slice(&rom_bin[start..TRAINLER_LEN+start]);
             Some(dst)
         } else {
             None
@@ -211,7 +212,8 @@ fn parse_nesrom(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
         let start = index;
         index += prg_rom_size;
         let mut dst = Vec::<u8>::with_capacity(prg_rom_size);
-        dst.copy_from_slice(&rom_bin[start..prg_rom_size]);
+        dst.resize(prg_rom_size, 0);
+        dst.copy_from_slice(&rom_bin[start..prg_rom_size+start]);
         dst
     };
         
@@ -220,7 +222,8 @@ fn parse_nesrom(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
         let start = index;
         index += chr_rom_size;
         let mut dst = Vec::<u8>::with_capacity(chr_rom_size);
-        dst.copy_from_slice(&rom_bin[start..chr_rom_size]);
+        dst.resize(chr_rom_size, 0);
+        dst.copy_from_slice(&rom_bin[start..chr_rom_size+start]);
         dst
     };
 

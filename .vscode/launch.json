@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "env": { "RUST_BACKTRACE": "1" },
             "type": "lldb",
             "request": "launch",
             "name": "Debug executable 'fami-rust'",

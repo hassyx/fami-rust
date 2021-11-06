@@ -4,26 +4,15 @@ use nes::util;
 
 fn main() {
     let path = "./ignores/donkeykong.nes";
-    let rom = match rom::load_from_file(&path) {
+    let rom = load_rom(path);
+}
+
+fn load_rom(path: &str) -> Box<rom::NesRom> {
+    match rom::load_from_file(&path) {
         Ok(bin) => bin,
         Err(err) => {
             // TODO:エラー時のメッセージをユーザーフレンドリーに
             util::err_exit(&err.to_string());
         },
-    };
-
-    
+    }
 }
-
-/*
-fn load_rom() -> Box<nes::rom::NesRom> {
-    let rom = match nesrom::load_from_file(&path) {
-        Ok(bin) => bin,
-        Err(err) => {
-            // TODO:エラー時のメッセージをユーザーフレンドリーに
-            util::err_exit(&err.to_string());
-        },
-    };
-    rom
-}
-*/
