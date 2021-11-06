@@ -6,7 +6,7 @@ use std::io::Read;
 // use std::io::Error;
 use std::error::Error;
 
-use crate::util;
+use crate::nes::util;
 
 /// NESのROM(バイナリ)情報を保存する構造体。
 /// バイナリの構成については以下を参照。
