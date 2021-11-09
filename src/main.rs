@@ -1,7 +1,9 @@
 mod nes;
+
 use nes::rom;
 use nes::util;
 use nes::cpu;
+use nes::ppu;
 
 extern crate piston_window;
 extern crate image;
@@ -10,10 +12,15 @@ use piston_window::*;
 
 fn main() {
    
-    // NESの環境を作成
+    // ROMをロード
     let path = "./ignores/donkeykong.nes";
     let rom = load_rom(path);
-    let mut cpu = cpu::CPU::default();
+
+    // PPUを初期化
+    let mut ppu = ppu::PPU::default();
+
+    // RAMとCPUを初期化
+    let mut cpu = cpu::CPU::new(ppu.registers());
     cpu.attach_rom(rom);
     cpu.power_on();
     
@@ -41,6 +48,13 @@ fn main() {
     // Start main loop.
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
+            // CPUの処理を進める
+            let cpu_clk = cpu.exec();
+            // TODO: clock_cycle * clock_freq 分、待機する。
+
+            // TODO: 3回に1回、ppuが動作する
+            let ppu_clk = ppu.exec();
+
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
 
@@ -50,6 +64,16 @@ fn main() {
                 image(&texture, c.transform, g);
                 // clear([0.5, 1.0, 0.5, 1.0], g);
             });
+        }
+
+        // 以下キーイベント処理。
+        // 場合によってはキーイベントを吸い上げても、
+        if let Some(Button::Keyboard(key)) = e.release_args() {
+
+        }
+
+        if let Some(Button::Keyboard(key)) = e.press_args() {
+
         }
     }
 }

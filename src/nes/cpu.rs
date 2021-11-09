@@ -1,6 +1,8 @@
 //! Emulated 6502.
 
+use std::rc::Rc;
 use crate::nes::rom;
+use crate::nes::mem;
 use crate::nes::ppu;
 
 // CPUは外部からは state machine として見えるべき。
@@ -9,61 +11,95 @@ use crate::nes::ppu;
 // コンストラクタで全てを設定すべきなのか、それともプロパティ的なもので
 // アクセスさせるべきなのか。Rustについてもっと調べること。
 
-pub const CLOCK_FREQ_NTSC: usize = 1789773;
-pub const CLOCK_FREQ_PAL: usize = 1662607;
-pub const REAL_RAM_SIZE: usize = 16384;
-pub const RAM_SPACE: usize = 16384;
+/// NTSC版のクロック周波数(Hz)
+pub const CLOCK_FREQ_NTSC: u32 = 1789773;
+/// PAL版のクロック周波数(Hz)
+pub const CLOCK_FREQ_PAL: u32 = 1662607;
 
 /// 6502 (RICHO 2A03)
 pub struct CPU {
-    ram: Vec<u8>,
+    ram: Box<mem::MemCon>,
     rom: Option<Box<rom::NesRom>>,
-    //ppu: ppu::PPU,
-    clock_freq: usize,
+    clock_freq: u32,
     clock_cycle: f32,
-    //regs: Registers,
+    regs: Rc<Registers>,
+    interruption: IntType,
 }
 
-struct Registers {
+#[derive(Default)]
+pub struct Registers {
     /// Accumulator
-    A: u8,
+    a: u8,
     /// Index Regeister 1
-    X: u8,
+    x: u8,
     /// Index Regeister 2
-    Y: u8,
+    y: u8,
     /// Stack Pointer
-    S: u8,
+    s: u8,
     /// Status Flag
-    P: u8,
+    p: u8,
     /// Program Counter
-    PC: u16,
+    pc: u16,
 }
 
 /// Type of interruption.
-enum IntType {
+#[derive(PartialEq, Clone, Copy)]
+pub enum IntType {
+    None,
     Reset,
     Nmi,
     Irq,
     Brk,
 }
 
-impl Default for CPU {
-    fn default() -> Self {
+impl CPU {
+
+    pub fn new(ppu_regs: Rc<ppu::Registers>) -> Self {
+        let regs = Rc::new(Registers::default());
         Self {
-            ram: vec!(0; RAM_SPACE),
+            ram: Box::new(mem::MemCon::new(
+                Rc::clone(&regs),
+                ppu_regs,
+            )),
             rom: Option::None,
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
+            interruption: IntType::None,
+            regs: Rc::clone(&regs),
         }
     }
-}
 
-impl CPU {
+    /// メモリから命令を読み込んで実行。
+    /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
+    /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
+    pub fn exec(&mut self) -> u32 {
+        // 割り込み発生していた場合はそちらに移動
+        if self.interruption != IntType::None {
+            self.interrupt(self.interruption);
+            self.interruption = IntType::None;
+            // TODO: ここで返すのは interrupt() の戻り値でいいか？
+            return 10;
+        }
 
-    pub fn execute(&self) {
-        // 命令を1つずつ読み込む。
-        // 割り込みが発生していたら実行する。
+        // メモリから命令をフェッチ
+        // そのためにはPCの値
+        //self.mem.
 
+        // 命令種別を判定
+        // メモリとレジスタの状態を変更
+
+        // 命令の完了に要するクロック数を返す
+        10
+    }
+
+    /// 割り込み
+    fn interrupt(&self, int_type: IntType) {
+        // TODO: PCの下位、上位、ステータスレジスタをスタックに積む
+        // 次に、割り込みの種類ごとに決まったアドレスを読み込み、そこにジャンプする。
+
+        // TODO: カセットのアドレスにアクセスする必要がある。
+
+        
     }
     
     /// 電源投入(リセット割り込み発生)
@@ -90,19 +126,18 @@ impl CPU {
 
     /// クロック周波数(clock_freq)を設定。
     /// 同時に clock_cycle も更新する。
-    fn set_clock_freq(&mut self, clock: usize) {
+    fn set_clock_freq(&mut self, clock: u32) {
         self.clock_freq = clock;
         self.clock_cycle = 1f32 / (self.clock_freq as f32);
     }
 
-    /// 割り込み
-    fn interrupt(&self, int_type: IntType) {
-        // TODO: PCの下位、上位、ステータスレジスタをスタックに積む
-        // 次に、割り込みの種類ごとに決まったアドレスを読み込み、そこにジャンプする。
-
-        // TODO: カセットのアドレスにアクセスする必要がある。
+    fn clock_freq(&self) -> u32 {
+        self.clock_freq
     }
 
+    fn clock_cycle(&self) -> f32 {
+        self.clock_cycle
+    }
 }
 
 
