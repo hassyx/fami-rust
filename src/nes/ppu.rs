@@ -7,15 +7,15 @@ use crate::nes::vram;
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
 
-pub struct PPU {
-    regs: Rc<Registers>,
+pub struct PPU<'a> {
+    regs: &'a Registers,
     
     /// スプライト用のメモリ(256バイト)
     /// VRAMと違い、特別な対応が必要ないのでベタな配列として扱う。
     spr_ram: Box<[u8]>,
 
     /// VRAMへのアクセスを司るコントローラ
-    vram: Box<vram::MemCon>
+    vram: Box<vram::MemCon<'a>>,
 }
 
 #[derive(Default)]
@@ -41,14 +41,13 @@ pub struct Registers {
     oam_dma: u8,
 }
 
-impl PPU {
+impl<'a> PPU<'a> {
 
-    pub fn new(rom: &Box<rom::NesRom>) -> PPU {
-        let regs = Rc::new(Registers::default());
+    pub fn new(ppu_regs: &'a Registers, rom: &'a rom::NesRom) -> PPU<'a> {
         let mut my = PPU {
-            regs: Rc::clone(&regs),
+            regs: ppu_regs,
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
-            vram: Box::new(vram::MemCon::new(Rc::clone(&regs))),
+            vram: Box::new(vram::MemCon::new(ppu_regs)),
         };
         
         {
@@ -73,11 +72,14 @@ impl PPU {
         // TODO: CPU側にVBlankを投げる必要あり。
     }
 
+    /*
     pub fn registers(&self) -> Rc<Registers> {
         Rc::clone(&self.regs)
     }
+    */
 
     pub fn power_on(&self) {
-
+        // TODO: 起動後、約29658クロック以内は書き込みを無視する必要がある
+        // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
     }
 }

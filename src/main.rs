@@ -17,12 +17,15 @@ fn main() {
     let rom = load_rom(path);
 
     // PPUを初期化
-    // VRAM側にCHR-ROMをマッピングさせるため、ROMを渡す。
-    let mut ppu = ppu::PPU::new(&rom);
+    let ppu_regs = ppu::Registers::default();
+    // VRAM側に、PPUのレジスタとROMのCHR-ROM領域をマッピングする。
+    let mut ppu = ppu::PPU::new(&ppu_regs, &rom);
     ppu.power_on();
 
-    // RAMとCPUを初期化
-    let mut cpu = cpu::CPU::new(ppu.registers(), &rom);
+    // CPUを初期化
+    let cpu_regs = cpu::Registers::default();
+    // RAMにPPUのレジスタをマッピングする。
+    let mut cpu = cpu::CPU::new(&cpu_regs, &ppu_regs, &rom);
     cpu.power_on();
     
     const window_x: u32 = 640;
@@ -33,8 +36,7 @@ fn main() {
         WindowSettings::new("Fami-Rust", (window_x, window_y))
         .exit_on_esc(true)
         .build()
-        .unwrap_or_else(|e| { panic!("Failed to build PistonWindow: {}", e) }
-    );
+        .unwrap_or_else(|e| { panic!("Failed to build PistonWindow: {}", e) });
     let mut texture_context = TextureContext {
         factory: window.factory.clone(),
         encoder: window.factory.create_command_buffer().into()

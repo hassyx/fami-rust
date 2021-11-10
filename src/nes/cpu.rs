@@ -19,28 +19,29 @@ pub const CLOCK_FREQ_NTSC: u32 = 1789773;
 pub const CLOCK_FREQ_PAL: u32 = 1662607;
 
 /// 6502 (RICHO 2A03)
-pub struct CPU {
-    ram: Box<mem::MemCon>,
+pub struct CPU<'a> {
+    rom: &'a rom::NesRom,
+    ram: Box<mem::MemCon<'a>>,
     clock_freq: u32,
     clock_cycle: f32,
-    regs: Rc<Registers>,
+    regs: Registers,
     interruption: IntType,
 }
 
 #[derive(Default)]
 pub struct Registers {
     /// Accumulator
-    a: u8,
+    pub a: u8,
     /// Index Regeister 1
-    x: u8,
+    pub x: u8,
     /// Index Regeister 2
-    y: u8,
+    pub y: u8,
     /// Stack Pointer
-    s: u8,
+    pub s: u8,
     /// Status Flag
-    p: u8,
+    pub p: u8,
     /// Program Counter
-    pc: u16,
+    pub pc: u16,
 }
 
 /// Type of interruption.
@@ -53,25 +54,26 @@ pub enum IntType {
     Brk,
 }
 
-impl CPU {
+fn mem_callback(addr: usize) {
 
-    pub fn new(ppu_regs: Rc<ppu::Registers>, rom: &Box<rom::NesRom>) -> Self {
-        let regs = Rc::new(Registers::default());
-        let mut my = Self {
-            ram: Box::new(mem::MemCon::new(
-                Rc::clone(&regs),
-                ppu_regs,
-            )),
+}
+
+impl<'a> CPU<'a> {
+    pub fn new(cpu_regs: &'a Registers, ppu_regs: &'a ppu::Registers, rom: &'a rom::NesRom) -> Self {
+        //let regs = Box::new(Registers::default());
+        let mut my = CPU {
+            rom,
+            ram: Box::new(mem::MemCon::new(cpu_regs, ppu_regs)),
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             interruption: IntType::None,
-            regs: Rc::clone(&regs),
+            regs: Registers::default(),
         };
 
         {
             // PRG-ROM を RAM に展開
             // TODO: PRG-ROMが2枚ない場合のメモリへの反映方法
-            let prg_rom = rom.prg_rom();
+            let prg_rom = my.rom.prg_rom();
             let len = rom::PRG_ROM_UNIT_SIZE;
             if prg_rom.len() >= len {
                 my.ram.raw_write(0x8000, &prg_rom[0..len]);
@@ -120,6 +122,8 @@ impl CPU {
     /// 電源投入(リセット割り込み発生)
     pub fn power_on(&mut self) {
         // レジスタとメモリの初期化
+        //self.regs.p = 0x34;
+
 
         // TODO: RAMに展開する！
 
