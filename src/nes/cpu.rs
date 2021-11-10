@@ -1,6 +1,8 @@
 //! Emulated 6502.
 
 use std::rc::Rc;
+use piston_window::PressEvent;
+
 use crate::nes::rom;
 use crate::nes::mem;
 use crate::nes::ppu;
@@ -19,7 +21,6 @@ pub const CLOCK_FREQ_PAL: u32 = 1662607;
 /// 6502 (RICHO 2A03)
 pub struct CPU {
     ram: Box<mem::MemCon>,
-    rom: Option<Box<rom::NesRom>>,
     clock_freq: u32,
     clock_cycle: f32,
     regs: Rc<Registers>,
@@ -54,19 +55,33 @@ pub enum IntType {
 
 impl CPU {
 
-    pub fn new(ppu_regs: Rc<ppu::Registers>) -> Self {
+    pub fn new(ppu_regs: Rc<ppu::Registers>, rom: &Box<rom::NesRom>) -> Self {
         let regs = Rc::new(Registers::default());
-        Self {
+        let mut my = Self {
             ram: Box::new(mem::MemCon::new(
                 Rc::clone(&regs),
                 ppu_regs,
             )),
-            rom: Option::None,
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             interruption: IntType::None,
             regs: Rc::clone(&regs),
+        };
+
+        {
+            // PRG-ROM を RAM に展開
+            // TODO: PRG-ROMが2枚ない場合のメモリへの反映方法
+            let prg_rom = rom.prg_rom();
+            let len = rom::PRG_ROM_UNIT_SIZE;
+            if prg_rom.len() >= len {
+                my.ram.raw_write(0x8000, &prg_rom[0..len]);
+            }
+            if prg_rom.len() >= (len * 2) {
+                my.ram.raw_write(0xC000, &prg_rom[len..len*2]);
+            }
         }
+
+        return my
     }
 
     /// メモリから命令を読み込んで実行。
@@ -82,7 +97,7 @@ impl CPU {
         }
 
         // メモリから命令をフェッチ
-        // そのためにはPCの値
+        // そのためにはPCの値を知る必要がある。
         //self.mem.
 
         // 命令種別を判定
@@ -103,19 +118,16 @@ impl CPU {
     }
     
     /// 電源投入(リセット割り込み発生)
-    pub fn power_on(&self) {
-        self.interrupt(IntType::Reset);
+    pub fn power_on(&mut self) {
+        // レジスタとメモリの初期化
+
+        // TODO: RAMに展開する！
+
+        self.interruption = IntType::Reset;
     }
 
     pub fn reset(&self) {
         // TODO: 電源投入時とはリセットする値がちょっと違う
-    }
-
-    pub fn attach_rom(&mut self, rom: Box<rom::NesRom>) {
-        // TODO: おそらく、romを保存する必要はない。
-        // ここにromが渡ってきた時点で、フラグに沿ってRAM空間に
-        // データを展開すればよい。
-        self.rom = Option::Some(rom);
     }
 
     /// clock で指定したクロック数分 wait を入れる。

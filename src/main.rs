@@ -17,11 +17,12 @@ fn main() {
     let rom = load_rom(path);
 
     // PPUを初期化
-    let mut ppu = ppu::PPU::default();
+    // VRAM側にCHR-ROMをマッピングさせるため、ROMを渡す。
+    let mut ppu = ppu::PPU::new(&rom);
+    ppu.power_on();
 
     // RAMとCPUを初期化
-    let mut cpu = cpu::CPU::new(ppu.registers());
-    cpu.attach_rom(rom);
+    let mut cpu = cpu::CPU::new(ppu.registers(), &rom);
     cpu.power_on();
     
     const window_x: u32 = 640;

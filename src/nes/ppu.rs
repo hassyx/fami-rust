@@ -1,6 +1,7 @@
 //! NES PPU.
 
 use std::rc::Rc;
+use crate::nes::rom;
 use crate::nes::vram;
 
 /// スプライト用メモリ容量(bytes)
@@ -40,18 +41,28 @@ pub struct Registers {
     oam_dma: u8,
 }
 
-impl Default for PPU {
-    fn default() -> Self {
+impl PPU {
+
+    pub fn new(rom: &Box<rom::NesRom>) -> PPU {
         let regs = Rc::new(Registers::default());
-        Self {
+        let mut my = PPU {
             regs: Rc::clone(&regs),
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
             vram: Box::new(vram::MemCon::new(Rc::clone(&regs))),
+        };
+        
+        {
+            // CHR-ROM を VRAM に展開
+            let chr_rom = rom.chr_rom();
+            let len = rom::CHR_ROM_UNIT_SIZE;
+            if chr_rom.len() >= len {
+                my.vram.raw_write(0x0000, &chr_rom[0..len]);
+            }
         }
-    }
-}
 
-impl PPU {
+        return my
+    }
+
     pub fn exec(&self) -> u32 {
         // 
         100
@@ -64,5 +75,9 @@ impl PPU {
 
     pub fn registers(&self) -> Rc<Registers> {
         Rc::clone(&self.regs)
+    }
+
+    pub fn power_on(&self) {
+
     }
 }

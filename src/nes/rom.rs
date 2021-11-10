@@ -8,6 +8,9 @@ use std::error::Error;
 
 use crate::nes::util;
 
+pub const PRG_ROM_UNIT_SIZE: usize = 0x4000;
+pub const CHR_ROM_UNIT_SIZE: usize = 0x2000;
+
 /// NESのROM(バイナリ)情報を保存する構造体。
 /// バイナリの構成については以下を参照。
 /// https://wiki.nesdev.org/w/index.php/INES
@@ -28,6 +31,16 @@ pub struct NesRom {
     cpu_timing: CPUTiming,
     vssystem_type: u8,
     vshardware_type: u8,
+}
+
+impl NesRom {
+    pub fn prg_rom(&self) -> &[u8] {
+        self.prg_rom.as_ref()
+    }
+
+    pub fn chr_rom(&self) -> &[u8] {
+        self.chr_rom.as_ref()
+    }
 }
 
 pub enum NameTableMirroring {
@@ -56,7 +69,6 @@ pub enum CPUTiming {
 }
 
 pub fn load_from_file(path: &str) -> Result<Box<NesRom>, Box<dyn Error>> {
-    
     let mut file = File::open(path)?;
     let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;
@@ -138,10 +150,8 @@ fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
         tv_format = TvFormat::NTSC;
     } else  {
         tv_format = parse_flag9(header[9]);
-        const UNIT_OF_PRG: usize = 0x4000;
-        const UNIT_OF_CHR: usize = 0x2000;
-        prg_rom_size = (prg_lower as usize) * UNIT_OF_PRG;
-        chr_rom_size = (chr_lower as usize) * UNIT_OF_CHR;
+        prg_rom_size = (prg_lower as usize) * PRG_ROM_UNIT_SIZE;
+        chr_rom_size = (chr_lower as usize) * CHR_ROM_UNIT_SIZE;
     }
 
     let chr_ram_size: u32;
