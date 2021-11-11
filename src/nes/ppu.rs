@@ -7,15 +7,14 @@ use crate::nes::vram;
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
 
-pub struct PPU<'a> {
-    regs: &'a Registers,
-    
+pub struct Ppu {
+    regs: Registers,
     /// スプライト用のメモリ(256バイト)
     /// VRAMと違い、特別な対応が必要ないのでベタな配列として扱う。
     spr_ram: Box<[u8]>,
-
     /// VRAMへのアクセスを司るコントローラ
-    vram: Box<vram::MemCon<'a>>,
+    vram: Box<vram::MemCon>,
+    clock_count: u64,
 }
 
 #[derive(Default)]
@@ -41,13 +40,13 @@ pub struct Registers {
     oam_dma: u8,
 }
 
-impl<'a> PPU<'a> {
-
-    pub fn new(ppu_regs: &'a Registers, rom: &'a rom::NesRom) -> PPU<'a> {
-        let mut my = PPU {
-            regs: ppu_regs,
+impl Ppu {
+    pub fn new(rom: &rom::NesRom) -> Ppu {
+        let mut my = Ppu {
+            regs: Default::default(),
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
-            vram: Box::new(vram::MemCon::new(ppu_regs)),
+            vram: Box::new(vram::MemCon::new()),
+            clock_count: 0,
         };
         
         {

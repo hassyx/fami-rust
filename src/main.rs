@@ -4,6 +4,7 @@ use nes::rom;
 use nes::util;
 use nes::cpu;
 use nes::ppu;
+use nes::mem;
 
 extern crate piston_window;
 extern crate image;
@@ -17,16 +18,16 @@ fn main() {
     let rom = load_rom(path);
 
     // PPUを初期化
-    let ppu_regs = ppu::Registers::default();
     // VRAM側に、PPUのレジスタとROMのCHR-ROM領域をマッピングする。
-    let mut ppu = ppu::PPU::new(&ppu_regs, &rom);
+    let mut ppu = ppu::Ppu::new(&rom);
     ppu.power_on();
 
+    // RAMを初期化
+    let mut ram = mem::MemCon::new(&mut ppu);
+
     // CPUを初期化
-    let cpu_regs = cpu::Registers::default();
-    // RAMにPPUのレジスタをマッピングする。
-    let mut cpu = cpu::CPU::new(&cpu_regs, &ppu_regs, &rom);
-    cpu.power_on();
+    let mut cpu = cpu::Cpu::new(&rom, &mut ram);
+    cpu.power_on(&mut ram);
     
     const window_x: u32 = 640;
     const window_y: u32 = 480;
@@ -47,6 +48,8 @@ fn main() {
         &screen,
         &TextureSettings::new()
     ).unwrap();
+
+    let clock_count: u64 = 0;
 
     // Start main loop.
     while let Some(e) = window.next() {

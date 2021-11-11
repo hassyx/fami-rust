@@ -1,6 +1,7 @@
 //! Emulated 6502.
 
-use std::rc::Rc;
+use std::io::BufRead;
+
 use piston_window::PressEvent;
 
 use crate::nes::rom;
@@ -19,13 +20,12 @@ pub const CLOCK_FREQ_NTSC: u32 = 1789773;
 pub const CLOCK_FREQ_PAL: u32 = 1662607;
 
 /// 6502 (RICHO 2A03)
-pub struct CPU<'a> {
-    rom: &'a rom::NesRom,
-    ram: Box<mem::MemCon<'a>>,
+pub struct Cpu {
     clock_freq: u32,
     clock_cycle: f32,
     regs: Registers,
     interruption: IntType,
+    clock_count: u64,
 }
 
 #[derive(Default)]
@@ -44,9 +44,19 @@ pub struct Registers {
     pub pc: u16,
 }
 
+// ステータスフラグs
+const F_CARRY: u8       = 0b0000_0001;
+const F_ZERO: u8        = 0b0000_0010;
+const F_INTERRUPT: u8   = 0b0000_0100;
+const F_DECIMAL: u8     = 0b0000_1000;
+const F_BREAK: u8       = 0b0001_0000;
+const F_RESERVED: u8    = 0b0010_0000;
+const F_OVERFLOW: u8    = 0b0100_0000;
+const F_NETIVE: u8      = 0b1000_0000;
+
 /// Type of interruption.
 #[derive(PartialEq, Clone, Copy)]
-pub enum IntType {
+enum IntType {
     None,
     Reset,
     Nmi,
@@ -54,32 +64,26 @@ pub enum IntType {
     Brk,
 }
 
-fn mem_callback(addr: usize) {
-
-}
-
-impl<'a> CPU<'a> {
-    pub fn new(cpu_regs: &'a Registers, ppu_regs: &'a ppu::Registers, rom: &'a rom::NesRom) -> Self {
-        //let regs = Box::new(Registers::default());
-        let mut my = CPU {
-            rom,
-            ram: Box::new(mem::MemCon::new(cpu_regs, ppu_regs)),
+impl Cpu {
+    pub fn new(rom: &Box<rom::NesRom>, ram: &mut mem::MemCon) -> Self {
+        let my = Cpu {
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             interruption: IntType::None,
             regs: Registers::default(),
+            clock_count: 0,
         };
 
         {
             // PRG-ROM を RAM に展開
             // TODO: PRG-ROMが2枚ない場合のメモリへの反映方法
-            let prg_rom = my.rom.prg_rom();
+            let prg_rom = rom.prg_rom();
             let len = rom::PRG_ROM_UNIT_SIZE;
             if prg_rom.len() >= len {
-                my.ram.raw_write(0x8000, &prg_rom[0..len]);
+                ram.raw_write(0x8000, &prg_rom[0..len]);
             }
             if prg_rom.len() >= (len * 2) {
-                my.ram.raw_write(0xC000, &prg_rom[len..len*2]);
+                ram.raw_write(0xC000, &prg_rom[len..len*2]);
             }
         }
 
@@ -116,22 +120,51 @@ impl<'a> CPU<'a> {
 
         // TODO: カセットのアドレスにアクセスする必要がある。
 
-        
+        // TODO: ステータスフラグの状態によっては、割り込みを無効にする必要がある。
     }
     
     /// 電源投入(リセット割り込み発生)
-    pub fn power_on(&mut self) {
+    pub fn power_on(&mut self, ram: &mut mem::MemCon) {
         // レジスタとメモリの初期化
+        self.regs.a = 0;
+        self.regs.x = 0;
+        self.regs.y = 0;
+        self.regs.s = 0xFD;
         //self.regs.p = 0x34;
+        self.regs.p = F_INTERRUPT | F_BREAK | F_RESERVED;
+        
+        enum Flags {
+            Carry       = 0b0000_0001,
+            Zero        = 0b0000_0010,
+            Interrupt   = 0b0000_0100,
+            Decimal     = 0b0000_1000,
+            Break       = 0b0001_0000,
+            Reserved    = 0b0010_0000,
+            Overflow    = 0b0100_0000,
+            Negative    = 0b1000_0000,
+        }
 
+        // APU状態のリセット
+        ram.fill(0x4000..0x400F, 0);
+        ram.fill(0x4010..0x4013, 0);
+        ram.write_b(0x4015, 0);
+        ram.write_b(0x4017, 0);
 
-        // TODO: RAMに展開する！
+        // 物理RAMの初期化
+        ram.fill(0x0000..0x07FF, 0);
+        
+        // TODO: ROMの内容をRAMに展開する！
 
         self.interruption = IntType::Reset;
     }
 
-    pub fn reset(&self) {
-        // TODO: 電源投入時とはリセットする値がちょっと違う
+    pub fn reset(&mut self) {
+        // TODO: 起動時にも、レジスタの初期化処理が走るのか？
+
+        // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
+        self.regs.s -= 3;
+        self.regs.p |= !F_INTERRUPT;
+        // APUの初期化があるが省略
     }
 
     /// clock で指定したクロック数分 wait を入れる。
