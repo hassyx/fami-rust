@@ -37,6 +37,11 @@ impl Ppu {
         return my
     }
 
+    pub fn power_on(&mut self) {
+        // TODO: 起動後、約29658クロック以内は書き込みを無視する必要がある
+        // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
+    }
+
     pub fn exec(&mut self) -> u32 {
         // 
         self.regs.status = 0;
@@ -47,22 +52,9 @@ impl Ppu {
     pub fn interrupt(&self) {
         // TODO: CPU側にVBlankを投げる必要あり。
     }
-
-    /*
-    pub fn registers(&self) -> Rc<Registers> {
-        Rc::clone(&self.regs)
-    }
-    */
-
-    pub fn power_on(&mut self) {
-        // TODO: 起動後、約29658クロック以内は書き込みを無視する必要がある
-        // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
-    }
 }
 
 #[derive(Default)]
-/// 注意点：全てのレジスタについて、CPU側から書き込み、または読み込みを行うと、バス上にあるラッチも更新される。
-/// また、書き込み専用レジスタを読み込むと、レジスタではなく、現在のラッチの値が返される。
 pub struct Registers {
     /// PPUCTRL($2000): 書き込み専用。PPU制御用のフラグレジスタ。
     pub ctrl: u8,

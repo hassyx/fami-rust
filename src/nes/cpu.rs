@@ -1,13 +1,7 @@
 //! Emulated 6502.
 
-use std::io::BufRead;
-
-use piston_window::PressEvent;
-
 use crate::nes::rom;
 use crate::nes::mem;
-
-use super::ppu_databus::PpuRegs;
 
 // CPUは外部からは state machine として見えるべき。
 // クロックも設定できるようにする。実行時であっても変えられる。
@@ -97,9 +91,6 @@ impl Cpu {
     /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
     /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
     pub fn exec(&mut self) -> u32 {
-        // TODO: テスト
-        self.ram.ppu_databus.write(PpuRegs::Status, 0);
-
         // 割り込み発生していた場合はそちらに移動
         if self.interruption != IntType::None {
             self.interrupt(self.interruption);
