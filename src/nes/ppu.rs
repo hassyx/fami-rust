@@ -1,6 +1,5 @@
 //! NES PPU.
 
-use std::rc::Rc;
 use crate::nes::rom;
 use crate::nes::vram;
 
@@ -8,36 +7,13 @@ use crate::nes::vram;
 pub const SPR_RAM_SIZE: usize = 256;
 
 pub struct Ppu {
-    regs: Registers,
+    pub regs: Registers,
     /// スプライト用のメモリ(256バイト)
     /// VRAMと違い、特別な対応が必要ないのでベタな配列として扱う。
     spr_ram: Box<[u8]>,
     /// VRAMへのアクセスを司るコントローラ
     vram: Box<vram::MemCon>,
     clock_count: u64,
-}
-
-#[derive(Default)]
-pub struct Registers {
-    /// PPUCTRL($2000): PPU制御用のフラグレジスタ
-    ctrl: u8,
-    /// PPUMASK($2001): マスク処理用のレジスタ
-    mask: u8,
-    /// PPUSTATUS ($2002): ステータスレジスタ
-    status: u8,
-    /// OAMADDR ($2003): OAM(SPR-RAM)への書き込み先アドレス設定用のレジスタ
-    oam_addr: u8,
-    /// OAMDATA ($2004): OAM(SPR-RAM)への読み書きレジスタ
-    oam_data: u8,
-    /// PPUSCROLL ($2005): スクロール位置変更用レジスタ
-    scroll: u8,
-    /// PPUADDR ($2006): VRAMへの書き込み位置の指定用レジスタ
-    addr: u8,
-    /// PPUDATA ($2007): VRAMへの書き込みと読み込み用レジスタ
-    data: u8,
-    /// OAMDMA ($4014): OAM(SPR-RAM)へのDMA転送に使用する、
-    /// source(CPU側のRAM)のアドレスを指定するレジスタ
-    oam_dma: u8,
 }
 
 impl Ppu {
@@ -61,8 +37,9 @@ impl Ppu {
         return my
     }
 
-    pub fn exec(&self) -> u32 {
+    pub fn exec(&mut self) -> u32 {
         // 
+        self.regs.status = 0;
         100
     }
 
@@ -77,8 +54,53 @@ impl Ppu {
     }
     */
 
-    pub fn power_on(&self) {
+    pub fn power_on(&mut self) {
         // TODO: 起動後、約29658クロック以内は書き込みを無視する必要がある
         // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
     }
 }
+
+#[derive(Default)]
+/// 注意点：全てのレジスタについて、CPU側から書き込み、または読み込みを行うと、バス上にあるラッチも更新される。
+/// また、書き込み専用レジスタを読み込むと、レジスタではなく、現在のラッチの値が返される。
+pub struct Registers {
+    /// PPUCTRL($2000): 書き込み専用。PPU制御用のフラグレジスタ。
+    pub ctrl: u8,
+    /// PPUMASK($2001): 書き込み専用。マスク処理用のレジスタ。
+    pub mask: u8,
+    /// PPUSTATUS ($2002): 読み込み専用。ステータスレジスタ。
+    pub status: u8,
+    /// OAMADDR ($2003): 書き込み専用。OAM(SPR-RAM)への書き込み先アドレス設定用のレジスタ。
+    pub oam_addr: u8,
+    /// OAMDATA ($2004): 読み書き可能。OAM(SPR-RAM)への読み書きレジスタ。
+    pub oam_data: u8,
+    /// PPUSCROLL ($2005): 書き込み専用。スクロール位置変更用レジスタ。
+    pub scroll: u8,
+    /// PPUADDR ($2006): 書き込み専用。VRAMへの書き込み位置の指定用レジスタ。
+    pub addr: u8,
+    /// PPUDATA ($2007): 読み書き可能。VRAMへの書き込みと読み込み用レジスタ。  
+    pub data: u8,
+    /// OAMDMA ($4014): 書き込み専用。OAM(SPR-RAM)へのDMA転送に使用する、
+    /// source(CPU側のRAM)側のアドレスを指定するレジスタ。  
+    pub oam_dma: u8,
+    /// CPUとPPUのデータ転送に利用するバス。実体は8bitのラッチ。
+    /// PPUのレジスタへ、CPU側から読み書きを行った場合に更新される。
+    pub latch: u8,
+}
+
+/*
+pub struct Reg {
+    data: u8,
+    flags: u8,
+}
+
+impl Reg {
+    const IS_READABLE: u8 = 0b0000_0001;
+    const IS_WRITABLE: u8 = 0b0000_0010;
+    
+    /// 外部デバイスからのレジスタへの書き込み
+    fn ext_write() {
+
+    }
+}
+*/

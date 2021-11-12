@@ -6,7 +6,8 @@ use piston_window::PressEvent;
 
 use crate::nes::rom;
 use crate::nes::mem;
-use crate::nes::ppu;
+
+use super::ppu_databus::PpuRegs;
 
 // CPUは外部からは state machine として見えるべき。
 // クロックも設定できるようにする。実行時であっても変えられる。
@@ -21,6 +22,7 @@ pub const CLOCK_FREQ_PAL: u32 = 1662607;
 
 /// 6502 (RICHO 2A03)
 pub struct Cpu {
+    ram: Box<mem::MemCon>,
     clock_freq: u32,
     clock_cycle: f32,
     regs: Registers,
@@ -65,8 +67,9 @@ enum IntType {
 }
 
 impl Cpu {
-    pub fn new(rom: &Box<rom::NesRom>, ram: &mut mem::MemCon) -> Self {
-        let my = Cpu {
+    pub fn new(rom: &Box<rom::NesRom>, ram: Box<mem::MemCon>) -> Self {
+        let mut my = Cpu {
+            ram,
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             interruption: IntType::None,
@@ -80,10 +83,10 @@ impl Cpu {
             let prg_rom = rom.prg_rom();
             let len = rom::PRG_ROM_UNIT_SIZE;
             if prg_rom.len() >= len {
-                ram.raw_write(0x8000, &prg_rom[0..len]);
+                my.ram.raw_write(0x8000, &prg_rom[0..len]);
             }
             if prg_rom.len() >= (len * 2) {
-                ram.raw_write(0xC000, &prg_rom[len..len*2]);
+                my.ram.raw_write(0xC000, &prg_rom[len..len*2]);
             }
         }
 
@@ -94,6 +97,9 @@ impl Cpu {
     /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
     /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
     pub fn exec(&mut self) -> u32 {
+        // TODO: テスト
+        self.ram.ppu_databus.write(PpuRegs::Status, 0);
+
         // 割り込み発生していた場合はそちらに移動
         if self.interruption != IntType::None {
             self.interrupt(self.interruption);
@@ -124,7 +130,7 @@ impl Cpu {
     }
     
     /// 電源投入(リセット割り込み発生)
-    pub fn power_on(&mut self, ram: &mut mem::MemCon) {
+    pub fn power_on(&mut self) {
         // レジスタとメモリの初期化
         self.regs.a = 0;
         self.regs.x = 0;
@@ -132,45 +138,26 @@ impl Cpu {
         self.regs.s = 0xFD;
         //self.regs.p = 0x34;
         self.regs.p = F_INTERRUPT | F_BREAK | F_RESERVED;
-        
-        enum Flags {
-            Carry       = 0b0000_0001,
-            Zero        = 0b0000_0010,
-            Interrupt   = 0b0000_0100,
-            Decimal     = 0b0000_1000,
-            Break       = 0b0001_0000,
-            Reserved    = 0b0010_0000,
-            Overflow    = 0b0100_0000,
-            Negative    = 0b1000_0000,
-        }
 
         // APU状態のリセット
-        ram.fill(0x4000..0x400F, 0);
-        ram.fill(0x4010..0x4013, 0);
-        ram.write_b(0x4015, 0);
-        ram.write_b(0x4017, 0);
+        self.ram.fill(0x4000..=0x400F, 0);
+        self.ram.fill(0x4010..=0x4013, 0);
+        self.ram.write(0x4015, 0);
+        self.ram.write(0x4017, 0);
 
         // 物理RAMの初期化
-        ram.fill(0x0000..0x07FF, 0);
-        
-        // TODO: ROMの内容をRAMに展開する！
+        self.ram.fill(0x0000..=0x07FF, 0);
 
         self.interruption = IntType::Reset;
     }
 
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self, ram: &mut mem::MemCon) {
         // TODO: 起動時にも、レジスタの初期化処理が走るのか？
 
         // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
         self.regs.s -= 3;
         self.regs.p |= !F_INTERRUPT;
         // APUの初期化があるが省略
-    }
-
-    /// clock で指定したクロック数分 wait を入れる。
-    pub fn wait(&self, clock: u32) {
-        // TODO: コンパイルオプションで (無効/有効/任意の値設定) に対応する。
-        // TODO: イベントループで待つ必要がある。
     }
 
     /// クロック周波数(clock_freq)を設定。

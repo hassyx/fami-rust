@@ -1,10 +1,14 @@
 mod nes;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use nes::rom::NesRom;
 use nes::rom;
 use nes::util;
-use nes::cpu;
-use nes::ppu;
-use nes::mem;
+use nes::cpu::Cpu;
+use nes::ppu::Ppu;
+use nes::mem::MemCon;
 
 extern crate piston_window;
 extern crate image;
@@ -19,15 +23,15 @@ fn main() {
 
     // PPUを初期化
     // VRAM側に、PPUのレジスタとROMのCHR-ROM領域をマッピングする。
-    let mut ppu = ppu::Ppu::new(&rom);
-    ppu.power_on();
+    let ppu = Rc::new(RefCell::new(Ppu::new(&rom)));
+    ppu.borrow_mut().power_on();
 
     // RAMを初期化
-    let mut ram = mem::MemCon::new(&mut ppu);
+    let ram = MemCon::new(Rc::clone(&ppu));
 
     // CPUを初期化
-    let mut cpu = cpu::Cpu::new(&rom, &mut ram);
-    cpu.power_on(&mut ram);
+    let mut cpu = Cpu::new(&rom, Box::new(ram));
+    cpu.power_on();
     
     const window_x: u32 = 640;
     const window_y: u32 = 480;
@@ -59,7 +63,7 @@ fn main() {
             // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する
-            let ppu_clk = ppu.exec();
+            let ppu_clk = ppu.borrow_mut().exec();
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
@@ -84,7 +88,7 @@ fn main() {
     }
 }
 
-fn load_rom(path: &str) -> Box<rom::NesRom> {
+fn load_rom(path: &str) -> Box<NesRom> {
     match rom::load_from_file(&path) {
         Ok(bin) => bin,
         Err(err) => {
