@@ -1,6 +1,7 @@
 mod nes;
 
 use std::cell::RefCell;
+use std::clone;
 use std::rc::Rc;
 
 use nes::rom::NesRom;
@@ -16,7 +17,8 @@ extern crate image;
 use piston_window::*;
 
 fn main() {
-   
+    let clock_count: u64 = 0;
+
     // ROMをロード
     let path = "./ignores/donkeykong.nes";
     let rom = load_rom(path);
@@ -30,8 +32,8 @@ fn main() {
     let ram = MemCon::new(Rc::clone(&ppu));
 
     // CPUを初期化
-    let mut cpu = Cpu::new(&rom, Box::new(ram));
-    cpu.power_on();
+    let mut cpu = Cpu::new(&rom, Box::new(ram), clock_count);
+    cpu.power_on(clock_count);
     
     const window_x: u32 = 640;
     const window_y: u32 = 480;
@@ -53,17 +55,15 @@ fn main() {
         &TextureSettings::new()
     ).unwrap();
 
-    let clock_count: u64 = 0;
-
     // Start main loop.
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
             // CPUの処理を進める
-            let cpu_clk = cpu.exec();
+            let cpu_clk = cpu.step(clock_count);
             // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する
-            let ppu_clk = ppu.borrow_mut().exec();
+            let ppu_clk = ppu.borrow_mut().render(clock_count);
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));

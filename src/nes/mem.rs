@@ -29,7 +29,7 @@ impl MemCon {
 
     /// メモリ空間上に存在するデバイスへの書き込みや、
     /// ミラー領域への反映を(必要であれば)行う。
-    fn write_to_dev(&mut self, addr: usize, data: u8) {
+    fn write_to_dev(&mut self, addr: usize, data: u8, clk_cnt: u64) {
         match addr {
             0x0000..=0x07FF => {
                 // 物理RAMのミラー領域への反映
@@ -41,17 +41,17 @@ impl MemCon {
             0x2000..=0x2007 | 0x4014 => {
                 // PPUのレジスタへ値の設定、かつミラー領域への反映
                 // orignal:($2000-$2007) -> mirror:($2008-$3FFF, repeat evry 8 bytes)
-                self.write_ppu_register(addr, data);
+                self.write_ppu_register(addr, data, clk_cnt);
             },
             // TODO: APUの対応が必要
             _ => (),
         }
     }
 
-    fn read_from_dev(&mut self, addr: usize) -> u8 {
+    fn read_from_dev(&mut self, addr: usize, clk_cnt: u64) -> u8 {
         match addr {
             0x2000..=0x2007 | 0x4014 => {
-                return self.read_ppu_register(addr)
+                return self.read_ppu_register(addr, clk_cnt)
             },
             // TODO: APUの対応が必要
             _ => {
@@ -65,9 +65,10 @@ impl MemCon {
     fn write_ppu_register(
         &mut self,
         addr: usize,
-        data: u8)
+        data: u8,
+        clk_cnt: u64)
     {
-        self.ppu_databus.write(addr, data);
+        self.ppu_databus.write(addr, data, clk_cnt);
 
         // ミラー領域への反映
         // orignal:($2000-$2007) -> mirror:($2008-$3FFF, repeat evry 8 bytes)
@@ -80,37 +81,37 @@ impl MemCon {
     }
 
     /// CPUのメモリ空間に露出した、PPUのレジスタからの読み込み
-    fn read_ppu_register(&mut self, addr: usize) -> u8 {
-        self.ppu_databus.read(addr)
+    fn read_ppu_register(&mut self, addr: usize, clk_cnt: u64) -> u8 {
+        self.ppu_databus.read(addr, clk_cnt)
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn raw_write(&mut self, addr: usize, data: &[u8]) {
+    pub fn raw_write(&mut self, addr: usize, data: &[u8], clk_cnt: u64) {
         println!("mem::MemCon::raw_write() addr={}, data.len()={}", addr, data.len());
         self.ram[addr..addr+data.len()].copy_from_slice(data);
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn raw_write_b(&mut self, addr: usize, data: u8) {
+    pub fn raw_write_b(&mut self, addr: usize, data: u8, clk_cnt: u64) {
         println!("mem::MemCon::raw_write_b() addr={}", addr);
         self.ram[addr] = data;
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn fill(&mut self, range: RangeInclusive<usize>, data: u8) {
+    pub fn fill(&mut self, range: RangeInclusive<usize>, data: u8, clk_cnt: u64) {
         println!("mem::MemCon::fill() range={:?}, data={}", range, data);
         self.ram[range].fill(data);
     }
 
-    pub fn write(&mut self, addr: usize, data: u8) {
+    pub fn write(&mut self, addr: usize, data: u8, clk_cnt: u64) {
         println!("mem::MemCon::write_b() addr={}", addr);
         self.ram[addr] = data;
-        self.write_to_dev(addr, data);
+        self.write_to_dev(addr, data, clk_cnt);
     }
 
-    pub fn read(&mut self, addr: usize) -> u8 {
+    pub fn read(&mut self, addr: usize, clk_cnt: u64) -> u8 {
         println!("mem::MemCon::read_b() addr={}", addr);
-        self.read_from_dev(addr)
+        self.read_from_dev(addr, clk_cnt)
     }
 
     // 8bit CPUなので、複数バイトの同時書き込みは不要？

@@ -61,7 +61,7 @@ enum IntType {
 }
 
 impl Cpu {
-    pub fn new(rom: &Box<rom::NesRom>, ram: Box<mem::MemCon>) -> Self {
+    pub fn new(rom: &Box<rom::NesRom>, ram: Box<mem::MemCon>, clk_cnt: u64) -> Self {
         let mut my = Cpu {
             ram,
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
@@ -77,10 +77,10 @@ impl Cpu {
             let prg_rom = rom.prg_rom();
             let len = rom::PRG_ROM_UNIT_SIZE;
             if prg_rom.len() >= len {
-                my.ram.raw_write(0x8000, &prg_rom[0..len]);
+                my.ram.raw_write(0x8000, &prg_rom[0..len], clk_cnt);
             }
             if prg_rom.len() >= (len * 2) {
-                my.ram.raw_write(0xC000, &prg_rom[len..len*2]);
+                my.ram.raw_write(0xC000, &prg_rom[len..len*2], clk_cnt);
             }
         }
 
@@ -90,7 +90,7 @@ impl Cpu {
     /// メモリから命令を読み込んで実行。
     /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
     /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
-    pub fn exec(&mut self) -> u32 {
+    pub fn step(&mut self, clk_cnt: u64) -> u32 {
         // 割り込み発生していた場合はそちらに移動
         if self.interruption != IntType::None {
             self.interrupt(self.interruption);
@@ -121,7 +121,7 @@ impl Cpu {
     }
     
     /// 電源投入(リセット割り込み発生)
-    pub fn power_on(&mut self) {
+    pub fn power_on(&mut self, clk_cnt: u64) {
         // レジスタとメモリの初期化
         self.regs.a = 0;
         self.regs.x = 0;
@@ -131,20 +131,18 @@ impl Cpu {
         self.regs.p = F_INTERRUPT | F_BREAK | F_RESERVED;
 
         // APU状態のリセット
-        self.ram.fill(0x4000..=0x400F, 0);
-        self.ram.fill(0x4010..=0x4013, 0);
-        self.ram.write(0x4015, 0);
-        self.ram.write(0x4017, 0);
+        self.ram.fill(0x4000..=0x400F, 0, clk_cnt);
+        self.ram.fill(0x4010..=0x4013, 0, clk_cnt);
+        self.ram.write(0x4015, 0, clk_cnt);
+        self.ram.write(0x4017, 0, clk_cnt);
 
         // 物理RAMの初期化
-        self.ram.fill(0x0000..=0x07FF, 0);
+        self.ram.fill(0x0000..=0x07FF, 0, clk_cnt);
 
         self.interruption = IntType::Reset;
     }
 
     pub fn reset(&mut self, ram: &mut mem::MemCon) {
-        // TODO: 起動時にも、レジスタの初期化処理が走るのか？
-
         // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
         self.regs.s -= 3;
         self.regs.p |= !F_INTERRUPT;
