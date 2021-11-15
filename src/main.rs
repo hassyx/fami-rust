@@ -63,7 +63,7 @@ fn main() {
             // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する
-            let ppu_clk = ppu.borrow_mut().render(clock_count);
+            let ppu_clk = ppu.borrow_mut().step(clock_count);
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
