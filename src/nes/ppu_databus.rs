@@ -2,6 +2,7 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use num_derive::FromPrimitive;    
 
 use crate::nes::ppu::Ppu;
 
@@ -10,19 +11,25 @@ pub struct DataBus {
     latch: u8,
 }
 
-/*
+#[derive(FromPrimitive)]
 pub enum PpuRegs {
-    Ctrl,
-    Mask,
-    Status,
-    OamAddr,
-    OamData,
-    Scroll,
-    PpuAddr,
-    PpuData,
-    OamDma,
+    /// $2000
+    Ctrl = 0,
+    /// $2001
+    Mask = 1,
+    /// $2002
+    Status = 2,
+    /// $2003
+    OamAddr = 3,
+    /// $2004
+    OamData = 4,
+    /// $2005
+    Scroll = 5,
+    /// $2006
+    PpuAddr = 6,
+    /// $2007
+    PpuData = 7,
 }
-*/
 
 impl DataBus {
 
@@ -33,42 +40,52 @@ impl DataBus {
         }
     }
 
-    /// 注意：全てのレジスタについて、CPU側から書き込み、または読み込みを行うと、バス上にあるラッチも更新される。
-    pub fn write(&mut self, addr: usize, data: u8, clock_count: u64) {
+    /// CPUからの、メモリを介したPPUへの書き込み要請
+    pub fn write(&mut self, reg_type: PpuRegs, data: u8, clock_count: u64) {
         let mut ppu = self.ppu.borrow_mut();
-        // なんにせよデータバス上のラッチは必ず更新しておく
+        // バスを介した書き込みを行うと、ラッチも必ず更新される。
         ppu.regs.latch = data;
-        // レジスタを更新
         // PPUのレジスタへの値の設定、かつミラー領域への反映
-        match addr {
-            0x2000 => if Ppu::is_ready(clock_count) { ppu.regs.ctrl = data },
-            0x2001 => if Ppu::is_ready(clock_count) { ppu.regs.mask = data },
-            0x2002 => (), // PPUSTATUSは読み込み専用
-            0x2003 => ppu.regs.oam_addr = data,
-            0x2004 => ppu.regs.oam_data = data,
-            0x2005 => if Ppu::is_ready(clock_count) { ppu.regs.scroll = data },
-            0x2006 => if Ppu::is_ready(clock_count) { ppu.regs.addr = data },
-            0x2007 => ppu.regs.data = data,
-            0x4014 => ppu.regs.oam_dma = data,
-            _ => panic!("invalid address."),
+        match reg_type {
+            PpuRegs::Ctrl => if Ppu::is_ready(clock_count) { ppu.regs.ctrl = data },
+            PpuRegs::Mask => if Ppu::is_ready(clock_count) { ppu.regs.mask = data },
+            PpuRegs::Status => (), // PPUSTATUSは読み込み専用
+            PpuRegs::OamAddr => ppu.regs.oam_addr = data,
+            PpuRegs::OamData => ppu.regs.oam_data = data,
+            PpuRegs::Scroll => if Ppu::is_ready(clock_count) { ppu.regs.scroll = data },
+            PpuRegs::PpuAddr => if Ppu::is_ready(clock_count) { ppu.regs.addr = data },
+            PpuRegs::PpuData => ppu.regs.data = data,
         };
     }
 
-    /// 注意：書き込み専用レジスタを読み込むと、レジスタではなく、現在のラッチの値を返す。
-    pub fn read(&mut self, addr: usize, clock_count: u64) -> u8 {
-        let ppu = self.ppu.borrow_mut();
-        // 可能であればレジスタを読み込む。読み込み禁止の場合はラッチの値を返す。
-        match addr {
-            0x2000 => ppu.regs.latch,
-            0x2001 => ppu.regs.latch,
-            0x2002 => ppu.regs.status,
-            0x2003 => ppu.regs.latch,
-            0x2004 => ppu.regs.oam_data,
-            0x2005 => ppu.regs.latch,
-            0x2006 => ppu.regs.latch,
-            0x2007 => ppu.regs.data,
-            0x4014 => ppu.regs.latch,
-            _ => panic!("invalid address."),
-        }
+    pub fn write_to_oamdma(&mut self, data: u8, clock_count: u64) {
+        let mut ppu = self.ppu.borrow_mut();
+        // TODO: 要実装！ここに書きこんだ後にDMA転送が始まる。
+        ppu.regs.oam_dma = data;
+    }
+
+    /// CPUからの、メモリを介したPPUからの読み込み要請
+    pub fn read(&mut self, reg_type: PpuRegs, clock_count: u64) -> u8 {
+        let mut ppu = self.ppu.borrow_mut();
+        // 可能であればレジスタを読み込む。読み込み禁止の場合は、代わりにラッチの値を返す。
+        let data = match reg_type {
+            PpuRegs::Ctrl => ppu.regs.latch,
+            PpuRegs::Mask => ppu.regs.latch,
+            PpuRegs::Status => ppu.regs.status,
+            PpuRegs::OamAddr => ppu.regs.latch,
+            PpuRegs::OamData => ppu.regs.oam_data,
+            PpuRegs::Scroll => ppu.regs.latch,
+            PpuRegs::PpuAddr => ppu.regs.latch,
+            PpuRegs::PpuData => ppu.regs.data,
+        };
+        // バスを介した読み込みを行うと、ラッチも必ず更新される。
+        ppu.regs.latch = data;
+        data
+    }
+    
+    pub fn read_from_oamdma(&mut self, clock_count: u64) -> u8 {
+        let ppu = self.ppu.borrow();
+        // データバスを介さないので、レジスタの値をそのまま返す。
+        ppu.regs.oam_dma
     }
 }
