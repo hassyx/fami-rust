@@ -21,7 +21,7 @@ fn main() {
 
     // ROMをロード
     let path = "./ignores/donkeykong.nes";
-    let rom = load_rom(path);
+    let rom: Box<NesRom> = load_rom(path);
 
     // PPUを初期化
     // VRAM側に、PPUのレジスタとROMのCHR-ROM領域をマッピングする。
@@ -60,7 +60,7 @@ fn main() {
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
             // CPUの処理を進める
-            let cpu_clk = cpu.step(clock_count);
+            cpu.step(clock_count);
             // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する

@@ -27,6 +27,7 @@ impl Ppu {
         
         {
             // CHR-ROM を VRAM に展開
+            // TODO: MMCによってはCHR-ROMが複数載っている可能性あり
             let chr_rom = rom.chr_rom();
             let len = rom::CHR_ROM_UNIT_SIZE;
             if chr_rom.len() >= len {

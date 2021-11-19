@@ -35,11 +35,11 @@ pub struct NesRom {
 
 impl NesRom {
     pub fn prg_rom(&self) -> &[u8] {
-        self.prg_rom.as_ref()
+        &self.prg_rom
     }
 
     pub fn chr_rom(&self) -> &[u8] {
-        self.chr_rom.as_ref()
+        &self.chr_rom
     }
 }
 
