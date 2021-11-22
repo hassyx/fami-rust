@@ -22,7 +22,7 @@ const F_CARRY: u8       = 0b0000_0001;
 /// 演算結果が0だった場合に1。
 const F_ZERO: u8        = 0b0000_0010;
 /// 割り込み禁止なら1。ただしNMIには影響しない。
-const F_INTERRUPT: u8   = 0b0000_0100;
+const F_INT_DISABLE: u8   = 0b0000_0100;
 /// 10進モードがONなら1。NESでは意味を持たない。
 const F_DECIMAL: u8     = 0b0000_1000;
 /// 割り込みがBRKだったら1。IRQとBRKの判別用。
@@ -116,12 +116,12 @@ fn STATE_interrupt(cpu: &mut Cpu) {
 
     if cpu.tmp_counter == 7 {
         // 割り込みを無効化
-        cpu.regs.p |= F_INTERRUPT;
+        cpu.flags_on(F_INT_DISABLE);
         // Brkフラグの設定
         if cpu.int == IntType::Brk {
-            cpu.regs.p |= F_BREAK;
+            cpu.flags_on(F_BREAK);
         } else {
-            cpu.regs.p &= !F_BREAK;
+            cpu.flags_off(F_BREAK);
         }
         // Resetの場合はスタックを触らない
         if cpu.int != IntType::Reset {
@@ -134,7 +134,7 @@ fn STATE_interrupt(cpu: &mut Cpu) {
             cpu.push(cpu.regs.p);
         }
         // スタックに保存したあとは、無条件でBreakフラグを落とす(常に0)
-        cpu.regs.p &= !F_BREAK;
+        cpu.flags_off(F_BREAK);
         // clock 6,7: 割り込みベクタテーブルを読み込む。
         let vec_addr = match cpu.int {
             IntType::Reset => ADDR_INT_RESET,
@@ -224,7 +224,7 @@ impl Cpu {
         self.regs.y = 0;
         self.regs.s = 0xFD;
         //self.regs.p = 0x34;
-        self.regs.p = F_INTERRUPT | F_BREAK | F_RESERVED;
+        self.flags_on(F_INT_DISABLE | F_BREAK | F_RESERVED);
 
         // 以下の初期値設定は、メモリが0クリアされているので厳密には意味がない。
 
@@ -239,6 +239,7 @@ impl Cpu {
         self.ram.raw_fill(0x0000..=0x07FF, 0);
 
         // スタート時は直にReset割り込みから実行開始
+        self.flags_off(F_INT_DISABLE);
         self.int = IntType::Reset;
         self.switch_state(STATE_interrupt);
     }
@@ -246,8 +247,7 @@ impl Cpu {
     pub fn reset(&mut self, ram: &mut mem::MemCon) {
         // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
         self.regs.s -= 3;
-        self.regs.p |= !F_INTERRUPT;
-        // APUの初期化があるが省略
+        self.flags_on(F_INT_DISABLE);
     }
 
     pub fn interrupt(&mut self, int_type: IntType) {
@@ -266,7 +266,15 @@ impl Cpu {
     }
 
     pub fn int_enabled(&self) -> bool {
-        (self.regs.p & F_INTERRUPT) == 0
+        (self.regs.p & F_INT_DISABLE) == 0
+    }
+
+    pub fn flags_on(&mut self, flags: u8) {
+        self.regs.p |= flags;
+    }
+
+    pub fn flags_off(&mut self, flags: u8) {
+        self.regs.p &= !flags;
     }
 
     pub fn push(&mut self, data: u8) {

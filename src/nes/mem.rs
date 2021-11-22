@@ -8,8 +8,8 @@ use crate::nes::ppu_databus::DataBus;
 
 /// NESに搭載されている物理RAM容量(bytes)
 pub const PHYSICAL_RAM_SIZE: usize = 0x0800;
-/// メモリ空間の広さ(bytes)
-pub const LOGICAL_RAM_SPACE: usize = 0xFFFF;
+/// 論理メモリ空間(bytes)
+pub const LOGICAL_RAM_SPACE: usize = 0x10000;
 
 pub struct MemCon {
     ram: Box<[u8]>,
