@@ -26,36 +26,38 @@ impl MemCon {
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn raw_write(&mut self, addr: usize, data: &[u8], clk_cnt: u64) {
+    pub fn raw_write(&mut self, addr: u16, data: &[u8]) {
         println!("mem::MemCon::raw_write() addr={}, data.len()={}", addr, data.len());
+        let addr = addr as usize;
         self.ram[addr..addr+data.len()].copy_from_slice(data);
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn raw_write_b(&mut self, addr: usize, data: u8, clk_cnt: u64) {
+    pub fn raw_write_b(&mut self, addr: u16, data: u8) {
         println!("mem::MemCon::raw_write_b() addr={}", addr);
+        let addr = addr as usize;
         self.ram[addr] = data;
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
-    pub fn fill(&mut self, range: RangeInclusive<usize>, data: u8, clk_cnt: u64) {
+    pub fn raw_fill(&mut self, range: RangeInclusive<usize>, data: u8) {
         println!("mem::MemCon::fill() range={:?}, data={}", range, data);
         self.ram[range].fill(data);
     }
 
-    pub fn write(&mut self, addr: usize, data: u8, clk_cnt: u64) {
+    pub fn write(&mut self, addr: u16, data: u8) {
         println!("mem::MemCon::write_b() addr={}", addr);
-        if !self.write_to_dev(addr, data, clk_cnt) {
-            self.ram[addr] = data;
+        if !self.write_to_dev(addr, data) {
+            self.ram[addr as usize] = data;
         }
     }
     
-    pub fn read(&mut self, addr: usize, clk_cnt: u64) -> u8 {
+    pub fn read(&mut self, addr: u16) -> u8 {
         println!("mem::MemCon::read_b() addr={}", addr);
-        if let Some(data) = self.read_from_dev(addr, clk_cnt) {
+        if let Some(data) = self.read_from_dev(addr) {
             data
         } else {
-            self.ram[addr]
+            self.ram[addr as usize]
         }
     }
 
@@ -74,11 +76,12 @@ impl MemCon {
 
     /// メモリ空間上に存在するデバイスへの書き込みや、ミラー領域への反映を(必要であれば)行う。
     /// 書き込みが行われた場合はtrueを返す。
-    fn write_to_dev(&mut self, addr: usize, data: u8, clk_cnt: u64) -> bool {
+    fn write_to_dev(&mut self, addr: u16, data: u8) -> bool {
         match addr {
             0x0000..=0x1FFF => {
                 // 物理RAMのミラー領域への反映
                 // orignal:($0000-$07FF) -> mirror:($0800-$0FFF, $1000-$17FF, $1800-$1FFF)
+                let addr = addr as usize;
                 self.ram[0x0000+addr] = data;
                 self.ram[0x0800+addr] = data;
                 self.ram[0x1000+addr] = data;
@@ -87,7 +90,7 @@ impl MemCon {
             },
             0x2000..=0x3FFF | 0x4014 => {
                 // PPUのレジスタへ値を設定し、ミラー領域への反映を行う
-                self.write_ppu_register(addr, data, clk_cnt);
+                self.write_ppu_register(addr, data);
                 return true;
             },
             // TODO: APUの対応が必要
@@ -95,10 +98,10 @@ impl MemCon {
         }
     }
 
-    fn read_from_dev(&mut self, addr: usize, clk_cnt: u64) -> Option<u8> {
+    fn read_from_dev(&mut self, addr: u16) -> Option<u8> {
         match addr {
             0x0000..=0x1FFF | 0x4014 => {
-                Some(self.read_ppu_register(addr, clk_cnt))
+                Some(self.read_ppu_register(addr))
             },
             // TODO: APUの対応が必要
             _ => None,
@@ -106,22 +109,17 @@ impl MemCon {
     }
 
     /// CPUのメモリ空間に露出した、PPUのレジスタへの書き込み
-    fn write_ppu_register(
-        &mut self,
-        addr: usize,
-        data: u8,
-        clk_cnt: u64)
-    {
+    fn write_ppu_register(&mut self, addr: u16, data: u8) {
         debug_assert!((0x2000..=0x3FFF | 0x4014).contains(&addr));
 
         if addr == 0x4014 {
-            self.ppu_databus.write_to_oamdma(data, clk_cnt);
+            self.ppu_databus.write_to_oamdma(data);
         } else {
             // 仮にミラー領域へ書きこんでいても、まずはオリジナル領域($2000-$2007)への書き込みとみなす。
             // ここで必要なアドレスは最後の3bitだけ。
-            let offset = addr & 0x0111;
+            let offset = (addr as usize) & 0x0111;
             let reg_type = FromPrimitive::from_usize(offset & 0x0111).unwrap();
-            self.ppu_databus.write(reg_type, data, clk_cnt);
+            self.ppu_databus.write(reg_type, data);
 
             // ミラー領域への反映
             // orignal:($2000-$2007) -> mirror:($2008-$3FFF, repeat evry 8 bytes)
@@ -132,17 +130,17 @@ impl MemCon {
     }
 
     /// CPUのメモリ空間に露出した、PPUのレジスタからの読み込み
-    fn read_ppu_register(&mut self, addr: usize, clk_cnt: u64) -> u8 {
+    fn read_ppu_register(&mut self, addr: u16) -> u8 {
         debug_assert!((0x2000..=0x3FFF | 0x4014).contains(&addr));
 
         if addr == 0x4014 {
-            return self.ppu_databus.read_from_oamdma(clk_cnt)
+            return self.ppu_databus.read_from_oamdma()
         } else {
             // 仮にミラー領域を読み込んでいても、オリジナル領域($2000-$2007)への読み込みとみなす。
             // ここで必要なアドレスは最後の3bitだけ。
-            let offset = addr & 0x0111;
+            let offset = (addr as usize) & 0x0111;
             let reg_type = FromPrimitive::from_usize(offset & 0x0111).unwrap();
-            return self.ppu_databus.read(reg_type, clk_cnt)
+            return self.ppu_databus.read(reg_type)
         }
     }
 }

@@ -5,6 +5,8 @@ use crate::nes::vram;
 
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
+/// 起動後、レジスタが外部からの呼びかけに応答を開始するまでのクロック数
+const WARM_UP_TIME: u64 = 29658 / 3;
 
 pub struct Ppu {
     pub regs: Registers,
@@ -38,9 +40,9 @@ impl Ppu {
         return my
     }
 
-    /// 起動後、29658クロックに「到達した」時点から書き込みを許可する。
-    pub fn is_ready(clock_count: u64) -> bool {
-        clock_count >= 29658
+    /// 起動後、CPU換算で29658クロックに「到達した」時点から書き込みを許可する。
+    pub fn is_ready(&self) -> bool {
+        self.clock_count >= WARM_UP_TIME
     }
 
     pub fn power_on(&mut self) {
@@ -51,7 +53,10 @@ impl Ppu {
         //
     }
 
-    pub fn step(&mut self, clk_cnt: u64) -> u32 {
+    pub fn step(&mut self) -> u32 {
+
+        // TODO: PPUはCPUと独立したクロックカウンターを持ち、
+        // そのクロックを基準として動く(CPUに合わせて3倍にはしない)
 
         // 割り込み発生した場合は戻り値として返す。
         return 0;

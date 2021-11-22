@@ -17,8 +17,7 @@ extern crate image;
 use piston_window::*;
 
 fn main() {
-    let clock_count: u64 = 0;
-
+    
     // ROMをロード
     let path = "./ignores/donkeykong.nes";
     let rom: Box<NesRom> = load_rom(path);
@@ -33,8 +32,8 @@ fn main() {
     let ram = MemCon::new(ppu_databus);
 
     // CPUを初期化
-    let mut cpu = Cpu::new(&rom, Box::new(ram), clock_count);
-    cpu.power_on(clock_count);
+    let mut cpu = Cpu::new(&rom, Box::new(ram));
+    cpu.power_on();
     
     const window_x: u32 = 640;
     const window_y: u32 = 480;
@@ -59,12 +58,14 @@ fn main() {
     // Start main loop.
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
+            // 毎クロック割り込みのチェック
+            cpu.check_int();
             // CPUの処理を進める
-            cpu.step(clock_count);
+            cpu.step();
             // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する
-            let ppu_clk = ppu.borrow_mut().step(clock_count);
+            let ppu_clk = ppu.borrow_mut().step();
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));

@@ -41,31 +41,31 @@ impl DataBus {
     }
 
     /// CPUからの、メモリを介したPPUへの書き込み要請
-    pub fn write(&mut self, reg_type: PpuRegs, data: u8, clock_count: u64) {
+    pub fn write(&mut self, reg_type: PpuRegs, data: u8) {
         let mut ppu = self.ppu.borrow_mut();
         // バスを介した書き込みを行うと、ラッチも必ず更新される。
         ppu.regs.latch = data;
         // PPUのレジスタへの値の設定、かつミラー領域への反映
         match reg_type {
-            PpuRegs::Ctrl => if Ppu::is_ready(clock_count) { ppu.regs.ctrl = data },
-            PpuRegs::Mask => if Ppu::is_ready(clock_count) { ppu.regs.mask = data },
+            PpuRegs::Ctrl => if ppu.is_ready() { ppu.regs.ctrl = data },
+            PpuRegs::Mask => if ppu.is_ready() { ppu.regs.mask = data },
             PpuRegs::Status => (), // PPUSTATUSは読み込み専用
             PpuRegs::OamAddr => ppu.regs.oam_addr = data,
             PpuRegs::OamData => ppu.regs.oam_data = data,
-            PpuRegs::Scroll => if Ppu::is_ready(clock_count) { ppu.regs.scroll = data },
-            PpuRegs::PpuAddr => if Ppu::is_ready(clock_count) { ppu.regs.addr = data },
+            PpuRegs::Scroll => if ppu.is_ready() { ppu.regs.scroll = data },
+            PpuRegs::PpuAddr => if ppu.is_ready() { ppu.regs.addr = data },
             PpuRegs::PpuData => ppu.regs.data = data,
         };
     }
 
-    pub fn write_to_oamdma(&mut self, data: u8, clock_count: u64) {
+    pub fn write_to_oamdma(&mut self, data: u8) {
         let mut ppu = self.ppu.borrow_mut();
         // TODO: 要実装！ここに書きこんだ後にDMA転送が始まる。
         ppu.regs.oam_dma = data;
     }
 
     /// CPUからの、メモリを介したPPUからの読み込み要請
-    pub fn read(&mut self, reg_type: PpuRegs, clock_count: u64) -> u8 {
+    pub fn read(&mut self, reg_type: PpuRegs) -> u8 {
         let mut ppu = self.ppu.borrow_mut();
         // 可能であればレジスタを読み込む。読み込み禁止の場合は、代わりにラッチの値を返す。
         let data = match reg_type {
@@ -83,7 +83,7 @@ impl DataBus {
         data
     }
     
-    pub fn read_from_oamdma(&mut self, clock_count: u64) -> u8 {
+    pub fn read_from_oamdma(&mut self) -> u8 {
         let ppu = self.ppu.borrow();
         // データバスを介さないので、レジスタの値をそのまま返す。
         ppu.regs.oam_dma
