@@ -1,6 +1,6 @@
 //! 6502 emulator.
 
-use crate::nes::decoder::Decoder;
+use crate::nes::decoder;
 use crate::nes::mem;
 use crate::nes::rom;
 
@@ -281,7 +281,7 @@ impl Cpu {
 
     /// 命令を読み込んで実行。戻り値として命令の実行に必要なクロックを返す。
     pub fn execute(&mut self) -> u8 {
-        Decoder::decode(self)
+        decoder::decode(self)
     }
 
     #[cfg(debug_assertions)]
