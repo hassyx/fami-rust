@@ -1,6 +1,7 @@
 //! 6502 emulator.
 
-use crate::nes::decoder;
+mod decoder;
+mod executer;
 use crate::nes::mem;
 use crate::nes::rom;
 

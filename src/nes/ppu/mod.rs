@@ -1,7 +1,8 @@
 //! NES PPU.
 
+mod vram;
+
 use crate::nes::rom;
-use crate::nes::vram;
 
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
