@@ -278,7 +278,7 @@ impl Cpu {
 
     /// 命令を読み込んで実行。戻り値として命令の実行に必要なクロックを返す。
     pub fn execute(&mut self) -> u8 {
-        decoder::decode(self)
+        self.decode()
     }
 
     #[cfg(debug_assertions)]

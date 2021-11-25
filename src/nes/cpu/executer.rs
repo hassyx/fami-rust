@@ -1,7 +1,7 @@
 //! Instruction executer.
 
-use crate::nes::cpu::Cpu;
-use crate::nes::cpu::decoder::AddrMode;
+use super::Cpu;
+use super::decoder::AddrMode;
 
 impl Cpu {
     pub fn ora(&mut self, addr_mode: AddrMode) {
