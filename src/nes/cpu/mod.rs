@@ -51,7 +51,6 @@ pub struct Cpu {
     tmp_counter: u64,
     regs: Registers,
     int: IntType,
-    clock_count: u64,
     /// CPUの状態ごとに切り替わる関数。いわゆるStateパターンを実現するための仕組み。
     /// CPUのメインループ内で呼ばれる処理では、可能な限り動的なメモリ確保を避けたいため、
     /// 構造体ではなく関数ポインタで実現している。(動的な状態はCpu構造体の方に持たせている)
@@ -147,7 +146,6 @@ impl Cpu {
             tmp_counter: 0,
             int: IntType::None,
             regs: Registers::default(),
-            clock_count: 0,
             fn_step: STATE_interrupt,
         };
 
@@ -173,8 +171,6 @@ impl Cpu {
     /// メモリから命令を読み込んで実行。
     /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
     /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
-    /// 
-    /// TODO: 外部からのクロックは不要？
     pub fn step(&mut self){
         self.clock_counter += 1;
         self.tmp_counter += 1;
