@@ -77,7 +77,7 @@ impl Cpu {
             match aaa {
                 0b000 => {
                     // ORA
-                    self.ora(addr_mode)
+                    //self.ora(addr_mode)
                 },
                 0b001 => {},    // AND
                 0b010 => {},    // EOR
