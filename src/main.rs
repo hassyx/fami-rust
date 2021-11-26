@@ -58,14 +58,11 @@ fn main() {
     // Start main loop.
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
-            // 毎クロック割り込みのチェック
-            cpu.check_int();
             // CPUの処理を進める
             cpu.step();
-            // TODO: clock_cycle * clock_freq 分、待機する。
 
             // TODO: 3回に1回、ppuが動作する
-            let ppu_clk = ppu.borrow_mut().step();
+            ppu.borrow_mut().step();
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
@@ -79,7 +76,7 @@ fn main() {
         }
 
         // 以下キーイベント処理。
-        // 場合によってはキーイベントを吸い上げても、
+        // キーが押されていたら割り込みトリガをONにする。
         if let Some(Button::Keyboard(key)) = e.release_args() {
 
         }

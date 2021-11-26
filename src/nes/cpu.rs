@@ -1,10 +1,12 @@
 //! 6502 emulator.
 
+mod cpu_state;
 mod decoder;
 mod executer;
+
 use crate::nes::mem;
 use crate::nes::rom;
-
+use crate::nes::cpu::cpu_state::*;
 
 /// NTSC版のクロック周波数(Hz)
 const CLOCK_FREQ_NTSC: u32 = 1789773;
@@ -42,19 +44,31 @@ const ADDR_STACK_UPPER: u16    = 0x0100;
 
 /// 6502 (RICHO 2A03)
 pub struct Cpu {
-    ram: Box<mem::MemCon>,
+    mem: Box<mem::MemCon>,
     clock_freq: u32,
     clock_cycle: f32,
     /// 起動後、リセットまたは電源断まで増加し続けるカウンター
     clock_counter: u64,
-    /// 特定の処理が発動した場合などに利用される、一時的なカウンター
-    tmp_counter: u64,
     regs: Registers,
-    int: IntType,
+    /// リセットピン
+    reset_trigger: bool,
+    /// エッジトリガな割り込み検出機(NMI用)。
+    nmi_trigger: bool,
+    /// レベルトリガな割り込み検出機(IRQ用)。
+    /// TODO: 正確なエミュレートのためには、トリガの有効期間を実装する必要がある。
+    irq_trigger: bool,
+    /// ソフトウェア割り込みの場合にtrue
+    irq_is_brake: bool,
+    /// 割り込み検出検出機のポーリング処理を停止
+    int_polling_enabled: bool,
     /// CPUの状態ごとに切り替わる関数。いわゆるStateパターンを実現するための仕組み。
+    /// こうした理由は、1クロックサイクルごとに走る条件判定処理をできるだけ減らしたかったのと、
     /// CPUのメインループ内で呼ばれる処理では、可能な限り動的なメモリ確保を避けたいため、
     /// 構造体ではなく関数ポインタで実現している。(動的な状態はCpu構造体の方に持たせている)
     fn_step: fn(&mut Cpu),
+    state: TmpState,
+    //state_exec: Box<StateExec>,
+    //state_int: Box<StateInt>,
 }
 
 #[derive(Default)]
@@ -83,70 +97,22 @@ pub enum IntType {
     Brk,
 }
 
-/// 通常の実行処理
-fn STATE_normal(cpu: &mut Cpu) {
-    // 効率のよい命令デコードについてはここが詳しい。
-    // https://llx.com/Neil/a2/opcodes.html
-    cpu.execute();
-}
-
-/// 割り込み処理
-fn STATE_interrupt(cpu: &mut Cpu) {
-    debug_assert!(cpu.int_enabled());
-    debug_assert!(cpu.tmp_counter < 8);
-    debug_assert_ne!(cpu.int, IntType::None);
-
-    //　割り込み処理は要7クロック。8クロック目に割り込みベクタの実行開始。
-
-    if cpu.tmp_counter == 7 {
-        // 割り込みを無効化
-        cpu.flags_on(F_INT_DISABLE);
-        // Brkフラグの設定
-        if cpu.int == IntType::Brk {
-            cpu.flags_on(F_BREAK);
-        } else {
-            cpu.flags_off(F_BREAK);
-        }
-        // Resetの場合はスタックを触らない
-        if cpu.int != IntType::Reset {
-            // clock 3,4: プログラムカウンタをHigh, Lowの順にpush
-            // Brk命令は2バイトあり、ここに来た時点で1バイト目を読んでいるので、PCを更に+1。
-            if cpu.int == IntType::Brk { cpu.regs.pc += 1 }
-            cpu.push((cpu.regs.pc >> 8 & 0x00FF) as u8);
-            cpu.push((cpu.regs.pc & 0x00FF) as u8);
-            // clock 5: ステータスレジスタをpush
-            cpu.push(cpu.regs.p);
-        }
-        // スタックに保存したあとは、無条件でBreakフラグを落とす(常に0)
-        cpu.flags_off(F_BREAK);
-        // clock 6,7: 割り込みベクタテーブルを読み込む。
-        let vec_addr = match cpu.int {
-            IntType::Reset => ADDR_INT_RESET,
-            IntType::Nmi => ADDR_INT_NMI,
-            IntType::Irq | IntType::Brk => ADDR_INT_IRQ,
-            IntType::None => panic!("invalid IntType."),
-        };
-        let low = cpu.ram.read(vec_addr);
-        let high = cpu.ram.read(vec_addr+1);
-        // clock 8: 割り込みベクタを実行する(ここでは準備だけ)
-        cpu.regs.pc = ((high as u16) << 4) | low as u16;
-        cpu.int = IntType::None;
-        cpu.switch_state(STATE_normal);
-        return;
-    }
-}
-
 impl Cpu {
     pub fn new(rom: &Box<rom::NesRom>, ram: Box<mem::MemCon>) -> Self {
+
         let mut my = Cpu {
-            ram,
+            mem: ram,
             clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
             clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             clock_counter: 0,
-            tmp_counter: 0,
-            int: IntType::None,
+            reset_trigger: false,
+            nmi_trigger: false,
+            irq_trigger: false,
+            irq_is_brake: false,
+            int_polling_enabled: false,
             regs: Registers::default(),
-            fn_step: STATE_interrupt,
+            fn_step: Cpu::int_step,
+            state: TmpState::default(),
         };
 
         {
@@ -154,48 +120,18 @@ impl Cpu {
             let prg_rom = rom.prg_rom();
             let len = rom::PRG_ROM_UNIT_SIZE;
             if prg_rom.len() >= len {
-                my.ram.raw_write(0x8000, &prg_rom[0..len]);
+                my.mem.raw_write(0x8000, &prg_rom[0..len]);
             }
             if prg_rom.len() >= (len * 2) {
-                my.ram.raw_write(0xC000, &prg_rom[len..len*2]);
+                my.mem.raw_write(0xC000, &prg_rom[len..len*2]);
             } else {
                 // PRG-ROMが2枚ない場合は、1枚目をコピーする。
                 // TODO: MMCによってはPRG-ROMが2つ以上載っている可能性あり。
-                my.ram.raw_write(0xC000, &prg_rom[0..len]);
+                my.mem.raw_write(0xC000, &prg_rom[0..len]);
             }
         }
 
         return my
-    }
-    
-    /// メモリから命令を読み込んで実行。
-    /// 命令自体は即座に実行されるが、戻り値として命令の実行完了に必要なクロック数を返す。
-    /// エミュレーションの精度を上げたい場合は、呼び出し元でそのクロック数分、待機する。
-    pub fn step(&mut self){
-        self.clock_counter += 1;
-        self.tmp_counter += 1;
-        (self.fn_step)(self);
-    }
-
-    /// PCが指すメモリを1バイト読み、PCを1進める。
-    pub fn fetch(&mut self) -> u8 {
-        let data = self.ram.read(self.regs.pc);
-        // TODO: PCがオーバーフローした場合の挙動は？
-        self.regs.pc += 1;
-        data
-    }
-
-    /// 割り込みチェック
-    pub fn check_int(&mut self) {
-        // 割り込み発生時は現在実行中の命令を中断する
-        if (self.int != IntType::None) {
-            self.switch_state(STATE_interrupt);
-        }
-    }
-
-    fn switch_state(&mut self, fn_next: fn(&mut Cpu)) {
-        self.tmp_counter = 0;
-        self.fn_step = fn_next;
     }
     
     /// 電源投入(リセット割り込み発生)
@@ -208,22 +144,22 @@ impl Cpu {
         //self.regs.p = 0x34;
         self.flags_on(F_INT_DISABLE | F_BREAK | F_RESERVED);
 
-        // 以下の初期値設定は、メモリが0クリアされているので厳密には意味がない。
-
         // APU状態のリセット
         // TODO: 厳密にはPPUのレジスタも書き換える必要がある(が、初期値0なので特に意味なし)
-        self.ram.raw_fill(0x4000..=0x400F, 0);
-        self.ram.raw_fill(0x4010..=0x4013, 0);
-        self.ram.write(0x4015, 0);
-        self.ram.write(0x4017, 0);
+        self.mem.raw_fill(0x4000..=0x400F, 0);
+        self.mem.raw_fill(0x4010..=0x4013, 0);
+        self.mem.write(0x4015, 0);
+        self.mem.write(0x4017, 0);
 
         // 物理RAMの初期化
-        self.ram.raw_fill(0x0000..=0x07FF, 0);
+        self.mem.raw_fill(0x0000..=0x07FF, 0);
 
-        // スタート時は直にReset割り込みから実行開始
-        self.flags_off(F_INT_DISABLE);
-        self.int = IntType::Reset;
-        self.switch_state(STATE_interrupt);
+        // 割り込み状態の初期化
+        self.clear_all_int_trigger();
+
+        // スタート時は直にReset割り込みから実行開始        
+        self.reset_trigger = true;
+        self.switch_state_int();
     }
 
     pub fn reset(&mut self, ram: &mut mem::MemCon) {
@@ -232,23 +168,89 @@ impl Cpu {
         self.flags_on(F_INT_DISABLE);
     }
 
-    pub fn interrupt(&mut self, int_type: IntType) {
-        // !!!!!!!!!!
-        // TODO: 割り込みは現在実行中の命令が完了するまで待ち、次の命令の実行直前にチェックすればよい。
-        // ただし、BRK中の割り込みは特殊。だけどエミュレーターではそこまで実装しなくていい？
-        // !!!!!!!!!!
+    /// 1クロックサイクル進める。
+    pub fn step(&mut self){
+        self.clock_counter += 1;
+        self.state.counter += 1;
+        (self.fn_step)(self);
+        self.check_int();
+    }
 
+    fn check_int(&mut self) {
+        if !self.int_polling_enabled {
+            return
+        }
+        if self.reset_trigger || self.nmi_trigger ||
+            (!self.int_disabled() && self.irq_trigger) {
+            // 割り込みが発生しているなら、割り込みモードへ遷移。
+            self.switch_state_int();
+        }
+    }
+
+    fn clear_all_int_trigger(&mut self) {
+        self.reset_trigger = false;
+        self.nmi_trigger = false;
+        self.irq_trigger = false;
+        self.irq_is_brake = false;
+    }
+
+    /// PCが指すメモリを1バイト読み、PCを1進める。
+    pub fn fetch(&mut self) -> u8 {
+        let data = self.mem.read(self.regs.pc);
+        // TODO: PCがオーバーフローした場合の挙動は？
+        self.regs.pc += 1;
+        data
+    }
+
+    fn switch_state_int(&mut self) {
+        self.state = TmpState::default();
+        self.fn_step = Cpu::int_step;
+    }
+
+    fn switch_state_exec(&mut self) {
+        self.state = TmpState::default();
+        self.fn_step = Cpu::exec_step;
+    }
+
+    fn exec_finished(&mut self) {
+        self.state = TmpState::default();
+        self.int_polling_enabled = true;
+    }
+
+    /*
+    // TODO: 割り込み処理はエッジトリガ・レベルトリガ等の厳密な対応が必要。
+    // ひとまず現状は、発生した割り込みを保存し続ける実装とする。
+    pub fn interrupt(&mut self) {
         // 割り込み無効フラグが立っている場合、IRQとBRKの発生を無視する。
-        if !self.int_enabled() &&
+        if self.int_disabled() &&
             (int_type == IntType::Irq || int_type == IntType::Brk)
         {
             return
         }
-        self.int = int_type;
+        
+        match int_type {
+            IntType::Reset => {
+                self.reset_trigger = true;
+                self.is_brake = false;
+            }
+            IntType::Nmi => {
+                self.nmi_trigger = true;
+                self.is_brake = false;
+            }
+            IntType::Irq => {
+                self.nmi_trigger = true;
+                self.is_brake = false;
+            },
+            IntType::Brk => {
+                self.nmi_trigger = true;
+                self.is_brake = true;
+            },
+        }
     }
+    */
 
-    pub fn int_enabled(&self) -> bool {
-        (self.regs.p & F_INT_DISABLE) == 0
+    pub fn int_disabled(&self) -> bool {
+        (self.regs.p & F_INT_DISABLE) != 0
     }
 
     pub fn flags_on(&mut self, flags: u8) {
@@ -263,7 +265,7 @@ impl Cpu {
         self.check_stack_overflow();
 
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
-        self.ram.write(addr, data);
+        self.mem.write(addr, data);
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
@@ -271,14 +273,9 @@ impl Cpu {
         self.check_stack_underflow();
 
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
-        let data = self.ram.read(addr);
+        let data = self.mem.read(addr);
         self.regs.s = self.regs.s.wrapping_add(1);
         data
-    }
-
-    /// 命令を読み込んで実行。戻り値として命令の実行に必要なクロックを返す。
-    pub fn execute(&mut self) -> u8 {
-        self.decode()
     }
 
     #[cfg(debug_assertions)]
@@ -295,6 +292,7 @@ impl Cpu {
         }
     }
 
+    /*
     /// クロック周波数(clock_freq)を設定。
     /// 同時に clock_cycle も更新する。
     fn set_clock_freq(&mut self, clock: u32) {
@@ -309,6 +307,7 @@ impl Cpu {
     fn clock_cycle(&self) -> f32 {
         self.clock_cycle
     }
+    */
 }
 
 

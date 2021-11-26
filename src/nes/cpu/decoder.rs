@@ -2,10 +2,13 @@
 
 use super::Cpu;
 
+/// 命令実行の実処理を行う関数ポインタの型
+pub type PtrFnExec = fn(cpu: &mut Cpu);
+
 /// アドレッシングモード
 /// TODO: matchで分岐する場合は、頻出するモードを先に置く。
-#[derive(PartialEq)]
-pub enum AddrMode {
+#[derive(Debug, PartialEq)]
+enum AddrMode {
     /// 不正なアドレッシングモード。
     Invalid,
     /// Aレジスタに対して演算を行い、Aレジスタに格納する。
@@ -14,15 +17,16 @@ pub enum AddrMode {
     Immediate,
     /// オペランドで16bitのアドレスを指定し、参照先の8bitの値と演算を行う。
     Absolute,
-    /// オペランドで16bitのアドレス(ただし0-255の範囲)を指定し、参照先の8bitの値と演算を行う。
+    /// オペランドで8bitのアドレスを指定し、参照先の8bitの値と演算を行う。
     ZeroPage,
     /// オペランドで指定した16bitのアドレスに、レジスタXの値を足して、
     /// そのアドレスが指す8bitの値に対して演算を行う。
     IndexedAbsolute_X,
     /// オペランドで指定した16bitのアドレスに、レジスタYの値を足して、
     /// そのアドレスが指す8bitの値に対して演算を行う。
+    /// 最終アドレスが16bitの最大値を超えた場合は、溢れた分を無視する。
     IndexedAbsolute_Y,
-    /// オペランドで指定した16bitのアドレス(ただし範囲は0-255)に、レジスタX(一部の命令ではY)を加算して、
+    /// オペランドで指定した8bitのアドレスに、レジスタX(一部の命令ではY)を加算して、
     /// そのアドレスが指す8bitの値に対して演算を行う。
     /// 算出したアドレスがゼロページ(0-255)を超過する、しないに関わらず、常に下位8bitの値しか見ない。
     IndexedZeroPage_X,
@@ -40,28 +44,43 @@ pub enum AddrMode {
 
 impl Cpu {
 
-    pub fn decode(&mut self) -> u8 {
+    pub fn panic_invalid_op(&mut self, opcode: u8) -> ! {
+        panic!("\"{:#0X}\" is invalid opcode.", opcode);
+    }
+
+    /// OPコードをフェッチして命令種別を判定、実行を担う関数を返す。
+    pub fn decode(&mut self) -> PtrFnExec {
         // 当面は非公式命令を検出した場合にpanicさせる。
         let opcode = self.fetch();
-        if let Some(wait) = self.decode_tier1(opcode) {
-            return wait;
+        if let Some(fn_exec) = self.decode_tier1(opcode) {
+            return fn_exec
         }
-        if let Some(wait) = self.decode_tier2(opcode) {
-            return wait;
+        if let Some(fn_exec) = self.decode_tier2(opcode) {
+            return fn_exec
         }
-        if let Some(wait) = self.decode_tier3(opcode) {
-            return wait;
+        if let Some(fn_exec) = self.decode_tier3(opcode) {
+            return fn_exec;
         }
 
         self.panic_invalid_op(opcode);
     }
 
-    fn panic_invalid_op(&mut self, opcode: u8) -> ! {
-        panic!("\"{:#0X}\" is invalid opcode.", opcode);
+    fn get_ora_func(&mut self, addr_mode: AddrMode) -> PtrFnExec {
+        match addr_mode {
+            AddrMode::Immediate => Cpu::ora_absolute,
+            AddrMode::ZeroPage => Cpu::ora_zeropage,
+            AddrMode::IndexedZeroPage_X => Cpu::ora_indexed_zeroPage_x,
+            AddrMode::Absolute => Cpu::ora_absolute,
+            AddrMode::IndexedAbsolute_X => Cpu::ora_indexed_absolute_x,
+            AddrMode::IndexedAbsolute_Y => Cpu::ora_indexed_absolute_y,
+            AddrMode::IndexedIndirect_X => Cpu::ora_indexed_indirect_x,
+            AddrMode::IndirectIndexed_Y => Cpu::ora_indirect_indexed_y,
+            _ => panic!("ORA: {:?} is invalid addressing mode.", addr_mode),
+        }
     }
 
     /// OPコードの末尾2ビットを使った解析
-    fn decode_tier1(&mut self, opcode: u8) -> Option<u8> {
+    fn decode_tier1(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // "aaabbbcc" で分類
         // aaa,cc = OPコード,  bbb = アドレッシングモード
         let aaa = (opcode & 0b1110_0000) >> 4;
@@ -77,7 +96,7 @@ impl Cpu {
             match aaa {
                 0b000 => {
                     // ORA
-                    //self.ora(addr_mode)
+                    return Some(self.get_ora_func(addr_mode))
                 },
                 0b001 => {},    // AND
                 0b010 => {},    // EOR
@@ -130,7 +149,6 @@ impl Cpu {
             self.panic_invalid_op(opcode);
         };
 
-        // TODO: 消すこと
         None
     }
 
@@ -178,7 +196,7 @@ impl Cpu {
     }
 
     /// OPコードの末尾5ビットを使った解析
-    fn decode_tier2(&mut self, opcode: u8) -> Option<u8> {
+    fn decode_tier2(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // "xxy10000" は全て条件付きブランチ。
         // xx = OPコード, y = 比較に用いる値
         let op = (opcode & 0b1100_0000) >> 5;
@@ -219,7 +237,7 @@ impl Cpu {
     }
 
     /// その他の1バイト命令をデコード
-    fn decode_tier3(&mut self, opcode: u8) -> Option<u8> {
+    fn decode_tier3(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // 注意：1バイト命令の次にはもう1バイトのパディング領域があるため、実際には2バイト長になる。
         match opcode {
             0x00 => {},     // BRK
