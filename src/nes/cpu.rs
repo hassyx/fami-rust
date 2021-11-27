@@ -157,7 +157,7 @@ impl Cpu {
         // 割り込み状態の初期化
         self.clear_all_int_trigger();
 
-        // スタート時は直にReset割り込みから実行開始        
+        // スタート時は直にReset割り込みから実行開始 
         self.reset_trigger = true;
         self.switch_state_int();
     }
@@ -262,16 +262,16 @@ impl Cpu {
     }
 
     pub fn push(&mut self, data: u8) {
+        #[cfg(debug_assertions)]
         self.check_stack_overflow();
-
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
         self.mem.write(addr, data);
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
     pub fn pop(&mut self) -> u8 {
+        #[cfg(debug_assertions)]
         self.check_stack_underflow();
-
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
         let data = self.mem.read(addr);
         self.regs.s = self.regs.s.wrapping_add(1);

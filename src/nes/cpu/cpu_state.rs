@@ -99,6 +99,7 @@ impl Cpu {
             let high = self.mem.read(vec_addr+1);
             // clock 8: 割り込みベクタを実行する(ここでは準備だけ)
             self.regs.pc = make_addr(high, low);
+            println!("{}", self.regs.pc);
             // この時点ではまだ割り込み検出のポーリング処理は停止している。
             // ポーリングが有効になるのは、少なくとも次の命令が完了してから。
             self.switch_state_exec();

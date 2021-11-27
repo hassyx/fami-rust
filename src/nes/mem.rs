@@ -2,7 +2,8 @@
 //! ミラー領域への値の反映など、メモリへの読み書きを仲介する。
 
 use std::ops::RangeInclusive;
-use num_traits::FromPrimitive;  
+use num_traits::FromPrimitive;
+use range_check::Check;
 
 use crate::nes::ppu_databus::DataBus;
 
@@ -100,7 +101,7 @@ impl MemCon {
 
     fn read_from_dev(&mut self, addr: u16) -> Option<u8> {
         match addr {
-            0x0000..=0x1FFF | 0x4014 => {
+            0x2000..=0x3FFF | 0x4014 => {
                 Some(self.read_ppu_register(addr))
             },
             // TODO: APUの対応が必要
@@ -110,7 +111,7 @@ impl MemCon {
 
     /// CPUのメモリ空間に露出した、PPUのレジスタへの書き込み
     fn write_ppu_register(&mut self, addr: u16, data: u8) {
-        debug_assert!((0x2000..=0x3FFF | 0x4014).contains(&addr));
+        debug_assert_eq!(addr.check_range(0x2000..=0x3FFF | 0x4014), Ok(addr));
 
         if addr == 0x4014 {
             self.ppu_databus.write_to_oamdma(data);
@@ -131,7 +132,7 @@ impl MemCon {
 
     /// CPUのメモリ空間に露出した、PPUのレジスタからの読み込み
     fn read_ppu_register(&mut self, addr: u16) -> u8 {
-        debug_assert!((0x2000..=0x3FFF | 0x4014).contains(&addr));
+        debug_assert_eq!(addr.check_range(0x2000..=0x3FFF | 0x4014), Ok(addr));
 
         if addr == 0x4014 {
             return self.ppu_databus.read_from_oamdma()
@@ -142,6 +143,10 @@ impl MemCon {
             let reg_type = FromPrimitive::from_usize(offset & 0x0111).unwrap();
             return self.ppu_databus.read(reg_type)
         }
+    }
+
+    pub fn dump(&self) {
+        println!("{:?}", self.ram);
     }
 }
 
