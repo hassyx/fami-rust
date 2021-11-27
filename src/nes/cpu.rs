@@ -174,6 +174,9 @@ impl Cpu {
         self.state.counter += 1;
         (self.fn_step)(self);
         self.check_int();
+
+        #[cfg(debug_assertions)]
+        self.print_cpu_state();
     }
 
     fn check_int(&mut self) {
@@ -290,6 +293,15 @@ impl Cpu {
         if self.regs.s >= u8::MAX {
             println!("stack underflow detected.");
         }
+    }
+
+    #[cfg(debug_assertions)]
+    fn print_cpu_state(&self) {
+        println!("################# CPU STATE: BEGIN");
+        println!("PC = {:#X}({})", self.regs.pc, self.regs.pc);
+        println!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
+        println!("S = {:#X}({}), P = {:#b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
+        println!("################# END");
     }
 
     /*
