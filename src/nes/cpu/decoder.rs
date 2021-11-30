@@ -182,6 +182,11 @@ impl Cpu {
         }
     }
 
+    /*
+        全命令：
+        ORA AND EOR ADC STA LDA CMP SBC
+        ASL ROL LSR ROR STX LDX DEC INC
+    */
     /// "aaabbbcc" 形式の命令で cc=00 の場合。
     /// "bbb" を利用したアドレッシングモードのデコード。
     fn decode_addr_tier1_00(&mut self, bbb: u8) -> AddrMode {
@@ -195,6 +200,9 @@ impl Cpu {
         }
     }
 
+    /*
+        全命令： BIT JMP JMP STY LDY CPY CPX
+    */
     /// OPコードの末尾5ビットを使った解析
     fn decode_tier2(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // "xxy10000" は全て条件付きブランチ。
@@ -202,14 +210,6 @@ impl Cpu {
         let op = (opcode & 0b1100_0000) >> 5;
         let val = (opcode & 0b0010_0000) >> 4;
         let tail = opcode & 0b0001_1111;
-
-        // TODO: 具体的には以下の命令のいずれかだが、実際には「どの命令か」を
-        // 知る必要はなく、デコードした結果を利用して演算すればよい。
-        // ただし、デバッグ用に命令名を出力する必要がある。
-        /*
-            BPL	BMI	BVC	BVS	BCC	BCS	BNE	BEQ
-            10	30	50	70	90	B0	D0	F0
-        */
 
         if tail == 0b0001_0000 {
             match op {
@@ -236,6 +236,11 @@ impl Cpu {
         None
     }
 
+    /*
+        全命令：
+        BRK JSR abs RTI RTS PHP PLP PHA PLA DEY TAY INY INX
+        CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
+    */
     /// その他の1バイト命令をデコード
     fn decode_tier3(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // 注意：1バイト命令の次にはもう1バイトのパディング領域があるため、実際には2バイト長になる。

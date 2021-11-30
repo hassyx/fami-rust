@@ -3,10 +3,22 @@
 use super::Cpu;
 use crate::nes::util::make_addr;
 
-const BYTES_OF_PAGE: u16 = 0xFF;
-
-// TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から番目で行う。
+// TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から2番目で行う。
 // 現状は、命令が終了したタイミングでポーリングを解禁している。
+
+// 未実装の命令(括弧で囲んだものは実装済み)
+/*
+tier1:
+ORA AND EOR ADC STA LDA CMP SBC
+ASL ROL LSR ROR STX LDX DEC INC
+
+tier2:
+BIT JMP JMP STY LDY CPY CPX
+
+tier3:
+BRK JSR abs RTI RTS PHP PLP PHA PLA DEY TAY INY INX
+CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
+*/
 
 impl Cpu {
 
