@@ -1,5 +1,6 @@
 //! 6502 emulator.
 
+#[macro_use] mod macros;
 mod cpu_state;
 mod decoder;
 mod executer;
@@ -190,8 +191,7 @@ impl Cpu {
         (self.fn_step)(self);
         self.check_int();
 
-        #[cfg(debug_assertions)]
-        self.print_cpu_state();
+        print_cpu_state!(self);
     }
 
     fn check_int(&mut self) {
@@ -268,16 +268,14 @@ impl Cpu {
     */
 
     pub fn push(&mut self, data: u8) {
-        #[cfg(debug_assertions)]
-        self.check_stack_overflow();
+        check_stack_overflow!(self);
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
         self.mem.write(addr, data);
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
     pub fn pop(&mut self) -> u8 {
-        #[cfg(debug_assertions)]
-        self.check_stack_underflow();
+        check_stack_underflow!(self);
         let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
         let data = self.mem.read(addr);
         self.regs.s = self.regs.s.wrapping_add(1);
@@ -324,5 +322,4 @@ impl Cpu {
     }
     */
 }
-
 

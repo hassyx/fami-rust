@@ -129,7 +129,7 @@ impl Cpu {
         } else if cc == 0b00 {
             let addr_mode = self.decode_addr_tier1_00(opcode);
             if addr_mode == AddrMode::Invalid {
-                self.panic_invalid_op(opcode);
+                return None
             }
 
             match aaa {
@@ -245,7 +245,6 @@ impl Cpu {
     */
     /// その他の1バイト命令をデコード
     fn decode_tier3(&mut self, opcode: u8) -> Option<PtrFnExec> {
-        // 注意：1バイト命令の次にはもう1バイトのパディング領域があるため、実際には2バイト長になる。
         match opcode {
             0x00 => None,     // BRK
             0x20 => None,     // JSR (abs)

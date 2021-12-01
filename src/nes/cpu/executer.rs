@@ -179,7 +179,6 @@ impl Cpu {
     pub fn sei(&mut self) {
         match self.state.counter {
             2 => {
-                let _ = self.fetch();
                 self.regs.flags_on(Flags::INT_DISABLE);
                 self.exec_finished();
             },
