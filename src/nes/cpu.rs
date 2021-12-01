@@ -4,6 +4,8 @@ mod cpu_state;
 mod decoder;
 mod executer;
 
+use bitflags::bitflags;
+
 use crate::nes::mem;
 use crate::nes::rom;
 use crate::nes::cpu::cpu_state::*;
@@ -13,31 +15,30 @@ const CLOCK_FREQ_NTSC: u32 = 1789773;
 /// PAL版のクロック周波数(Hz)
 const CLOCK_FREQ_PAL: u32 = 1662607;
 
-// ステータスフラグ
-/// キャリー発生時に1。
-const F_CARRY: u8       = 0b0000_0001;
-/// 演算結果が0だった場合に1。
-const F_ZERO: u8        = 0b0000_0010;
-/// 割り込み禁止なら1。ただしNMIには影響しない。
-const F_INT_DISABLE: u8   = 0b0000_0100;
-/// 10進モードがONなら1。NESでは意味を持たない。
-const F_DECIMAL: u8     = 0b0000_1000;
-/// 割り込みがBRKだったら1。IRQとBRKの判別用。
-/// このフラグは本来レジスタ上には存在しない。
-/// ユーザーは、スタックにpushされた内容からフラグの値を判断する。
-const F_BREAK: u8       = 0b0001_0000;
-/// 予約領域。常に1。
-const F_RESERVED: u8    = 0b0010_0000;
-/// オーバーフロー。最上位ビットからの繰り下がり、
-/// または最上位ビットへの繰り上がりが発生した場合に1になる。
-const F_OVERFLOW: u8    = 0b0100_0000;
-/// 演算結果が負だった場合に1。Aレジスタの最上位ビットと同じ。
-const F_NETIVE: u8      = 0b1000_0000;
-
-// 割り込みハンドラのアドレス:
-const ADDR_INT_NMI: u16        = 0xFFFA;
-const ADDR_INT_RESET: u16      = 0xFFFC;
-const ADDR_INT_IRQ: u16        = 0xFFFE;
+bitflags! {
+    /// ステータスフラグ
+    pub struct Flags: u8 {
+        /// キャリー発生時に1。
+        const CARRY       = 0b0000_0001;
+        /// 演算結果が0だった場合に1。
+        const ZERO        = 0b0000_0010;
+        /// 割り込み禁止なら1。ただしNMIには影響しない。
+        const INT_DISABLE = 0b0000_0100;
+        /// 10進モードがONなら1。NESでは意味を持たない。
+        const DECIMAL     = 0b0000_1000;
+        /// 割り込みがBRKだったら1。IRQとBRKの判別用。
+        /// このフラグは本来レジスタ上には存在しない。
+        /// ユーザーは、スタックにpushされたPレジスタの内容から、フラグの値を判断する。
+        const BREAK       = 0b0001_0000;
+        /// 予約領域。常に1。
+        const RESERVED    = 0b0010_0000;
+        /// オーバーフロー。最上位ビットからの繰り下がり、
+        /// または最上位ビットへの繰り上がりが発生した場合に1になる。
+        const OVERFLOW    = 0b0100_0000;
+        /// 演算結果が負だった場合に1。Aレジスタの最上位ビットと同じ。
+        const NETIVE      = 0b1000_0000;
+    }
+}
 
 // スタックポインタの上位アドレス
 const ADDR_STACK_UPPER: u16    = 0x0100;
@@ -85,6 +86,20 @@ pub struct Registers {
     pub p: u8,
     /// Program Counter
     pub pc: u16,
+}
+
+impl Registers {
+    pub fn int_disabled(&self) -> bool {
+        (self.p & Flags::INT_DISABLE.bits) != 0
+    }
+
+    pub fn flags_on(&mut self, flags: Flags) {
+        self.p |= flags.bits;
+    }
+
+    pub fn flags_off(&mut self, flags: Flags) {
+        self.p &= !flags.bits;
+    }
 }
 
 /// Type of interruption.
@@ -142,7 +157,7 @@ impl Cpu {
         self.regs.y = 0;
         self.regs.s = 0xFD;
         //self.regs.p = 0x34;
-        self.flags_on(F_INT_DISABLE | F_BREAK | F_RESERVED);
+        self.regs.flags_on(Flags::INT_DISABLE | Flags::BREAK | Flags::RESERVED);
 
         // APU状態のリセット
         // TODO: 厳密にはPPUのレジスタも書き換える必要がある(が、初期値0なので特に意味なし)
@@ -165,7 +180,7 @@ impl Cpu {
     pub fn reset(&mut self, ram: &mut mem::MemCon) {
         // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
         self.regs.s -= 3;
-        self.flags_on(F_INT_DISABLE);
+        self.regs.flags_on(Flags::INT_DISABLE);
     }
 
     /// 1クロックサイクル進める。
@@ -184,7 +199,7 @@ impl Cpu {
             return
         }
         if self.reset_trigger || self.nmi_trigger ||
-            (!self.int_disabled() && self.irq_trigger) {
+            (!self.regs.int_disabled() && self.irq_trigger) {
             // 割り込みが発生しているなら、割り込みモードへ遷移。
             self.switch_state_int();
         }
@@ -251,18 +266,6 @@ impl Cpu {
         }
     }
     */
-
-    pub fn int_disabled(&self) -> bool {
-        (self.regs.p & F_INT_DISABLE) != 0
-    }
-
-    pub fn flags_on(&mut self, flags: u8) {
-        self.regs.p |= flags;
-    }
-
-    pub fn flags_off(&mut self, flags: u8) {
-        self.regs.p &= !flags;
-    }
 
     pub fn push(&mut self, data: u8) {
         #[cfg(debug_assertions)]

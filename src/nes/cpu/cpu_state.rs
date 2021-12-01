@@ -1,8 +1,14 @@
 //! CPUの状態遷移
 
-use crate::nes::cpu::*;
+use super::{Cpu, Flags, IntType};
 use crate::util::*;
 use super::decoder::PtrFnExec;
+
+
+// 割り込みハンドラのアドレス:
+const ADDR_INT_NMI: u16        = 0xFFFA;
+const ADDR_INT_RESET: u16      = 0xFFFC;
+const ADDR_INT_IRQ: u16        = 0xFFFE;
 
 /// 一時的な状態保持用
 pub struct TmpState {
@@ -50,7 +56,7 @@ impl Cpu {
             // まず割り込み状態のポーリングを禁止
             self.int_polling_enabled = false;
             // IRQ/BRK無視フラグを立てる
-            self.flags_on(F_INT_DISABLE);
+            self.regs.flags_on(Flags::INT_DISABLE);
             // 発生した割り込み種別をチェックして記憶
             // 優先度: Reset > NMI > IRQ = Brk
             if self.reset_trigger {
@@ -65,14 +71,15 @@ impl Cpu {
                 }
             }
             // TODO: 本来は割り込み種別ごとにトリガーが解除されるタイミングが異なる。
-            // ひとまず一括で状態をクリアする。
+            // また、割り込みが競合した際の振る舞いも実装する必要がある。
+            // ここでは、ひとまず一括で現在の割り込み状態をリセットする。
             self.clear_all_int_trigger();
         } else if self.state.counter == 7 {
             // Brkフラグの設定
             if self.state.int == IntType::Brk {
-                self.flags_on(F_BREAK);
+                self.regs.flags_on(Flags::BREAK);
             } else {
-                self.flags_off(F_BREAK);
+                self.regs.flags_off(Flags::BREAK);
             }
             // Resetの場合はスタックを触らない
             if self.state.int != IntType::Reset {
@@ -87,7 +94,7 @@ impl Cpu {
                 self.push(self.regs.p);
             }
             // スタックに保存したあとは、無条件でBreakフラグを落とす(常に0)
-            self.flags_off(F_BREAK);
+            self.regs.flags_off(Flags::BREAK);
             // clock 6,7: 割り込みベクタテーブルを読み込む。
             let vec_addr = match self.state.int {
                 IntType::Reset => ADDR_INT_RESET,
@@ -101,7 +108,7 @@ impl Cpu {
             self.regs.pc = make_addr(high, low);
             println!("{}", self.regs.pc);
             // この時点ではまだ割り込み検出のポーリング処理は停止している。
-            // ポーリングが有効になるのは、少なくとも次の命令が完了してから。
+            // ポーリングが有効になるのは、少なくとも1つの命令の実行が完了してから。
             self.switch_state_exec();
         }
     }

@@ -2,7 +2,7 @@
 
 use super::Cpu;
 
-/// 命令実行の実処理を行う関数ポインタの型
+/// 命令実行の実処理を担う関数ポインタの型
 pub type PtrFnExec = fn(cpu: &mut Cpu);
 
 /// アドレッシングモード
@@ -90,7 +90,7 @@ impl Cpu {
         if cc == 0b01 {
             let addr_mode = self.decode_addr_tier1_01(bbb);
             if addr_mode == AddrMode::Invalid {
-                self.panic_invalid_op(opcode);
+                return None
             }
 
             match aaa {
@@ -98,36 +98,33 @@ impl Cpu {
                     // ORA
                     return Some(self.get_ora_func(addr_mode))
                 },
-                0b001 => {},    // AND
-                0b010 => {},    // EOR
-                0b011 => {},    // ADC
-                0b100 => {
-                    // STA
-                    // immediateなSTAは存在しない
-                },    
-                0b101 => {},    // LDA
-                0b110 => {},    // CMP
-                0b111 => {},    // SBC
-                _ => self.panic_invalid_op(opcode),
+                0b001 => None,    // AND
+                0b010 => None,    // EOR
+                0b011 => None,    // ADC
+                0b100 => None,    // STA (immediateなSTAは存在しない) 
+                0b101 => None,    // LDA
+                0b110 => None,    // CMP
+                0b111 => None,    // SBC
+                _ => None,
             }
         } else if cc == 0b10 {
             // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
             // また、LDXでは、IndexedAbsolute_X は Y を見る。
             let addr_mode = self.decode_addr_tier1_10(opcode);
             if addr_mode == AddrMode::Invalid {
-                self.panic_invalid_op(opcode);
+                return None
             }
 
             match aaa {
-                0b000 => {},    // ASL
-                0b001 => {},    // ROL
-                0b010 => {},    // LSR
-                0b011 => {},    // ROR
-                0b100 => {},    // STX
-                0b101 => {},    // LDX
-                0b110 => {},    // DEC
-                0b111 => {},    // INC
-                _ => self.panic_invalid_op(opcode),
+                0b000 => None,    // ASL
+                0b001 => None,    // ROL
+                0b010 => None,    // LSR
+                0b011 => None,    // ROR
+                0b100 => None,    // STX
+                0b101 => None,    // LDX
+                0b110 => None,    // DEC
+                0b111 => None,    // INC
+                _ => None,
             }
         } else if cc == 0b00 {
             let addr_mode = self.decode_addr_tier1_00(opcode);
@@ -136,20 +133,21 @@ impl Cpu {
             }
 
             match aaa {
-                0b001 => {},    //BIT
-                0b010 => {},    //JMP
-                0b011 => {},    //JMP (abs)
-                0b100 => {},    //STY
-                0b101 => {},    //LDY
-                0b110 => {},    //CPY
-                0b111 => {},    //CPX
-                _ => self.panic_invalid_op(opcode),
+                0b001 => None,    //BIT
+                0b010 => None,    //JMP
+                0b011 => None,    //JMP (abs)
+                0b100 => None,    //STY
+                0b101 => None,    //LDY
+                0b110 => None,    //CPY
+                0b111 => None,    //CPX
+                _ => None,
             }
         } else if cc == 0b11 {
+            // 末尾が11の命令は存在しない
             self.panic_invalid_op(opcode);
-        };
-
-        None
+        } else {
+            None
+        }
     }
 
     /// "aaabbbcc" 形式の命令で cc=01 の場合。
@@ -211,29 +209,33 @@ impl Cpu {
         let val = (opcode & 0b0010_0000) >> 4;
         let tail = opcode & 0b0001_1111;
 
-        if tail == 0b0001_0000 {
+        if tail != 0b0001_0000 {
+            None
+        } else {
             match op {
                 // check negative flag
                 0b00 => {
                     // BPL or BMI
+                    None
                 },
                 // check overflow flag
                 0b01 => {
                     // BVC or BVS
+                    None
                 },
                 // check carry flag
                 0b10 => {
                     // BCC or BCS
+                    None
                 },
                 // check zero flag
                 0b11 => {
                     // BNE or BEQ
+                    None
                 },
-                _ => self.panic_invalid_op(opcode),
+                _ => None,
             }
-        };
-        
-        None
+        }
     }
 
     /*
@@ -245,35 +247,35 @@ impl Cpu {
     fn decode_tier3(&mut self, opcode: u8) -> Option<PtrFnExec> {
         // 注意：1バイト命令の次にはもう1バイトのパディング領域があるため、実際には2バイト長になる。
         match opcode {
-            0x00 => {},     // BRK
-            0x20 => {},     // JSR (abs)
-            0x40 => {},     // RTI
-            0x60 => {},     // RTS
-            0x08 => {},     // PHP
-            0x28 => {},     // PLP
-            0x48 => {},     // PHA
-            0x68 => {},     // PLA
-            0x88 => {},     // DEY
-            0xA8 => {},     // TAY
-            0xC8 => {},     // INY
-            0xE8 => {},     // INX
-            0x18 => {},     // CLC
-            0x38 => {},     // SEC
-            0x58 => {},     // CLI
-            0x78 => {},     // SEI
-            0x98 => {},     // TYA
-            0xB8 => {},     // CLV
-            0xD8 => {},     // CLD
-            0xF8 => {},     // SED
-            0x8A => {},     // TXA
-            0x9A => {},     // TXS
-            0xAA => {},     // TAX
-            0xBA => {},     // TSX
-            0xCA => {},     // DEX
-            0xEA => {},     // NOP
-            _ => self.panic_invalid_op(opcode),
+            0x00 => None,     // BRK
+            0x20 => None,     // JSR (abs)
+            0x40 => None,     // RTI
+            0x60 => None,     // RTS
+            0x08 => None,     // PHP
+            0x28 => None,     // PLP
+            0x48 => None,     // PHA
+            0x68 => None,     // PLA
+            0x88 => None,     // DEY
+            0xA8 => None,     // TAY
+            0xC8 => None,     // INY
+            0xE8 => None,     // INX
+            0x18 => None,     // CLC
+            0x38 => None,     // SEC
+            0x58 => None,     // CLI
+            0x78 => {   // SEI
+                Some(Cpu::sei)
+            },
+            0x98 => None,     // TYA
+            0xB8 => None,     // CLV
+            0xD8 => None,     // CLD
+            0xF8 => None,     // SED
+            0x8A => None,     // TXA
+            0x9A => None,     // TXS
+            0xAA => None,     // TAX
+            0xBA => None,     // TSX
+            0xCA => None,     // DEX
+            0xEA => None,     // NOP
+            _ => None,
         }
-
-        None
     }
 }

@@ -1,6 +1,6 @@
 //! Instruction executer.
 
-use super::Cpu;
+use super::{Cpu, Flags};
 use crate::nes::util::make_addr;
 
 // TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から2番目で行う。
@@ -9,7 +9,7 @@ use crate::nes::util::make_addr;
 // 未実装の命令(括弧で囲んだものは実装済み)
 /*
 tier1:
-ORA AND EOR ADC STA LDA CMP SBC
+(ORA) AND EOR ADC STA LDA CMP SBC
 ASL ROL LSR ROR STX LDX DEC INC
 
 tier2:
@@ -17,20 +17,23 @@ BIT JMP JMP STY LDY CPY CPX
 
 tier3:
 BRK JSR abs RTI RTS PHP PLP PHA PLA DEY TAY INY INX
-CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
+CLC SEC CLI (SEI) TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
 */
 
 impl Cpu {
 
     //////////////////////////////////////////////
-    // ORA: レジスタAとメモリをORしてAに格納。
+    /// ORA: レジスタAとメモリをORしてAに格納。
     //////////////////////////////////////////////
     
     pub fn ora_immediate(&mut self) {
-        if self.state.counter == 2 {
-            let operand = self.fetch();
-            self.regs.a |= operand;
-            self.exec_finished();
+        match self.state.counter {
+            2 => {
+                let operand = self.fetch();
+                self.regs.a |= operand;
+                self.exec_finished();
+            },
+            _ => unreachable!(),
         }
     }
 
@@ -166,6 +169,20 @@ impl Cpu {
                 }
             }
             6 => self.exec_finished(),
+            _ => unreachable!(),
+        }
+    }
+
+    //////////////////////////////////////////////
+    /// SEI: 割り込み禁止フラグを立てる。
+    //////////////////////////////////////////////
+    pub fn sei(&mut self) {
+        match self.state.counter {
+            2 => {
+                let _ = self.fetch();
+                self.regs.flags_on(Flags::INT_DISABLE);
+                self.exec_finished();
+            },
             _ => unreachable!(),
         }
     }
