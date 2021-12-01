@@ -1,4 +1,4 @@
-#! Macros for CPU.
+//! Macros for CPU.
 
 #[cfg(debug_assertions)]
 macro_rules! print_cpu_state {
