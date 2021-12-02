@@ -301,7 +301,7 @@ impl Cpu {
         println!("################# CPU STATE: BEGIN");
         println!("PC = {:#X}({})", self.regs.pc, self.regs.pc);
         println!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
-        println!("S = {:#X}({}), P = {:#b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
+        println!("S = {:#X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
         println!("################# END");
     }
 
