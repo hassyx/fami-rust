@@ -6,49 +6,218 @@ use crate::nes::util::make_addr;
 // TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から2番目で行う。
 // 現状は、命令が終了したタイミングでポーリングを解禁している。
 
-// 未実装の命令(括弧で囲んだものは実装済み)
-/*
-tier1:
-(ORA) AND EOR ADC STA LDA CMP SBC
-ASL ROL LSR ROR STX LDX DEC INC
+/// 命令実行の骨組み(どの命令でも共通するテンプレート部分)の処理を担う関数
+pub type FnExec = fn(cpu: &mut Cpu);
+/// 命令実行処理のうち、命令ごとに異なるコア部分の処理を担う関数
+pub type FnCore = fn(cpu: &mut Cpu, val: u8);
 
-tier2:
-BIT JMP JMP STY LDY CPY CPX
+pub struct Executer {
+    pub fn_exec: FnExec,
+    pub fn_core: FnCore,
+}
 
-tier3:
-BRK JSR abs RTI RTS PHP PLP PHA PLA DEY TAY INY INX
-CLC SEC CLI (SEI) TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
-*/
+impl Default for Executer {
+    fn default() -> Self {
+        Self { 
+            fn_exec: Cpu::fn_exec_dummy,
+            fn_core: Cpu::fn_core_cummy,
+        }
+    }
+}
 
 impl Cpu {
 
-    //////////////////////////////////////////////
-    /// ORA: レジスタAとメモリをORしてAに格納。
-    //////////////////////////////////////////////
+    pub fn fn_exec_dummy(&mut self) { }
+    pub fn fn_core_cummy(&mut self, _val: u8) { }
     
-    pub fn ora_immediate(&mut self) {
+    pub fn exec_immediate(&mut self) {
         match self.state.counter {
             2 => {
                 let operand = self.fetch();
-                self.regs.a |= operand;
+                (self.state.executer.fn_core)(self, operand);
                 self.exec_finished();
             },
             _ => unreachable!(),
         }
     }
 
-    pub fn ora_zeropage(&mut self) {
+    pub fn exec_zeropage(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
                 let val = self.mem.read(self.state.op_1 as u16);
-                self.regs.a |= val;
+                (self.state.executer.fn_core)(self, val);
                 self.exec_finished();
             },
             _ => unreachable!(),
         }
     }
 
+    pub fn exec_indexed_zeroPage_x(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x),
+            4 => {
+                let addr = self.state.op_1 as u16;
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                self.exec_finished();
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_absolute(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_2 = self.fetch(),
+            4 => {
+                let addr = make_addr(self.state.op_2, self.state.op_1);
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indexed_absolute_x(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_2 = self.fetch(),
+            4 => {
+                let low = self.state.op_1;
+                let high = self.state.op_2;
+                let addr = make_addr(high, low).wrapping_add(self.regs.x as u16);
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                if let Some(_) = low.checked_add(self.regs.x) {
+                    self.exec_finished()
+                }
+            },
+            5 => self.exec_finished(),
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indexed_absolute_y(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_2 = self.fetch(),
+            4 => {
+                let low = self.state.op_1;
+                let high = self.state.op_2;
+                let addr = make_addr(high, low).wrapping_add(self.regs.y as u16);
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                if let Some(_) = low.checked_add(self.regs.y) {
+                    self.exec_finished();
+                }
+            },
+            5 => self.exec_finished(),
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indexed_indirect_x(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => {
+                let addr = self.state.op_1.wrapping_add(self.regs.x) as u16;
+                self.state.op_1 = self.mem.read(addr);
+            }
+            4 => {
+                let low = self.mem.read(self.state.op_1 as u16);
+                self.state.op_1 = low;
+            },
+            5 => {
+                let low = self.state.op_1;
+                let addr = low.wrapping_add(1);
+                let high = self.mem.read(addr as u16);
+                self.state.op_2 = high;
+            },
+            6 => {
+                let low = self.state.op_1;
+                let high = self.state.op_2;
+                let addr = make_addr(high, low);
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                self.exec_finished();
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indirect_indexed_y(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => {
+                let addr = self.state.op_1;
+                let low = self.mem.read(addr as u16);
+                self.state.op_2 = low;
+            },
+            4 => {
+                let addr = self.state.op_1.wrapping_add(1);
+                let high = self.mem.read(addr as u16);
+                self.state.op_1 = high;
+            },
+            5 => {
+                let high = self.state.op_1;
+                let low = self.state.op_2;
+                let addr = make_addr(high, low);
+                let addr = addr.wrapping_add(self.regs.y as u16);
+                let val = self.mem.read(addr);
+                (self.state.executer.fn_core)(self, val);
+                if let Some(_) = low.checked_add(self.regs.y) {
+                    self.exec_finished();
+                }
+            }
+            6 => self.exec_finished(),
+            _ => unreachable!(),
+        }
+    }
+
+    //////////////////////////////////////////////
+    /// ORA: レジスタAとメモリをORしてAに格納。
+    //////////////////////////////////////////////
+    pub fn ora_action(&mut self, val: u8) {
+        self.regs.a |= val;
+    }
+
+    //////////////////////////////////////////////
+    /// LDA: 値をレジスタAにロード。
+    //////////////////////////////////////////////
+    pub fn lda_action(&mut self, val: u8) {
+        self.regs.a = val;
+    }
+
+    //////////////////////////////////////////////
+    /// SEI: 割り込み禁止フラグを立てる。
+    //////////////////////////////////////////////
+    pub fn sei(&mut self) {
+        match self.state.counter {
+            2 => {
+                self.regs.flags_on(Flags::INT_DISABLE);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    //////////////////////////////////////////////
+    /// CLD: Overflowフラグをクリア。
+    //////////////////////////////////////////////
+    pub fn cld(&mut self) {
+        match self.state.counter {
+            2 => {
+                self.regs.flags_off(Flags::OVERFLOW);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    /*
     pub fn ora_indexed_zeroPage_x(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
@@ -172,23 +341,8 @@ impl Cpu {
             _ => unreachable!(),
         }
     }
+    */
 
-    //////////////////////////////////////////////
-    /// SEI: 割り込み禁止フラグを立てる。
-    //////////////////////////////////////////////
-    pub fn sei(&mut self) {
-        match self.state.counter {
-            2 => {
-                self.regs.flags_on(Flags::INT_DISABLE);
-                self.exec_finished();
-            },
-            _ => unreachable!(),
-        }
-    }
-
-/*
-     
-*/
 
 /*
     *

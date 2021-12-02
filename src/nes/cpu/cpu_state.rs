@@ -1,9 +1,7 @@
 //! CPUの状態遷移
 
-use super::{Cpu, Flags, IntType};
+use super::{Cpu, Flags, IntType, decoder, executer::Executer};
 use crate::util::*;
-use super::decoder::PtrFnExec;
-
 
 // 割り込みハンドラのアドレス:
 const ADDR_INT_NMI: u16        = 0xFFFA;
@@ -16,7 +14,7 @@ pub struct TmpState {
     pub op_1: u8,
     pub op_2: u8,
     pub int: IntType,
-    pub fn_exec: Option<PtrFnExec>,
+    pub executer: Executer,
 }
 
 impl Default for TmpState {
@@ -26,7 +24,7 @@ impl Default for TmpState {
             op_1: 0,
             op_2: 0,
             int: IntType::None,
-            fn_exec: None,
+            executer: Default::default(),
         }
     }
 }
@@ -42,10 +40,10 @@ impl Cpu {
             self.int_polling_enabled = false;
             // 1クロックサイクル目は必ずOPコードのフェッチになる。
             // 命令種別を解析し、実際の処理を担う関数を取得して設定。
-            self.state.fn_exec = Some(self.decode());
+            self.state.executer = decoder::fetch_and_decode(self);
         } else {
             // 2クロック目以降は、実際の処理を担う関数に全てを任せる。
-            self.state.fn_exec.unwrap()(self);
+            (self.state.executer.fn_exec)(self);
         }
     }
 
