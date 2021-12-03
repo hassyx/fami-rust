@@ -285,24 +285,24 @@ impl Cpu {
     #[cfg(debug_assertions)]
     fn check_stack_overflow(&self) {
         if self.regs.s <= 0 {
-            println!("stack overflow detected.");
+            log::debug!("stack overflow detected.");
         }
     }
 
     #[cfg(debug_assertions)]
     fn check_stack_underflow(&self) {
         if self.regs.s >= u8::MAX {
-            println!("stack underflow detected.");
+            log::debug!("stack underflow detected.");
         }
     }
 
     #[cfg(debug_assertions)]
     fn print_cpu_state(&self) {
-        println!("################# CPU STATE: BEGIN");
-        println!("PC = {:#X}({})", self.regs.pc, self.regs.pc);
-        println!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
-        println!("S = {:#X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
-        println!("################# END");
+        log::debug!("#### CPU STATE: BEGIN");
+        log::debug!("PC = {:#X}({})", self.regs.pc, self.regs.pc);
+        log::debug!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
+        log::debug!("S = {:#X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
+        log::debug!("#### END");
     }
 
     /*

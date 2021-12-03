@@ -28,34 +28,34 @@ impl MemCon {
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_write(&mut self, addr: u16, data: &[u8]) {
-        println!("mem::MemCon::raw_write() addr={}, data.len()={}", addr, data.len());
+        log::debug!("addr={}, data.len()={}", addr, data.len());
         let addr = addr as usize;
         self.ram[addr..addr+data.len()].copy_from_slice(data);
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_write_b(&mut self, addr: u16, data: u8) {
-        println!("mem::MemCon::raw_write_b() addr={}", addr);
+        log::debug!("addr={}", addr);
         let addr = addr as usize;
         self.ram[addr] = data;
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_fill(&mut self, range: RangeInclusive<usize>, data: u8) {
-        println!("mem::MemCon::fill() range={:?}, data={}", range, data);
+        log::debug!("range={:?}, data={}", range, data);
         self.ram[range].fill(data);
     }
 
     pub fn write(&mut self, addr: u16, data: u8) {
-        println!("mem::MemCon::write_b() addr={}", addr);
+        log::debug!("addr={}, data={}", addr, data);
         if !self.write_to_dev(addr, data) {
             self.ram[addr as usize] = data;
         }
     }
     
     pub fn read(&mut self, addr: u16) -> u8 {
-        println!("mem::MemCon::read_b() addr={}", addr);
         if let Some(data) = self.read_from_dev(addr) {
+            log::debug!("addr={}, data={}", addr, data);
             data
         } else {
             self.ram[addr as usize]

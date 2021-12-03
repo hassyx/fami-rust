@@ -105,21 +105,26 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
         // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
         // また、LDXでは、IndexedAbsolute_X は Y を見る。
         let (addr_mode, fn_exec) = decode_addr_tier1_10(opcode)?;
-
         match aaa {
             0b000 => None,    // ASL
             0b001 => None,    // ROL
             0b010 => None,    // LSR
             0b011 => None,    // ROR
             0b100 => None,    // STX
-            0b101 => None,    // LDX
+            0b101 => {
+                let fn_exec = match addr_mode {
+                    IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
+                    IndexedAbsolute_X => Cpu::exec_indexed_absolute_y,
+                    _ => fn_exec,
+                };
+                Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
+            }
             0b110 => None,    // DEC
             0b111 => None,    // INC
             _ => None,
         }
     } else if cc == 0b00 {
         let (addr_mode, fn_exec) = decode_addr_tier1_00(opcode)?;
-
         match aaa {
             0b001 => None,    //BIT
             0b010 => None,    //JMP
@@ -147,7 +152,7 @@ fn decode_addr_tier1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
         0b010 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
         0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
         0b100 => Some((AddrMode::IndirectIndexed_Y, Cpu::exec_indirect_indexed_y)),
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeroPage_x)),
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x)),
         0b110 => Some((AddrMode::IndexedAbsolute_Y, Cpu::exec_indexed_absolute_y)),
         0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
         _ => None,
@@ -193,8 +198,8 @@ fn decode_addr_tier1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
 fn decode_tier2(opcode: u8) -> Option<Executer> {
     // "xxy10000" は全て条件付きブランチ。
     // xx = OPコード, y = 比較に用いる値
-    let op = (opcode & 0b1100_0000) >> 5;
-    let val = (opcode & 0b0010_0000) >> 4;
+    let op = (opcode & 0b1100_0000) >> 6;
+    let val = (opcode & 0b0010_0000) >> 5;
     let tail = opcode & 0b0001_1111;
 
     if tail != 0b0001_0000 {

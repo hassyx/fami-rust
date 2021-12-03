@@ -17,7 +17,9 @@ extern crate image;
 use piston_window::*;
 
 fn main() {
-    
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
     // ROMをロード
     let path = "./ignores/donkeykong.nes";
     let rom: Box<NesRom> = load_rom(path);
