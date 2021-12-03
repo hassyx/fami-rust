@@ -18,7 +18,9 @@ use piston_window::*;
 
 fn main() {
     std::env::set_var("RUST_LOG", "debug");
-    env_logger::init();
+    env_logger::builder()
+        .format_timestamp(None)
+        .init();
 
     // ROMをロード
     let path = "./ignores/donkeykong.nes";
