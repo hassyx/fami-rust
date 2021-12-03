@@ -104,7 +104,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
     } else if cc == 0b10 {
         // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
         // また、LDXでは、IndexedAbsolute_X は Y を見る。
-        let (addr_mode, fn_exec) = decode_addr_tier1_10(opcode)?;
+        let (addr_mode, fn_exec) = decode_addr_tier1_10(bbb)?;
         match aaa {
             0b000 => None,    // ASL
             0b001 => None,    // ROL
@@ -113,8 +113,8 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
             0b100 => None,    // STX
             0b101 => {
                 let fn_exec = match addr_mode {
-                    IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
-                    IndexedAbsolute_X => Cpu::exec_indexed_absolute_y,
+                    AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
+                    AddrMode::IndexedAbsolute_X => Cpu::exec_indexed_absolute_y,
                     _ => fn_exec,
                 };
                 Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
@@ -124,7 +124,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
             _ => None,
         }
     } else if cc == 0b00 {
-        let (addr_mode, fn_exec) = decode_addr_tier1_00(opcode)?;
+        let (addr_mode, fn_exec) = decode_addr_tier1_00(bbb)?;
         match aaa {
             0b001 => None,    //BIT
             0b010 => None,    //JMP
@@ -233,8 +233,8 @@ fn decode_tier2(opcode: u8) -> Option<Executer> {
 
 /*
     全命令：
-    BRK JSR abs RTI RTS PHP PLP PHA PLA DEY TAY INY INX
-    CLC SEC CLI SEI TYA CLV (CLD) SED TXA TXS TAX TSX DEX NOP
+    BRK JSR(abs) RTI RTS PHP PLP PHA PLA DEY TAY INY INX
+    CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
 */
 /// その他の1バイト命令をデコード
 fn decode_tier3(opcode: u8) -> Option<Executer> {
@@ -248,53 +248,37 @@ fn decode_tier3(opcode: u8) -> Option<Executer> {
         0x48 => None,     // PHA
         0x68 => None,     // PLA
         0x88 => None,     // DEY
-        0xA8 => None,     // TAY
+        // TAY
+        0xA8 => Some(make_executer(Cpu::exec_implied, Cpu::tay_action, Destination::Register)),
         0xC8 => None,     // INY
         0xE8 => None,     // INX
-        0x18 => None,     // CLC
-        0x38 => None,     // SEC
-        0x58 => None,     // CLI
+        // CLC
+        0x18 => Some(make_executer(Cpu::exec_implied, Cpu::clc_action, Destination::Register)),
+        // SEC
+        0x38 => Some(make_executer(Cpu::exec_implied, Cpu::sec_action, Destination::Register)), 
+        // CLI
+        0x58 => Some(make_executer(Cpu::exec_implied, Cpu::cli_action, Destination::Register)),
+        // SEI
         0x78 => Some(make_executer(Cpu::exec_implied, Cpu::sei_action, Destination::Register)),
-        0x98 => None,     // TYA
-        0xB8 => None,     // CLV
+        // TYA
+        0x98 => Some(make_executer(Cpu::exec_implied, Cpu::tya_action, Destination::Register)),
+        // CLV
+        0xB8 => Some(make_executer(Cpu::exec_implied, Cpu::clv_action, Destination::Register)),
+        // CLD
         0xD8 => Some(make_executer(Cpu::exec_implied, Cpu::cld_action, Destination::Register)),
-        0xF8 => None,     // SED
-        0x8A => None,     // TXA
-        0x9A => None,     // TXS
-        0xAA => None,     // TAX
-        0xBA => None,     // TSX
-        0xCA => None,     // DEX
+        // SED
+        0xF8 => Some(make_executer(Cpu::exec_implied, Cpu::sed_action, Destination::Register)),
+        // TXA
+        0x8A => Some(make_executer(Cpu::exec_implied, Cpu::txa_action, Destination::Register)),
+        // TXS
+        0x9A => Some(make_executer(Cpu::exec_implied, Cpu::txs_action, Destination::Register)),
+        // TAX
+        0xAA => Some(make_executer(Cpu::exec_implied, Cpu::tax_action, Destination::Register)),
+        // TSX
+        0xBA => Some(make_executer(Cpu::exec_implied, Cpu::tsx_action, Destination::Register)),
+        // DEX
+        0xCA => Some(make_executer(Cpu::exec_implied, Cpu::dex_action, Destination::Register)),
         0xEA => None,     // NOP
         _ => None,
     }
 }
-
-/*
-fn get_ora(addr_mode: AddrMode) -> FnTemplate {
-    match addr_mode {
-        AddrMode::Immediate => Cpu::exec_immediate,
-        AddrMode::ZeroPage => Cpu::ora_zeropage,
-        AddrMode::IndexedZeroPage_X => Cpu::ora_indexed_zeroPage_x,
-        AddrMode::Absolute => Cpu::ora_absolute,
-        AddrMode::IndexedAbsolute_X => Cpu::ora_indexed_absolute_x,
-        AddrMode::IndexedAbsolute_Y => Cpu::ora_indexed_absolute_y,
-        AddrMode::IndexedIndirect_X => Cpu::ora_indexed_indirect_x,
-        AddrMode::IndirectIndexed_Y => Cpu::ora_indirect_indexed_y,
-        _ => panic!("ORA: {:?} is invalid addressing mode.", addr_mode),
-    };
-}   
-
-fn get_lda(addr_mode: AddrMode) -> PtrFnExec {
-    match addr_mode {
-        AddrMode::Immediate => Cpu::lda_absolute,
-        AddrMode::ZeroPage => Cpu::lda_zeropage,
-        AddrMode::IndexedZeroPage_X => Cpu::lda_indexed_zeroPage_x,
-        AddrMode::Absolute => Cpu::lda_absolute,
-        AddrMode::IndexedAbsolute_X => Cpu::lda_indexed_absolute_x,
-        AddrMode::IndexedAbsolute_Y => Cpu::lda_indexed_absolute_y,
-        AddrMode::IndexedIndirect_X => Cpu::lda_indexed_indirect_x,
-        AddrMode::IndirectIndexed_Y => Cpu::lda_indirect_indexed_y,
-        _ => panic!("ORA: {:?} is invalid addressing mode.", addr_mode),
-    }
-}
-*/
