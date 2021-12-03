@@ -7,7 +7,7 @@ use super::{Cpu, executer::*};
 #[derive(Debug, PartialEq)]
 enum AddrMode {
     /// 不正なアドレッシングモード。
-    Invalid,
+    // Invalid,
     /// Aレジスタに対して演算を行い、Aレジスタに格納する。
     Accumulator,
     /// オペランドの16bitの即値との演算。
@@ -43,10 +43,11 @@ fn panic_invalid_op(opcode: u8) -> ! {
     panic!("\"{:#0X}\" is invalid opcode.", opcode);
 }
 
-fn make_executer(fn_exec: FnExec, fn_core: FnCore) -> Executer {
+fn make_executer(fn_exec: FnExec, fn_core: FnCore, dst: Destination) -> Executer {
     Executer {
         fn_exec,
         fn_core,
+        dst,
     }
 }
 
@@ -62,8 +63,8 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
     if let Some(e) = decode_tier2(opcode) {
         return e
     }
-    if let Some(fn_exec) = decode_tier3(opcode) {
-        return make_executer(fn_exec, Cpu::fn_core_cummy)
+    if let Some(e) = decode_tier3(opcode) {
+        return e
     }
 
     panic_invalid_op(opcode);
@@ -71,7 +72,7 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
 
 /*  
     全命令：
-    (ORA) AND EOR ADC STA (LDA) CMP SBC
+    (ORA) AND EOR ADC (STA) (LDA) CMP SBC
     ASL ROL LSR ROR STX LDX DEC INC
     */
 /// OPコードの末尾2ビットを使った解析
@@ -83,28 +84,27 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
     let cc = opcode & 0b0000_0011;
 
     if cc == 0b01 {
-        if let Some(fn_exec) = decode_addr_tier1_01(bbb) {
-            match aaa {
-                0b000 => Some(make_executer(fn_exec, Cpu::ora_action)),
-                0b001 => None,    // AND
-                0b010 => None,    // EOR
-                0b011 => None,    // ADC
-                0b100 => None,    // STA (immediateなSTAは存在しない) 
-                0b101 => Some(make_executer(fn_exec, Cpu::lda_action)),
-                0b110 => None,    // CMP
-                0b111 => None,    // SBC
-                _ => None,
-            }    
-        } else {
-            return None
+        let (addr_mode, fn_exec) = decode_addr_tier1_01(bbb)?;
+        match aaa {
+            0b000 => Some(make_executer(fn_exec, Cpu::ora_action, Destination::Register)),
+            0b001 => None,    // AND
+            0b010 => None,    // EOR
+            0b011 => None,    // ADC
+            0b100 => {
+                if addr_mode == AddrMode::Immediate {
+                    return None
+                }
+                Some(make_executer(fn_exec, Cpu::sta_action, Destination::Memory))
+            },
+            0b101 => Some(make_executer(fn_exec, Cpu::lda_action, Destination::Register)),
+            0b110 => None,    // CMP
+            0b111 => None,    // SBC
+            _ => None,
         }
     } else if cc == 0b10 {
         // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
         // また、LDXでは、IndexedAbsolute_X は Y を見る。
-        let addr_mode = decode_addr_tier1_10(opcode);
-        if addr_mode == AddrMode::Invalid {
-            return None
-        }
+        let (addr_mode, fn_exec) = decode_addr_tier1_10(opcode)?;
 
         match aaa {
             0b000 => None,    // ASL
@@ -118,10 +118,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
             _ => None,
         }
     } else if cc == 0b00 {
-        let addr_mode = decode_addr_tier1_00(opcode);
-        if addr_mode == AddrMode::Invalid {
-            return None
-        }
+        let (addr_mode, fn_exec) = decode_addr_tier1_00(opcode)?;
 
         match aaa {
             0b001 => None,    //BIT
@@ -143,49 +140,49 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
 
 /// "aaabbbcc" 形式の命令で cc=01 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_01(bbb: u8) -> Option<FnExec> {
+fn decode_addr_tier1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
     match bbb {
-        0b000 => Some(Cpu::exec_indexed_indirect_x),
-        0b001 => Some(Cpu::exec_zeropage),
-        0b010 => Some(Cpu::exec_immediate),
-        0b011 => Some(Cpu::exec_absolute),
-        0b100 => Some(Cpu::exec_indirect_indexed_y),
-        0b101 => Some(Cpu::exec_indexed_zeroPage_x),
-        0b110 => Some(Cpu::exec_indexed_absolute_y),
-        0b111 => Some(Cpu::exec_indexed_absolute_x),
+        0b000 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
+        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b010 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
+        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        0b100 => Some((AddrMode::IndirectIndexed_Y, Cpu::exec_indirect_indexed_y)),
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeroPage_x)),
+        0b110 => Some((AddrMode::IndexedAbsolute_Y, Cpu::exec_indexed_absolute_y)),
+        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
         _ => None,
     }
 }
 
 /// "aaabbbcc" 形式の命令で cc=10 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_10(bbb: u8) -> AddrMode {
+fn decode_addr_tier1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
     match bbb {
-        0b000 => AddrMode::Immediate,
-        0b001 => AddrMode::ZeroPage,
-        0b010 => AddrMode::Accumulator,
-        0b011 => AddrMode::Absolute,
-        0b101 => AddrMode::IndexedIndirect_X,
-        0b111 => AddrMode::IndexedAbsolute_X,
-        _ => AddrMode::Invalid,
+        0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
+        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
+        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        0b101 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
+        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
+        _ => None,
     }
 }
 
 /*
     全命令：
-    (ORA) AND EOR ADC STA LDA CMP SBC
+    (ORA) AND EOR ADC (STA) (LDA) CMP SBC
     ASL ROL LSR ROR STX LDX DEC INC
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_00(bbb: u8) -> AddrMode {
+fn decode_addr_tier1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
     match bbb {
-        0b000 => AddrMode::Immediate,
-        0b001 => AddrMode::ZeroPage,
-        0b011 => AddrMode::Absolute,
-        0b101 => AddrMode::IndexedIndirect_X,
-        0b111 => AddrMode::IndexedAbsolute_X,
-        _ => AddrMode::Invalid,
+        0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
+        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        0b101 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
+        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
+        _ => None,
     }
 }
 
@@ -235,7 +232,7 @@ fn decode_tier2(opcode: u8) -> Option<Executer> {
     CLC SEC CLI SEI TYA CLV (CLD) SED TXA TXS TAX TSX DEX NOP
 */
 /// その他の1バイト命令をデコード
-fn decode_tier3(opcode: u8) -> Option<FnExec> {
+fn decode_tier3(opcode: u8) -> Option<Executer> {
     match opcode {
         0x00 => None,     // BRK
         0x20 => None,     // JSR (abs)
@@ -252,10 +249,10 @@ fn decode_tier3(opcode: u8) -> Option<FnExec> {
         0x18 => None,     // CLC
         0x38 => None,     // SEC
         0x58 => None,     // CLI
-        0x78 => Some(Cpu::sei),
+        0x78 => Some(make_executer(Cpu::exec_implied, Cpu::sei_action, Destination::Register)),
         0x98 => None,     // TYA
         0xB8 => None,     // CLV
-        0xD8 => Some(Cpu::cld),
+        0xD8 => Some(make_executer(Cpu::exec_implied, Cpu::cld_action, Destination::Register)),
         0xF8 => None,     // SED
         0x8A => None,     // TXA
         0x9A => None,     // TXS
