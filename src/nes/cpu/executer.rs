@@ -1,5 +1,7 @@
 //! Instruction executer.
 
+use std::ops::BitOr;
+
 use super::{Cpu, Flags};
 use crate::nes::util::make_addr;
 
@@ -355,19 +357,22 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// DEX: レジスタXをデクリメント。
+    /// DEX(Implied): レジスタXをデクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn dex_action(&mut self, _: u8) -> u8 {
         log::debug!("[DEX]");
-        //・オーバーフローするのか？？
-        //・あと今までに実装した命令でフラグが変化する場合は修正が必要。
         self.regs.x = self.regs.x.wrapping_sub(1);
+        // decrementの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
+        let z_flag: u8 = self.regs.x & Flags::NEGATIVE.bits;
+        self.regs.p = (self.regs.p & !Flags::NEGATIVE.bits) | z_flag;
+        // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
+        let z_flag: u8 = ((self.regs.x == 0) as u8) << 1;
+        self.regs.p = (self.regs.p & !Flags::ZERO.bits) | z_flag;
         0
     }
-
-
-
-    
 
     //////////////////////////////////////////////
     /// SEI: 割り込み禁止フラグを立てる。
