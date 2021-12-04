@@ -57,13 +57,13 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
 
     // 当面は非公式命令を検出した場合にpanicさせる。
     let opcode = cpu.fetch();
-    if let Some(e) = decode_tier1(opcode) {
+    if let Some(e) = decode_group1(opcode) {
         return e
     }
-    if let Some(e) = decode_tier2(opcode) {
+    if let Some(e) = decode_group2(opcode) {
         return e
     }
-    if let Some(e) = decode_tier3(opcode) {
+    if let Some(e) = decode_group3(opcode) {
         return e
     }
 
@@ -76,7 +76,7 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
     ASL ROL LSR ROR STX LDX DEC INC
     */
 /// OPコードの末尾2ビットを使った解析
-fn decode_tier1(opcode: u8) -> Option<Executer> {
+fn decode_group1(opcode: u8) -> Option<Executer> {
     // "aaabbbcc" で分類
     // aaa,cc = OPコード,  bbb = アドレッシングモード
     let aaa = (opcode & 0b1110_0000) >> 5;
@@ -84,13 +84,14 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
     let cc = opcode & 0b0000_0011;
 
     if cc == 0b01 {
-        let (addr_mode, fn_exec) = decode_addr_tier1_01(bbb)?;
+        let (addr_mode, fn_exec) = decode_addr_group1_01(bbb)?;
         match aaa {
             0b000 => Some(make_executer(fn_exec, Cpu::ora_action, Destination::Register)),
             0b001 => None,    // AND
             0b010 => None,    // EOR
             0b011 => None,    // ADC
             0b100 => {
+                // Group 1 の中では、STAのみ唯一 Immediate モードを持たない。
                 if addr_mode == AddrMode::Immediate {
                     return None
                 }
@@ -104,7 +105,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
     } else if cc == 0b10 {
         // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
         // また、LDXでは、IndexedAbsolute_X は Y を見る。
-        let (addr_mode, fn_exec) = decode_addr_tier1_10(bbb)?;
+        let (addr_mode, fn_exec) = decode_addr_group1_10(bbb)?;
         match aaa {
             0b000 => None,    // ASL
             0b001 => None,    // ROL
@@ -124,7 +125,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
             _ => None,
         }
     } else if cc == 0b00 {
-        let (addr_mode, fn_exec) = decode_addr_tier1_00(bbb)?;
+        let (addr_mode, fn_exec) = decode_addr_group1_00(bbb)?;
         match aaa {
             0b001 => None,    //BIT
             0b010 => None,    //JMP
@@ -145,7 +146,7 @@ fn decode_tier1(opcode: u8) -> Option<Executer> {
 
 /// "aaabbbcc" 形式の命令で cc=01 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
+fn decode_addr_group1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
     match bbb {
         0b000 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
@@ -161,7 +162,7 @@ fn decode_addr_tier1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
 
 /// "aaabbbcc" 形式の命令で cc=10 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
     match bbb {
         0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
@@ -180,7 +181,7 @@ fn decode_addr_tier1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_tier1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
     match bbb {
         0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
@@ -195,7 +196,7 @@ fn decode_addr_tier1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
     全命令： BIT JMP JMP STY LDY CPY CPX
 */
 /// OPコードの末尾5ビットを使った解析
-fn decode_tier2(opcode: u8) -> Option<Executer> {
+fn decode_group2(opcode: u8) -> Option<Executer> {
     // "xxy10000" は全て条件付きブランチ。
     // xx = OPコード, y = 比較に用いる値
     let op = (opcode & 0b1100_0000) >> 6;
@@ -237,7 +238,7 @@ fn decode_tier2(opcode: u8) -> Option<Executer> {
     CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
 */
 /// その他の1バイト命令をデコード
-fn decode_tier3(opcode: u8) -> Option<Executer> {
+fn decode_group3(opcode: u8) -> Option<Executer> {
     match opcode {
         0x00 => None,     // BRK
         0x20 => None,     // JSR (abs)

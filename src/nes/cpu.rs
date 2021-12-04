@@ -101,6 +101,16 @@ impl Registers {
     pub fn flags_off(&mut self, flags: Flags) {
         self.p &= !flags.bits;
     }
+
+    pub fn change_negative_by_value(&mut self, val: u8) {
+        let z_flag: u8 = val & Flags::NEGATIVE.bits;
+        self.p = (self.p & !Flags::NEGATIVE.bits) | z_flag;
+    }
+
+    pub fn change_zero_by_value(&mut self, val: u8) {
+        let z_flag: u8 = ((val == 0) as u8) << 1;
+        self.p = (self.p & !Flags::ZERO.bits) | z_flag;
+    }
 }
 
 /// Type of interruption.

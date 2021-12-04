@@ -268,34 +268,62 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// ORA: レジスタAとメモリをORしてAに格納。
+    /// ORA (group 1):
+    /// レジスタAとメモリをORしてAに格納。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn ora_action(&mut self, val: u8) -> u8 {
         log::debug!("[ORA]");
         self.regs.a |= val;
+        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.a);
+        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.a);
         0
     }
 
     //////////////////////////////////////////////
-    /// LDA: 値をレジスタAにロード。
+    /// LDA (group 1):
+    /// 値をレジスタAにロード。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn lda_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDA]");
         self.regs.a = val;
+        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.a);
+        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.a);
         0
     }
 
     //////////////////////////////////////////////
-    /// LDA: 値をレジスタXにロード。
+    /// LDX (group 1):
+    /// 値をレジスタXにロード。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn ldx_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDX]");
         self.regs.x = val;
+        // コピーの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.x);
+        // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.x);
         0
     }
 
     //////////////////////////////////////////////
-    /// STA: レジスタAの内容をメモリに書き込む。
+    /// STA (group 1, ただしimmediateなし):
+    /// レジスタAの内容をメモリに書き込む。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
     //////////////////////////////////////////////
     pub fn sta_action(&mut self, _: u8) -> u8 {
         log::debug!("[STA]");
@@ -303,43 +331,79 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// TAX: レジスタAをレジスタXにコピー。
+    /// TAX (implied):
+    /// レジスタAをレジスタXにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn tax_action(&mut self, _: u8) -> u8 {
         log::debug!("[TAX]");
         self.regs.x = self.regs.a;
+        // コピーの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.x);
+        // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.x);
         0
     }
 
     //////////////////////////////////////////////
-    /// TAY: レジスタAをレジスタYにコピー。
+    /// TAY (implied):
+    /// レジスタAをレジスタYにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn tay_action(&mut self, _: u8) -> u8 {
         log::debug!("[TAY]");
         self.regs.y = self.regs.a;
+        // コピーの結果、レジスタYのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.y);
+        // decrementの結果、レジスタYの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.y);
         0
     }
 
     //////////////////////////////////////////////
-    /// TXA: レジスタXをレジスタAにコピー。
+    /// TXA (implied):
+    /// レジスタXをレジスタAにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn txa_action(&mut self, _: u8) -> u8 {
         log::debug!("[TXA]");
         self.regs.a = self.regs.x;
+        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.a);
+        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.a);
         0
     }
 
     //////////////////////////////////////////////
-    /// TYA: レジスタYをレジスタSにコピー。
+    /// TYA (implied):
+    /// レジスタYをレジスタSにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn tya_action(&mut self, _: u8) -> u8 {
         log::debug!("[TYA]");
         self.regs.a = self.regs.y;
+        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.a);
+        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.a);
         0
     }
 
     //////////////////////////////////////////////
-    /// TXS: レジスタXをレジスタSにコピー。
+    /// TXS (implied):
+    /// レジスタXをレジスタSにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
     //////////////////////////////////////////////
     pub fn txs_action(&mut self, _: u8) -> u8 {
         log::debug!("[TXS]");
@@ -348,16 +412,25 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// TXS: レジスタSをレジスタXにコピー。
+    /// TSX (implied):
+    /// レジスタSをレジスタXにコピー。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
     //////////////////////////////////////////////
     pub fn tsx_action(&mut self, _: u8) -> u8 {
         log::debug!("[TSX]");
         self.regs.x = self.regs.s;
+        // コピーの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.x);
+        // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.x);
         0
     }
 
     //////////////////////////////////////////////
-    /// DEX(Implied): レジスタXをデクリメント。
+    /// DEX (Implied):
+    /// レジスタXをデクリメント。
     //////////////////////////////////////////////
     //  N Z C I D V
     //  + + - - - -
@@ -366,16 +439,18 @@ impl Cpu {
         log::debug!("[DEX]");
         self.regs.x = self.regs.x.wrapping_sub(1);
         // decrementの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
-        let z_flag: u8 = self.regs.x & Flags::NEGATIVE.bits;
-        self.regs.p = (self.regs.p & !Flags::NEGATIVE.bits) | z_flag;
+        self.regs.change_negative_by_value(self.regs.x);
         // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
-        let z_flag: u8 = ((self.regs.x == 0) as u8) << 1;
-        self.regs.p = (self.regs.p & !Flags::ZERO.bits) | z_flag;
+        self.regs.change_zero_by_value(self.regs.x);
         0
     }
 
     //////////////////////////////////////////////
-    /// SEI: 割り込み禁止フラグを立てる。
+    /// SEI (implied):
+    /// 割り込み禁止フラグを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - 1 - -
     //////////////////////////////////////////////
     pub fn sei_action(&mut self, _: u8) -> u8 {
         log::debug!("[SEI]");
@@ -384,7 +459,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// SEI: 割り込み禁止フラグをクリア。
+    /// CLI (implied):
+    /// 割り込み禁止フラグをクリア。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - 0 - -
     //////////////////////////////////////////////
     pub fn cli_action(&mut self, _: u8) -> u8 {
         log::debug!("[CLI]");
@@ -393,7 +472,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// SED: Decimalフラグを立てる。
+    /// SED (implied):
+    /// Decimalフラグを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - 1 -
     //////////////////////////////////////////////
     pub fn sed_action(&mut self, _: u8) -> u8 {
         log::debug!("[SED]");
@@ -402,7 +485,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// CLD: Decimalフラグをクリア。
+    /// CLD (implied):
+    /// Decimalフラグをクリア。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - 0 -
     //////////////////////////////////////////////
     pub fn cld_action(&mut self, _: u8) -> u8 {
         log::debug!("[CLD]");
@@ -411,7 +498,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// CLV: Overflowフラグをクリア。
+    /// CLV (implied):
+    /// Overflowフラグをクリア。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - 0
     //////////////////////////////////////////////
     pub fn clv_action(&mut self, _: u8) -> u8 {
         log::debug!("[CLV]");
@@ -420,7 +511,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// SEC: Carryフラグを立てる。
+    /// SEC (implied):
+    /// Carryフラグを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - 1 - - -
     //////////////////////////////////////////////
     pub fn sec_action(&mut self, _: u8) -> u8 {
         log::debug!("[SEC]");
@@ -429,7 +524,11 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// CLV: Carryフラグをクリア。
+    /// CLC (implied):
+    /// Carryフラグをクリア。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - 0 - - -
     //////////////////////////////////////////////
     pub fn clc_action(&mut self, _: u8) -> u8 {
         log::debug!("[CLC]");
