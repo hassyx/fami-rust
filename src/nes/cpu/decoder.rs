@@ -72,7 +72,7 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
 
 /*  
     全命令：
-    (ORA) AND EOR ADC (STA) (LDA) CMP SBC
+    ORA AND EOR ADC STA LDA CMP SBC
     ASL ROL LSR ROR STX LDX DEC INC
     */
 /// OPコードの末尾2ビットを使った解析
@@ -86,10 +86,13 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
     if cc == 0b01 {
         let (addr_mode, fn_exec) = decode_addr_group1_01(bbb)?;
         match aaa {
+            // ORA
             0b000 => Some(make_executer(fn_exec, Cpu::ora_action, Destination::Register)),
-            0b001 => None,    // AND
+            // AND
+            0b001 => Some(make_executer(fn_exec, Cpu::and_action, Destination::Register)),
             0b010 => None,    // EOR
             0b011 => None,    // ADC
+            // STA
             0b100 => {
                 // Group 1 の中では、STAのみ唯一 Immediate モードを持たない。
                 if addr_mode == AddrMode::Immediate {
@@ -97,6 +100,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                 }
                 Some(make_executer(fn_exec, Cpu::sta_action, Destination::Memory))
             },
+            // LDA
             0b101 => Some(make_executer(fn_exec, Cpu::lda_action, Destination::Register)),
             0b110 => None,    // CMP
             0b111 => None,    // SBC
@@ -112,6 +116,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b010 => None,    // LSR
             0b011 => None,    // ROR
             0b100 => None,    // STX
+            // LDX
             0b101 => {
                 let fn_exec = match addr_mode {
                     AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
@@ -176,7 +181,7 @@ fn decode_addr_group1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
 
 /*
     全命令：
-    (ORA) AND EOR ADC (STA) (LDA) CMP SBC
+    ORA AND EOR ADC STA LDA CMP SBC
     ASL ROL LSR ROR STX LDX DEC INC
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
@@ -193,7 +198,8 @@ fn decode_addr_group1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
 }
 
 /*
-    全命令： BIT JMP JMP STY LDY CPY CPX
+    全命令:
+    BIT JMP JMP STY LDY CPY CPX
 */
 /// OPコードの末尾5ビットを使った解析
 fn decode_group2(opcode: u8) -> Option<Executer> {

@@ -285,6 +285,23 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// AND (group 1):
+    /// レジスタAとメモリをANDしてAに格納。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn and_action(&mut self, val: u8) -> u8 {
+        log::debug!("[AND]");
+        self.regs.a |= val;
+        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.a);
+        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.a);
+        0
+    }
+
+    //////////////////////////////////////////////
     /// LDA (group 1):
     /// 値をレジスタAにロード。
     //////////////////////////////////////////////

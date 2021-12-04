@@ -16,6 +16,10 @@ const CLOCK_FREQ_NTSC: u32 = 1789773;
 /// PAL版のクロック周波数(Hz)
 const CLOCK_FREQ_PAL: u32 = 1662607;
 
+// スタックポインタの上位アドレス
+const ADDR_STACK_UPPER: u16 = 0x0100;
+
+
 bitflags! {
     /// ステータスフラグ
     pub struct Flags: u8 {
@@ -40,9 +44,6 @@ bitflags! {
         const NEGATIVE    = 0b1000_0000;
     }
 }
-
-// スタックポインタの上位アドレス
-const ADDR_STACK_UPPER: u16    = 0x0100;
 
 /// 6502 (RICHO 2A03)
 pub struct Cpu {
