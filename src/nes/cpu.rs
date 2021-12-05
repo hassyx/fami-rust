@@ -112,6 +112,29 @@ impl Registers {
         let z_flag: u8 = ((val == 0) as u8) << 1;
         self.p = (self.p & !Flags::ZERO.bits) | z_flag;
     }
+
+    pub fn a_add(&mut self, val: u8) {
+        let carry = self.p & Flags::CARRY.bits;
+        let (result, carry_1) = self.a.overflowing_add(carry);
+        let (result, carry_2) = result.overflowing_add(val);
+        let new_carry = (carry_1 || carry_2) as u8;
+
+        // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
+        self.p = (self.p & !Flags::CARRY.bits) | new_carry;
+        // 演算結果のMSBが 0 から 1 に「変わった」場合にのみ、Overflowフラグを立てる。
+        // そうでない場合は、例え結果のMSBが 1 でも、Overflowフラグをクリアする。
+        // "(M^result) & (N^result) & 0x80 != 0" で判定可能。
+        // 詳細: http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+        let overflowed = ((self.a ^ result) & (val ^ result) & 0x80) != 0;
+        let overflow_bit = (overflowed as u8) << 6;
+        self.p = (self.p & !Flags::OVERFLOW.bits) | overflow_bit;
+        // 演算結果のMSBが 1 なら、ZeroをOn。そうでなければクリア。
+        self.change_negative_by_value(result);
+        // 演算結果が 0 なら、ZeroをOn。そうでなければクリア。
+        self.change_zero_by_value(result);
+
+        self.a = result;
+    }
 }
 
 /// Type of interruption.

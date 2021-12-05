@@ -91,7 +91,8 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             // AND
             0b001 => Some(make_executer(fn_exec, Cpu::and_action, Destination::Register)),
             0b010 => None,    // EOR
-            0b011 => None,    // ADC
+            // ADC
+            0b011 => Some(make_executer(fn_exec, Cpu::adc_action, Destination::Register)),
             // STA
             0b100 => {
                 // Group 1 の中では、STAのみ唯一 Immediate モードを持たない。
