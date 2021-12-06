@@ -258,11 +258,14 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0x28 => None,     // PLP
         0x48 => None,     // PHA
         0x68 => None,     // PLA
-        0x88 => None,     // DEY
+        // DEY
+        0x88 => Some(make_executer(Cpu::exec_implied, Cpu::dey_action, Destination::Register)),    
         // TAY
         0xA8 => Some(make_executer(Cpu::exec_implied, Cpu::tay_action, Destination::Register)),
-        0xC8 => None,     // INY
-        0xE8 => None,     // INX
+        // INY
+        0xC8 => Some(make_executer(Cpu::exec_implied, Cpu::inx_action, Destination::Register)),
+        // INX
+        0xE8 => Some(make_executer(Cpu::exec_implied, Cpu::iny_action, Destination::Register)),
         // CLC
         0x18 => Some(make_executer(Cpu::exec_implied, Cpu::clc_action, Destination::Register)),
         // SEC

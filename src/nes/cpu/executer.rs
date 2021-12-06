@@ -506,6 +506,23 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// INX (Implied):
+    /// レジスタXをインクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn inx_action(&mut self, _: u8) -> u8 {
+        log::debug!("[INX]");
+        self.regs.x = self.regs.x.wrapping_add(1);
+        // incrementの結果、レジスタXのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.x);
+        // incrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.x);
+        0
+    }
+
+    //////////////////////////////////////////////
     /// DEX (Implied):
     /// レジスタXをデクリメント。
     //////////////////////////////////////////////
@@ -519,6 +536,40 @@ impl Cpu {
         self.regs.change_negative_by_value(self.regs.x);
         // decrementの結果、レジスタXの値が0ならZをon、それ以内ならZをoff。
         self.regs.change_zero_by_value(self.regs.x);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// INY (Implied):
+    /// レジスタYをインクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn iny_action(&mut self, _: u8) -> u8 {
+        log::debug!("[INY]");
+        self.regs.x = self.regs.y.wrapping_add(1);
+        // incrementの結果、レジスタYのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.y);
+        // incrementの結果、レジスタYの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.y);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// DEY (Implied):
+    /// レジスタYをデクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn dey_action(&mut self, _: u8) -> u8 {
+        log::debug!("[DEY]");
+        self.regs.x = self.regs.y.wrapping_sub(1);
+        // decrementの結果、レジスタYのMSBが1ならNをon、0ならNをoff。
+        self.regs.change_negative_by_value(self.regs.y);
+        // decrementの結果、レジスタYの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.y);
         0
     }
 
