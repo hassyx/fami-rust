@@ -90,7 +90,8 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b000 => Some(make_executer(fn_exec, Cpu::ora_action, Destination::Register)),
             // AND
             0b001 => Some(make_executer(fn_exec, Cpu::and_action, Destination::Register)),
-            0b010 => None,    // EOR
+            // EOR
+            0b010 => Some(make_executer(fn_exec, Cpu::eor_action, Destination::Register)),
             // ADC
             0b011 => Some(make_executer(fn_exec, Cpu::adc_action, Destination::Register)),
             // STA
