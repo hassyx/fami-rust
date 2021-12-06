@@ -39,12 +39,12 @@ fn main() {
     let mut cpu = Cpu::new(&rom, Box::new(ram));
     cpu.power_on();
     
-    const window_x: u32 = 640;
-    const window_y: u32 = 480;
+    const WINDOW_X: u32 = 640;
+    const WINDOW_Y: u32 = 480;
 
     // Create window.
     let mut window: PistonWindow = 
-        WindowSettings::new("Fami-Rust", (window_x, window_y))
+        WindowSettings::new("Fami-Rust", (WINDOW_X, WINDOW_Y))
         .exit_on_esc(true)
         .build()
         .unwrap_or_else(|e| { panic!("Failed to build PistonWindow: {}", e) });
@@ -52,7 +52,7 @@ fn main() {
         factory: window.factory.clone(),
         encoder: window.factory.create_command_buffer().into()
     };
-    let mut screen = image::ImageBuffer::new(window_x, window_y);
+    let mut screen = image::ImageBuffer::new(WINDOW_X, WINDOW_Y);
     let mut texture: G2dTexture = Texture::from_image(
         &mut texture_context,
         &screen,

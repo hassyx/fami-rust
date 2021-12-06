@@ -11,8 +11,6 @@ use crate::nes::mem;
 use crate::nes::rom;
 use crate::nes::cpu::cpu_state::*;
 
-use self::executer::Executer;
-
 /// NTSC版のクロック周波数(Hz)
 const CLOCK_FREQ_NTSC: u32 = 1789773;
 /// PAL版のクロック周波数(Hz)
