@@ -23,7 +23,7 @@ const ADDR_STACK_UPPER: u16 = 0x0100;
 bitflags! {
     /// ステータスフラグ
     pub struct Flags: u8 {
-        /// キャリー発生時に1。
+        /// 加算でキャリーが、または減算でボローが発生した時に1。
         const CARRY       = 0b0000_0001;
         /// 演算結果が0だった場合に1。
         const ZERO        = 0b0000_0010;
@@ -114,16 +114,25 @@ impl Registers {
     }
 
     pub fn a_add(&mut self, val: u8) {
-        let carry = self.p & Flags::CARRY.bits;
-        let (result, carry_1) = self.a.overflowing_add(carry);
-        let (result, carry_2) = result.overflowing_add(val);
-        let new_carry = (carry_1 || carry_2) as u8;
+        let carry: u8 = self.p & Flags::CARRY.bits;
+        // 16bitに拡張した上で加算を行う。u8が取りうる最大の値が
+        // キャリー含めて加算された場合の結果は、以下の通り。
+        //
+        // $FF + $FF = $1FE(=0b0000_0001_1111_1110)
+        // $1FE + 1  = $1FF(=0b0000_0001_1111_1111)
+        //
+        // つまりキャリー含めて全て加算しても結果は $1FF となり、
+        // 先頭ビットの値をそのままCarryフラグとして利用できる。
+        let result: u16 = (self.a as u16) + (val as u16) + (carry as u16);
+        let new_carry = ((result & 0b0000_0001_0000_0000) != 0) as u8;
+        // キャリーは記録したので上位8bitは削っていい
+        let result = result as u8;
 
         // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
         self.p = (self.p & !Flags::CARRY.bits) | new_carry;
         // 演算結果のMSBが 0 から 1 に「変わった」場合にのみ、Overflowフラグを立てる。
         // そうでない場合は、例え結果のMSBが 1 でも、Overflowフラグをクリアする。
-        // "(M^result) & (N^result) & 0x80 != 0" で判定可能。
+        // 加算する数値を(M, N)とした場合、"(M^result) & (N^result) & 0x80 != 0" で判定可能。
         // 詳細: http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         let overflowed = ((self.a ^ result) & (val ^ result) & 0x80) != 0;
         let overflow_bit = (overflowed as u8) << 6;
@@ -134,6 +143,24 @@ impl Registers {
         self.change_zero_by_value(result);
 
         self.a = result;
+    }
+
+    pub fn a_sub(&mut self, val: u8) {
+        // Carryフラグの扱いについて:
+        // 6502は単純化のため、加算と減算で同じ演算機を利用している。
+        // よってフラグの設定もそれに準ずる。
+        // 具体的には、「2の補数の加算」を行った結果、桁溢れが発生した場合にCarryがOn、
+        // 桁溢れが起きなかった場合にOffとなる。
+        //
+        // つまり、減算する値の2の補数を求め、この値とレジスタAの値を加算して、
+        // 桁溢れした8bit目の値をそのままCarryフラグの値に利用できる。
+        // 
+        // この単純化のため、6502は減算時に「Borrowが発生した場合にCarryがOff、そうでない場合にOn」
+        // という、直感に反するフラグ設定が行われる。また、Borrowの影響を無視して真っさらな状態で減算を行うには、
+        // 「まずSECでCarry(=Borrow)フラグを"立てる"」という、これまた変なルールが生まれてしまう。
+        
+        // SBCは、減算する値を2の補数で表したADCに等しい。
+        self.a_add(val.wrapping_neg());
     }
 }
 

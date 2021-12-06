@@ -104,7 +104,8 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             // LDA
             0b101 => Some(make_executer(fn_exec, Cpu::lda_action, Destination::Register)),
             0b110 => None,    // CMP
-            0b111 => None,    // SBC
+            // SBC
+            0b111 => Some(make_executer(fn_exec, Cpu::sbc_action, Destination::Register)),
             _ => None,
         }
     } else if cc == 0b10 {
