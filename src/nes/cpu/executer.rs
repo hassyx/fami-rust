@@ -16,7 +16,9 @@ pub type FnCore = fn(cpu: &mut Cpu, val: u8) -> u8;
 #[derive(PartialEq)]
 /// 最終的な演算結果を、レジスタに書き込むのか、それともメモリに書き込むのか。
 pub enum Destination {
+    /// レジスタに書き込む。NOPのような書き込み対象が存在しない命令もこちらに分類する。
     Register,
+    /// メモリへ書き込む。
     Memory,
 }
 
@@ -661,6 +663,18 @@ impl Cpu {
     pub fn clc_action(&mut self, _: u8) -> u8 {
         log::debug!("[CLC]");
         self.regs.flags_off(Flags::CARRY);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// NOP (impliedということにしておく):
+    /// 何もしない。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
+    //////////////////////////////////////////////
+    pub fn nop_action(&mut self, _: u8) -> u8 {
+        log::debug!("[NOP]");
         0
     }
 

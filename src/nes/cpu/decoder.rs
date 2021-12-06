@@ -292,7 +292,8 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0xBA => Some(make_executer(Cpu::exec_implied, Cpu::tsx_action, Destination::Register)),
         // DEX
         0xCA => Some(make_executer(Cpu::exec_implied, Cpu::dex_action, Destination::Register)),
-        0xEA => None,     // NOP
+        // NOP
+        0xEA => Some(make_executer(Cpu::exec_implied, Cpu::nop_action, Destination::Register)),
         _ => None,
     }
 }
