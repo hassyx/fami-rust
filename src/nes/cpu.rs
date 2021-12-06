@@ -11,6 +11,8 @@ use crate::nes::mem;
 use crate::nes::rom;
 use crate::nes::cpu::cpu_state::*;
 
+use self::executer::Executer;
+
 /// NTSC版のクロック周波数(Hz)
 const CLOCK_FREQ_NTSC: u32 = 1789773;
 /// PAL版のクロック周波数(Hz)
@@ -113,30 +115,37 @@ impl Registers {
         self.p = (self.p & !Flags::ZERO.bits) | z_flag;
     }
 
-    pub fn a_add(&mut self, val: u8) {
-        let carry: u8 = self.p & Flags::CARRY.bits;
-        // 16bitに拡張した上で加算を行う。u8が取りうる最大の値が
-        // キャリー含めて加算された場合の結果は、以下の通り。
+    fn add_with_carry(val1: u8, val2: u8, carry: bool) -> (u8, bool) {
+        // 全ての値をu8から16bitに拡張した上で加算を行う。
+        // u8が取りうる最大の値が、Carry含めて加算された場合の結果は、以下の通り。
         //
-        // $FF + $FF = $1FE(=0b0000_0001_1111_1110)
-        // $1FE + 1  = $1FF(=0b0000_0001_1111_1111)
+        // $FF + $FF + 1 = $1FE(=0b0000_0001_1111_1111)
         //
         // つまりキャリー含めて全て加算しても結果は $1FF となり、
         // 先頭ビットの値をそのままCarryフラグとして利用できる。
-        let result: u16 = (self.a as u16) + (val as u16) + (carry as u16);
-        let new_carry = ((result & 0b0000_0001_0000_0000) != 0) as u8;
+        let result: u16 = (val1 as u16) + (val2 as u16) + (carry as u16);
+        let new_carry = (result & 0x0100) != 0;
         // キャリーは記録したので上位8bitは削っていい
         let result = result as u8;
+        // 2バイトなのでレジスタ経由で渡してくれるはず...
+        (result, new_carry)
+    }
+
+    pub fn a_add(&mut self, val: u8) {
+        let (result, carry) = 
+            Self::add_with_carry(self.a, val, (self.p & Flags::CARRY.bits) != 0);
 
         // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
-        self.p = (self.p & !Flags::CARRY.bits) | new_carry;
+        self.p = (self.p & !Flags::CARRY.bits) | carry as u8;
         // 演算結果のMSBが 0 から 1 に「変わった」場合にのみ、Overflowフラグを立てる。
         // そうでない場合は、例え結果のMSBが 1 でも、Overflowフラグをクリアする。
         // 加算する数値を(M, N)とした場合、"(M^result) & (N^result) & 0x80 != 0" で判定可能。
         // 詳細: http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-        let overflowed = ((self.a ^ result) & (val ^ result) & 0x80) != 0;
-        let overflow_bit = (overflowed as u8) << 6;
-        self.p = (self.p & !Flags::OVERFLOW.bits) | overflow_bit;
+        self.p = {
+            let overflowed = ((self.a ^ result) & (val ^ result) & 0x80) != 0;
+            let overflow_bit = (overflowed as u8) << 6;
+            (self.p & !Flags::OVERFLOW.bits) | overflow_bit
+        };
         // 演算結果のMSBが 1 なら、ZeroをOn。そうでなければクリア。
         self.change_negative_by_value(result);
         // 演算結果が 0 なら、ZeroをOn。そうでなければクリア。
@@ -159,8 +168,21 @@ impl Registers {
         // という、直感に反するフラグ設定が行われる。また、Borrowの影響を無視して真っさらな状態で減算を行うには、
         // 「まずSECでCarry(=Borrow)フラグを"立てる"」という、これまた変なルールが生まれてしまう。
         
-        // 上記の解説より、SBCは、減算する値を1の補数で表したADCに等しい。
+        // 上記より、SBCは、減算する値を1の補数で表したADCに等しい。
         self.a_add(!val);
+    }
+
+    pub fn a_cmp(&mut self, val: u8) {
+        // CMP = Aに対して2の補数を加算し、加算の際にCarryを考慮せず、計算後にOverflowが変化しないADC。
+        let (result, carry) = 
+            Self::add_with_carry(self.a, val.wrapping_neg(), false);
+
+        // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
+        self.p = (self.p & !Flags::CARRY.bits) | carry as u8;
+        // 演算結果のMSBが 1 なら、ZeroをOn。そうでなければクリア。
+        self.change_negative_by_value(result);
+        // 演算結果が 0 なら、ZeroをOn。そうでなければクリア。
+        self.change_zero_by_value(result);
     }
 }
 
