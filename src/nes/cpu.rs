@@ -103,11 +103,13 @@ impl Registers {
         self.p &= !flags.bits;
     }
 
+    /// valのMSBが1ならNegativeフラグをon、0ならoff。
     pub fn change_negative_by_value(&mut self, val: u8) {
         let z_flag: u8 = val & Flags::NEGATIVE.bits;
         self.p = (self.p & !Flags::NEGATIVE.bits) | z_flag;
     }
 
+    /// valの値が0ならZeroフラグをon、それ以内ならoff。
     pub fn change_zero_by_value(&mut self, val: u8) {
         let z_flag: u8 = ((val == 0) as u8) << 1;
         self.p = (self.p & !Flags::ZERO.bits) | z_flag;
@@ -350,14 +352,14 @@ impl Cpu {
 
     pub fn push(&mut self, data: u8) {
         check_stack_overflow!(self);
-        let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
+        let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
         self.mem.write(addr, data);
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
     pub fn pop(&mut self) -> u8 {
         check_stack_underflow!(self);
-        let addr = ADDR_STACK_UPPER & (self.regs.s as u16);
+        let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
         let data = self.mem.read(addr);
         self.regs.s = self.regs.s.wrapping_add(1);
         data

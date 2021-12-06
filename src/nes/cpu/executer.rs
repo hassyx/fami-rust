@@ -269,6 +269,14 @@ impl Cpu {
         }
     }
 
+    pub fn exec_stack(&mut self) {
+        match self.state.counter {
+            4 => (self.state.executer.fn_core)(self, 0),
+            _ => unreachable!(),
+        };
+    }
+
+
     //////////////////////////////////////////////
     /// ADC (group 1):
     /// レジスタAとメモリとキャリー(もしあれば)を加算してAに格納。
@@ -554,6 +562,22 @@ impl Cpu {
         // incrementの結果、レジスタYのMSBが1ならNをon、0ならNをoff。
         self.regs.change_negative_by_value(self.regs.y);
         // incrementの結果、レジスタYの値が0ならZをon、それ以内ならZをoff。
+        self.regs.change_zero_by_value(self.regs.y);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// PLA (Implied/Stack):
+    /// スタックポイントから値をPopしてレジスタAに保存。
+    /// スタックポインタを+1する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn pla_action(&mut self, _: u8) -> u8 {
+        log::debug!("[PLA]");
+        self.regs.a = self.pop();
+        self.regs.change_negative_by_value(self.regs.y);
         self.regs.change_zero_by_value(self.regs.y);
         0
     }
