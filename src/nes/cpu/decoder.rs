@@ -258,7 +258,7 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0x28 => None,     // PLP
         0x48 => None,     // PHA
         // PLA
-        0x68 => Some(make_executer(Cpu::exec_stack, Cpu::pla_action, Destination::Register)),
+        0x68 => Some(make_executer(Cpu::exec_pull_stack, Cpu::pla_action, Destination::Register)),
         // DEY
         0x88 => Some(make_executer(Cpu::exec_implied, Cpu::dey_action, Destination::Register)),
         // TAY

@@ -350,32 +350,49 @@ impl Cpu {
     }
     */
 
-    pub fn push(&mut self, data: u8) {
+    /// スタックが新しい空き領域を指すように、スタックポインタを 1 減算する。
+    /// スタックへ値を積んだ(Pushした)後に呼び出す。
+    pub fn dec_stack(&mut self) {
+        // スタックに積みすぎて天井を超えていないか？
+        // つまり減算しすぎて $00 -> $FF にオーバーラップしていないか？のチェック。
         check_stack_overflow!(self);
-        let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
-        self.mem.write(addr, data);
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
-    pub fn pop(&mut self) -> u8 {
+    /// 現在のスタックポインタの指すアドレスに値を積む。スタックポインタは操作しない。
+    pub fn push_stack(&mut self, data: u8) {
+        let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
+        self.mem.write(addr, data);   
+    }
+
+    /// スタックポインタに 1 加算する。スタックからの値の取得(Pull/Pop)の前に呼び出す。
+    pub fn inc_stack(&mut self) {
+        // スタックから取り出しすぎて底が抜けていないか？
+        // つまり加算しすぎて $FF -> $00 にオーバーラップしていないか？のチェック。
         check_stack_underflow!(self);
+        self.regs.s = self.regs.s.wrapping_add(1);
+    }
+
+    /// 現在のスタックポインタの指すアドレスから値を取り出す。スタックポインタは操作しない。
+    pub fn peek_stack(&mut self) -> u8 {
         let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
         let data = self.mem.read(addr);
-        self.regs.s = self.regs.s.wrapping_add(1);
         data
     }
 
     #[cfg(debug_assertions)]
+    /// スタックが天井を突き破らないかチェック。
     fn check_stack_overflow(&self) {
         if self.regs.s <= 0 {
-            log::debug!("stack overflow detected.");
+            log::debug!("!!! stack overflow detected.");
         }
     }
 
     #[cfg(debug_assertions)]
+    /// スタックの底が抜けないかチェック。
     fn check_stack_underflow(&self) {
         if self.regs.s >= u8::MAX {
-            log::debug!("stack underflow detected.");
+            log::debug!("!!! stack underflow detected.");
         }
     }
 

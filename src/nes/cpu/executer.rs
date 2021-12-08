@@ -269,9 +269,13 @@ impl Cpu {
         }
     }
 
-    pub fn exec_stack(&mut self) {
+    pub fn exec_pull_stack(&mut self) {
         match self.state.counter {
-            4 => (self.state.executer.fn_core)(self, 0),
+            2 => (),
+            3 => {
+                self.inc_stack();
+            }
+            4 => { (self.state.executer.fn_core)(self, 0); },
             _ => unreachable!(),
         };
     }
@@ -568,17 +572,17 @@ impl Cpu {
 
     //////////////////////////////////////////////
     /// PLA (Implied/Stack):
-    /// スタックポイントから値をPopしてレジスタAに保存。
-    /// スタックポインタを+1する。
+    /// スタックポインタを+1して、 スタックポインタの指す位置から値を取得する。
+    /// (ここに来た時点でスタックポインタは +1 されている)
     //////////////////////////////////////////////
     //  N Z C I D V
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn pla_action(&mut self, _: u8) -> u8 {
         log::debug!("[PLA]");
-        self.regs.a = self.pop();
-        self.regs.change_negative_by_value(self.regs.y);
-        self.regs.change_zero_by_value(self.regs.y);
+        self.regs.a = self.peek_stack();
+        self.regs.change_negative_by_value(self.regs.a);
+        self.regs.change_zero_by_value(self.regs.a);
         0
     }
 
