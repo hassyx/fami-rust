@@ -244,15 +244,17 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
 
 /*
     全命令：
-    BRK JSR(abs) RTI RTS PHP PLP PHA PLA DEY TAY INY INX
+    BRK JSR RTI RTS PHP PLP PHA PLA DEY TAY INY INX
     CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
 */
 /// その他の1バイト命令をデコード
 fn decode_group3(opcode: u8) -> Option<Executer> {
     match opcode {
         0x00 => None,     // BRK
-        0x20 => None,     // JSR (abs)
-        0x40 => None,     // RTI
+        // JSR
+        0x20 => Some(make_executer(Cpu::exec_jsr, Cpu::jsr_action, Destination::Register)),
+        // RTI
+        0x40 => Some(make_executer(Cpu::exec_rti, Cpu::rti_action, Destination::Register)),
         // RTS
         0x60 => Some(make_executer(Cpu::exec_rts, Cpu::rts_action, Destination::Register)),
         // PHP

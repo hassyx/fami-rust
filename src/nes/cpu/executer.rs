@@ -2,6 +2,8 @@
 
 use std::ops::BitOr;
 
+use num_traits::WrappingAdd;
+
 use super::{Cpu, Flags};
 use crate::nes::util::make_addr;
 
@@ -275,7 +277,10 @@ impl Cpu {
             3 => {
                 self.inc_stack();
             }
-            4 => { (self.state.executer.fn_core)(self, 0); },
+            4 => { 
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            },
             _ => unreachable!(),
         };
     }
@@ -283,7 +288,32 @@ impl Cpu {
     pub fn exec_push_stack(&mut self) {
         match self.state.counter {
             2 => (),
-            3 => { (self.state.executer.fn_core)(self, 0); },
+            3 => {
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        };
+    }
+
+    pub fn exec_rti(&mut self) {
+        match self.state.counter {
+            2 => (),
+            3 => (),
+            4 => {
+                // スタックからステータスレジスタの内容を復元するが、
+                // Brkフラグは実在しないので 0 にしておく。
+                self.regs.p = self.pull_stack() & !Flags::BREAK.bits;
+            },
+            5 => self.state.op_1 = self.pull_stack(),
+            6 => {
+                let low = self.state.op_1;
+                let high = self.pull_stack();
+                self.regs.pc = make_addr(high, low);
+                // 何もしないが呼んでおく。
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            },
             _ => unreachable!(),
         };
     }
@@ -303,6 +333,31 @@ impl Cpu {
                 self.regs.pc = make_addr(high, low).wrapping_add(1);
                 // 何もしないが呼んでおく。
                 (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        };
+    }
+
+    pub fn exec_jsr(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => (),
+            4 => {
+                let high = ((self.regs.pc & 0xFF00) >> 8) as u8;
+                self.push_stack(high);
+            },
+            5 => {
+                let low = (self.regs.pc & 0x00FF) as u8;
+                self.push_stack(low);
+            },
+            6 => {
+                let low = self.state.op_1;
+                let high = self.fetch();
+                self.regs.pc = make_addr(high, low);
+                // 何もしないが呼んでおく。
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
             },
             _ => unreachable!(),
         };
@@ -451,14 +506,38 @@ impl Cpu {
 
     //////////////////////////////////////////////
     /// RTS (implied/Stack):
-    /// スタックからPC(low)とPC(high)をPullし、その 値+1 をPCに設定する。
+    /// 関数から呼び出し元に戻る。
+    /// 具体的には、スタックからPCをPullし、その値+1 をPCに設定する。
     //////////////////////////////////////////////
     //  N Z C I D V
     //  - - - - - -
     //////////////////////////////////////////////
     pub fn rts_action(&mut self, _: u8) -> u8 {
         log::debug!("[RTS]");
-        // この関数は何も行わない。呼び出し元(exec_rts)側で処理が完結するので、
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// RTI (implied/Stack):
+    /// スタックから、ステータスフラグと、PCをPullして設定する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  (スタックの内容によって上書き)
+    //////////////////////////////////////////////
+    pub fn rti_action(&mut self, _: u8) -> u8 {
+        log::debug!("[RTI]");
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// JSR (absolute):
+    /// スタックから、ステータスフラグと、PCをPullして設定する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
+    //////////////////////////////////////////////
+    pub fn jsr_action(&mut self, _: u8) -> u8 {
+        log::debug!("[JSR]");
         0
     }
 
@@ -620,7 +699,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn pha_action(&mut self, _: u8) -> u8 {
         log::debug!("[PHA]");
-        self.push_stack_whole(self.regs.a);
+        self.push_stack(self.regs.a);
         0
     }
 
@@ -633,7 +712,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn php_action(&mut self, _: u8) -> u8 {
         log::debug!("[PHP]");
-        self.push_stack_whole(self.regs.p);
+        self.push_stack(self.regs.p);
         0
     }
 

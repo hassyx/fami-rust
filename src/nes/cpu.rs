@@ -350,9 +350,9 @@ impl Cpu {
     }
     */
 
-    /// スタックへのPushと、スタックポインタの操作をまとめて行う。
-    pub fn push_stack_whole(&mut self, data: u8) {
-        self.push_stack(data);
+    /// スタックへのPushと、スタックポインタの減算をまとめて行う。
+    pub fn push_stack(&mut self, data: u8) {
+        self.set_to_stack(data);
         self.dec_stack();
     }
 
@@ -365,10 +365,16 @@ impl Cpu {
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
-    /// 現在のスタックポインタの指すアドレスに値を積む。スタックポインタは操作しない。
-    pub fn push_stack(&mut self, data: u8) {
+    /// 現在のスタックポインタの指すアドレスに値を設定。スタックポインタは操作しない。
+    pub fn set_to_stack(&mut self, data: u8) {
         let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
         self.mem.write(addr, data);   
+    }
+
+    /// スタックポインタの加算と、Pullをまとめて行う。
+    pub fn pull_stack(&mut self) -> u8 {
+        self.inc_stack();
+        self.peek_stack()
     }
 
     /// スタックポインタに 1 加算する。スタックからの値の取得(Pull/Pop)の前に呼び出す。
