@@ -288,6 +288,26 @@ impl Cpu {
         };
     }
 
+    pub fn exec_rts(&mut self) {
+        match self.state.counter {
+            2 => (),
+            3 => self.inc_stack(),
+            4 => {
+                self.state.op_1 = self.peek_stack();
+                self.inc_stack();
+            },
+            5 => self.state.op_2 = self.peek_stack(),
+            6 => {
+                let low = self.state.op_1;
+                let high = self.state.op_2;
+                self.regs.pc = make_addr(high, low).wrapping_add(1);
+                // 何もしないが呼んでおく。
+                (self.state.executer.fn_core)(self, 0);
+            },
+            _ => unreachable!(),
+        };
+    }
+
 
     //////////////////////////////////////////////
     /// ADC (group 1):
@@ -427,6 +447,19 @@ impl Cpu {
     pub fn sta_action(&mut self, _: u8) -> u8 {
         log::debug!("[STA]");
         self.regs.a
+    }
+
+    //////////////////////////////////////////////
+    /// RTS (implied/Stack):
+    /// スタックからPC(low)とPC(high)をPullし、その 値+1 をPCに設定する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
+    //////////////////////////////////////////////
+    pub fn rts_action(&mut self, _: u8) -> u8 {
+        log::debug!("[RTS]");
+        // この関数は何も行わない。呼び出し元(exec_rts)側で処理が完結するので、
+        0
     }
 
     //////////////////////////////////////////////
@@ -606,8 +639,8 @@ impl Cpu {
 
     //////////////////////////////////////////////
     /// PLA (Implied/Stack):
-    /// スタックポインタを+1して、 スタックポインタの指す位置から値を取得する。
-    /// (ここに来た時点でスタックポインタは +1 されている)
+    /// スタックポインタを+1して、 スタックポインタの指す位置から値を取得し、
+    /// レジスタAに格納する。(ここに来た時点でスタックポインタは +1 されている)
     //////////////////////////////////////////////
     //  N Z C I D V
     //  + + - - - -

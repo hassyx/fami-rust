@@ -253,7 +253,8 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0x00 => None,     // BRK
         0x20 => None,     // JSR (abs)
         0x40 => None,     // RTI
-        0x60 => None,     // RTS
+        // RTS
+        0x60 => Some(make_executer(Cpu::exec_rts, Cpu::rts_action, Destination::Register)),
         // PHP
         0x08 => Some(make_executer(Cpu::exec_push_stack, Cpu::php_action, Destination::Register)),
         // PLP
