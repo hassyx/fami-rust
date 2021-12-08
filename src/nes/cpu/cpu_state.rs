@@ -86,10 +86,10 @@ impl Cpu {
                     // Brkの場合、ここに来た時点でPCはBrkの2バイト目を指しているので、更に+1する。
                     self.regs.pc += 1;
                 }
-                self.push((self.regs.pc >> 8 & 0x00FF) as u8);
-                self.push((self.regs.pc & 0x00FF) as u8);
+                self.push_stack_whole((self.regs.pc >> 8 & 0x00FF) as u8);
+                self.push_stack_whole((self.regs.pc & 0x00FF) as u8);
                 // clock 5: ステータスレジスタをpush
-                self.push(self.regs.p);
+                self.push_stack_whole(self.regs.p);
             }
             // スタックに保存したあとは、無条件でBreakフラグを落とす(常に0)
             self.regs.flags_off(Flags::BREAK);

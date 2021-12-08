@@ -350,6 +350,12 @@ impl Cpu {
     }
     */
 
+    /// スタックへのPushと、スタックポインタの操作をまとめて行う。
+    pub fn push_stack_whole(&mut self, data: u8) {
+        self.push_stack(data);
+        self.dec_stack();
+    }
+
     /// スタックが新しい空き領域を指すように、スタックポインタを 1 減算する。
     /// スタックへ値を積んだ(Pushした)後に呼び出す。
     pub fn dec_stack(&mut self) {
