@@ -280,6 +280,14 @@ impl Cpu {
         };
     }
 
+    pub fn exec_push_stack(&mut self) {
+        match self.state.counter {
+            2 => (),
+            3 => { (self.state.executer.fn_core)(self, 0); },
+            _ => unreachable!(),
+        };
+    }
+
 
     //////////////////////////////////////////////
     /// ADC (group 1):
@@ -571,6 +579,32 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// PHA (Implied/Stack):
+    /// レジスタAの内容をスタックにPushし、スタックポインタを -1 する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
+    //////////////////////////////////////////////
+    pub fn pha_action(&mut self, _: u8) -> u8 {
+        log::debug!("[PHA]");
+        self.push_stack_whole(self.regs.a);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// PHP (Implied/Stack):
+    /// ステータスレジスタの内容をスタックにPushし、スタックポインタを -1 する。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  - - - - - -
+    //////////////////////////////////////////////
+    pub fn php_action(&mut self, _: u8) -> u8 {
+        log::debug!("[PHP]");
+        self.push_stack_whole(self.regs.p);
+        0
+    }
+
+    //////////////////////////////////////////////
     /// PLA (Implied/Stack):
     /// スタックポインタを+1して、 スタックポインタの指す位置から値を取得する。
     /// (ここに来た時点でスタックポインタは +1 されている)
@@ -609,7 +643,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn dey_action(&mut self, _: u8) -> u8 {
         log::debug!("[DEY]");
-        self.regs.x = self.regs.y.wrapping_sub(1);
+        self.regs.y = self.regs.y.wrapping_sub(1);
         // decrementの結果、レジスタYのMSBが1ならNをon、0ならNをoff。
         self.regs.change_negative_by_value(self.regs.y);
         // decrementの結果、レジスタYの値が0ならZをon、それ以内ならZをoff。
