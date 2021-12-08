@@ -255,7 +255,8 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0x40 => None,     // RTI
         0x60 => None,     // RTS
         0x08 => None,     // PHP
-        0x28 => None,     // PLP
+        // PLP
+        0x28 => Some(make_executer(Cpu::exec_pull_stack, Cpu::plp_action, Destination::Register)),
         0x48 => None,     // PHA
         // PLA
         0x68 => Some(make_executer(Cpu::exec_pull_stack, Cpu::pla_action, Destination::Register)),
