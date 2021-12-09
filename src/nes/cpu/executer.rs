@@ -1,9 +1,5 @@
 //! Instruction executer.
 
-use std::ops::BitOr;
-
-use num_traits::WrappingAdd;
-
 use super::{Cpu, Flags};
 use crate::nes::util::make_addr;
 
