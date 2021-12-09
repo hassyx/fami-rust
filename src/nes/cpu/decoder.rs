@@ -1,6 +1,10 @@
 //! Instruction decoder.
 
-use super::{Cpu, executer::*};
+use super::Cpu;
+use super::executer::*;
+use super::exec_core_g1;
+use super::exec_core_g2;
+use super::exec_core_g3;
 
 /// アドレッシングモード
 /// TODO: matchで分岐する場合は、頻出するモードを先に置く。
@@ -74,7 +78,7 @@ pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
     全命令：
     ORA AND EOR ADC STA LDA CMP SBC
     ASL ROL LSR ROR STX LDX DEC INC
-    */
+*/
 /// OPコードの末尾2ビットを使った解析
 fn decode_group1(opcode: u8) -> Option<Executer> {
     // "aaabbbcc" で分類

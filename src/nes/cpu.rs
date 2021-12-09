@@ -4,6 +4,9 @@
 mod cpu_state;
 mod decoder;
 mod executer;
+mod exec_core_g1;
+mod exec_core_g2;
+mod exec_core_g3;
 
 use bitflags::bitflags;
 
