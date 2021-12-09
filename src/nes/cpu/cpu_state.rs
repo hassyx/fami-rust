@@ -49,64 +49,75 @@ impl Cpu {
 
     /// 割り込みシーケンスのステップ処理
     pub fn int_step(&mut self) {
-        //　割り込み処理は要7クロック。8クロック目に割り込みベクタの遷移先の実行開始。
-        if self.state.counter == 1 {
-            // まず割り込み状態のポーリングを禁止
-            self.int_polling_enabled = false;
-            // IRQ/BRK無視フラグを立てる
-            self.regs.flags_on(Flags::INT_DISABLE);
-            // 発生した割り込み種別をチェックして記憶
-            // 優先度: Reset > NMI > IRQ = Brk
-            if self.reset_trigger {
-                self.state.int = IntType::Reset;
-            } else if self.nmi_trigger {
-                self.state.int = IntType::Nmi;
-            } else if self.irq_trigger {
-                if self.irq_is_brake {
-                    self.state.int = IntType::Irq;
-                } else {
-                    self.state.int = IntType::Brk;
+        match self.state.counter {
+            1 => {
+                // Brkであれば、本来ここで命令をフェッチする必要があるが、
+                // 既にフェッチしてBrkかどうかを判定済みの状態でここに来るはずなので、
+                // フェッチは必要ない。
+
+                // まず割り込み状態のポーリングを禁止
+                self.int_polling_enabled = false;
+                // IRQ/BRK無視フラグを立てる
+                self.regs.flags_on(Flags::INT_DISABLE);
+                // 発生した割り込み種別をチェックして記憶
+                // 優先度: Reset > NMI > IRQ = Brk
+                if self.reset_trigger {
+                    self.state.int = IntType::Reset;
+                } else if self.nmi_trigger {
+                    self.state.int = IntType::Nmi;
+                } else if self.irq_trigger {
+                    if self.irq_is_brake {
+                        self.state.int = IntType::Brk;
+                    } else {
+                        self.state.int = IntType::Irq;
+                    }
                 }
-            }
-            // TODO: 本来は割り込み種別ごとにトリガーが解除されるタイミングが異なる。
-            // また、割り込みが競合した際の振る舞いも実装する必要がある。
-            // ここでは、ひとまず一括で現在の割り込み状態をリセットする。
-            self.clear_all_int_trigger();
-        } else if self.state.counter == 7 {
-            // Brkフラグの設定
-            if self.state.int == IntType::Brk {
-                self.regs.flags_on(Flags::BREAK);
-            } else {
-                self.regs.flags_off(Flags::BREAK);
-            }
-            // Resetの場合はスタックを触らない
-            if self.state.int != IntType::Reset {
-                // clock 3,4: RTIで割り込み処理終了時に戻るアドレス(PC)を、High, Lowの順にpush。
+                // TODO: 本来は割り込み種別ごとにトリガーが解除されるタイミングが異なる。
+                // また、割り込みが競合した際の振る舞いも実装する必要がある。
+                // ここでは、ひとまず一括で現在の割り込み状態をリセットする。
+                self.clear_all_int_trigger();
+            },
+            2 => {
                 if self.state.int == IntType::Brk {
-                    // Brkの場合、ここに来た時点でPCはBrkの2バイト目を指しているので、更に+1する。
-                    self.regs.pc += 1;
+                    // Brkの場合、ここに来た時点でPCはBrkの1バイト先を指しているので、更に+1する。
+                    self.regs.pc = self.regs.pc.wrapping_add(1);
                 }
+            },
+            // Resetの場合はスタックを操作しない
+            3 => if self.state.int != IntType::Reset {
                 self.push_stack((self.regs.pc >> 8 & 0x00FF) as u8);
+            },
+            // Resetの場合はスタックを操作しない
+            4 => if self.state.int != IntType::Reset {
                 self.push_stack((self.regs.pc & 0x00FF) as u8);
-                // clock 5: ステータスレジスタをpush
-                self.push_stack(self.regs.p);
-            }
-            // スタックに保存したあとは、無条件でBreakフラグを落とす(常に0)
-            self.regs.flags_off(Flags::BREAK);
-            // clock 6,7: 割り込みベクタテーブルを読み込む。
-            let vec_addr = match self.state.int {
-                IntType::Reset => ADDR_INT_RESET,
-                IntType::Nmi => ADDR_INT_NMI,
-                IntType::Irq | IntType::Brk => ADDR_INT_IRQ,
-                IntType::None => panic!("invalid IntType."),
-            };
-            let low = self.mem.read(vec_addr);
-            let high = self.mem.read(vec_addr+1);
-            // clock 8: 割り込みベクタを実行する(ここでは準備だけ)
-            self.regs.pc = make_addr(high, low);
-            // この時点ではまだ割り込み検出のポーリング処理は停止している。
-            // ポーリングが有効になるのは、少なくとも1つの命令の実行が完了してから。
-            self.switch_state_exec();
-        }
+            },
+            // Resetの場合はスタックを操作しない
+            5 => if self.state.int != IntType::Reset {
+                // ステータスレジスタをスタックに保存。
+                // その前にBrakeフラグを設定する。Brakeフラグはスタック上にのみ存在する。
+                let brk_flag = ((self.state.int == IntType::Brk) as u8) << 4;
+                let flags = self.regs.p | brk_flag;
+                self.push_stack(flags);
+            },
+            6 => (),
+            7 => {
+                // clock 6,7: 割り込みベクタテーブルを読み込む。
+                // 処理が重いのでこのクロック内でまとめて処理する。
+                let vec_addr = match self.state.int {
+                    IntType::Reset => ADDR_INT_RESET,
+                    IntType::Nmi => ADDR_INT_NMI,
+                    IntType::Irq | IntType::Brk => ADDR_INT_IRQ,
+                    IntType::None => unreachable!(),
+                };
+                let low = self.mem.read(vec_addr);
+                let high = self.mem.read(vec_addr+1);
+                // clock 8: 割り込みベクタを実行する(ここでは準備だけ)
+                self.regs.pc = make_addr(high, low);
+                // この時点ではまだ割り込み検出のポーリング処理は停止している。
+                // ポーリングが有効になるのは、少なくとも1つの命令の実行が完了してから。
+                self.switch_state_exec();
+            },
+            _ => unreachable!(),
+        };
     }
 }
