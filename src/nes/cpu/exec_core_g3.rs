@@ -100,9 +100,8 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn pla_action(&mut self, _: u8) -> u8 {
         log::debug!("[PLA]");
-        self.regs.a = self.peek_stack();
-        self.regs.change_negative_by_value(self.regs.a);
-        self.regs.change_zero_by_value(self.regs.a);
+        let val = self.peek_stack();
+        self.regs.a_set(val);
         0
     }
 
@@ -115,9 +114,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn dey_action(&mut self, _: u8) -> u8 {
         log::debug!("[DEY]");
-        self.regs.y = self.regs.y.wrapping_sub(1);
-        self.regs.change_negative_by_value(self.regs.y);
-        self.regs.change_zero_by_value(self.regs.y);
+        self.regs.y_set(self.regs.y.wrapping_sub(1));
         0
     }
 
@@ -130,9 +127,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn tay_action(&mut self, _: u8) -> u8 {
         log::debug!("[TAY]");
-        self.regs.y = self.regs.a;
-        self.regs.change_negative_by_value(self.regs.y);
-        self.regs.change_zero_by_value(self.regs.y);
+        self.regs.y_set(self.regs.a);
         0
     }
 
@@ -145,9 +140,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn iny_action(&mut self, _: u8) -> u8 {
         log::debug!("[INY]");
-        self.regs.x = self.regs.y.wrapping_add(1);
-        self.regs.change_negative_by_value(self.regs.y);
-        self.regs.change_zero_by_value(self.regs.y);
+        self.regs.y_set(self.regs.y.wrapping_add(1));
         0
     }
 
@@ -160,9 +153,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn inx_action(&mut self, _: u8) -> u8 {
         log::debug!("[INX]");
-        self.regs.x = self.regs.x.wrapping_add(1);
-        self.regs.change_negative_by_value(self.regs.x);
-        self.regs.change_zero_by_value(self.regs.x);
+        self.regs.x_set(self.regs.x.wrapping_add(1));
         0
     }
 
@@ -227,11 +218,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn tya_action(&mut self, _: u8) -> u8 {
         log::debug!("[TYA]");
-        self.regs.a = self.regs.y;
-        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
-        self.regs.change_negative_by_value(self.regs.a);
-        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(self.regs.y);
         0
     }
 
@@ -283,11 +270,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn txa_action(&mut self, _: u8) -> u8 {
         log::debug!("[TXA]");
-        self.regs.a = self.regs.x;
-        // コピーの結果、レジスタAのMSBが1ならNをon、0ならNをoff。
-        self.regs.change_negative_by_value(self.regs.a);
-        // decrementの結果、レジスタAの値が0ならZをon、それ以内ならZをoff。
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(self.regs.x);
         0
     }
 
@@ -313,9 +296,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn tax_action(&mut self, _: u8) -> u8 {
         log::debug!("[TAX]");
-        self.regs.x = self.regs.a;
-        self.regs.change_negative_by_value(self.regs.x);
-        self.regs.change_zero_by_value(self.regs.x);
+        self.regs.x_set(self.regs.a);
         0
     }
 
@@ -328,9 +309,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn tsx_action(&mut self, _: u8) -> u8 {
         log::debug!("[TSX]");
-        self.regs.x = self.regs.s;
-        self.regs.change_negative_by_value(self.regs.x);
-        self.regs.change_zero_by_value(self.regs.x);
+        self.regs.x_set(self.regs.s);
         0
     }
 
@@ -343,9 +322,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn dex_action(&mut self, _: u8) -> u8 {
         log::debug!("[DEX]");
-        self.regs.x = self.regs.x.wrapping_sub(1);
-        self.regs.change_negative_by_value(self.regs.x);
-        self.regs.change_zero_by_value(self.regs.x);
+        self.regs.x_set(self.regs.x.wrapping_sub(1));
         0
     }
 

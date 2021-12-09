@@ -187,6 +187,27 @@ impl Registers {
         // 演算結果が 0 なら、ZeroをOn。そうでなければクリア。
         self.change_zero_by_value(result);
     }
+
+    /// レジスタAに値を設定し、同時にNegativeとZeroフラグを更新する。
+    pub fn a_set(&mut self, val: u8) {
+        self.a = val;
+        self.change_negative_by_value(val);
+        self.change_zero_by_value(val);
+    }
+
+    /// レジスタXに値を設定し、同時にNegativeとZeroフラグを更新する。
+    pub fn x_set(&mut self, val: u8) {
+        self.x = val;
+        self.change_negative_by_value(val);
+        self.change_zero_by_value(val);
+    }
+
+    /// レジスタYに値を設定し、同時にNegativeとZeroフラグを更新する。
+    pub fn y_set(&mut self, val: u8) {
+        self.x = val;
+        self.change_negative_by_value(val);
+        self.change_zero_by_value(val);
+    }
 }
 
 /// Type of interruption.

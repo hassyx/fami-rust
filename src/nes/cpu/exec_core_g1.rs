@@ -19,9 +19,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn ora_action(&mut self, val: u8) -> u8 {
         log::debug!("[ORA]");
-        self.regs.a |= val;
-        self.regs.change_negative_by_value(self.regs.a);
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(self.regs.a | val);
         0
     }
 
@@ -34,9 +32,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn and_action(&mut self, val: u8) -> u8 {
         log::debug!("[AND]");
-        self.regs.a &= val;
-        self.regs.change_negative_by_value(self.regs.a);
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(self.regs.a & val);
         0
     }
 
@@ -49,9 +45,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn eor_action(&mut self, val: u8) -> u8 {
         log::debug!("[EOR]");
-        self.regs.a ^= val;
-        self.regs.change_negative_by_value(self.regs.a);
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(self.regs.a ^ val);
         0
     }
 
@@ -89,9 +83,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn lda_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDA]");
-        self.regs.a = val;
-        self.regs.change_negative_by_value(self.regs.a);
-        self.regs.change_zero_by_value(self.regs.a);
+        self.regs.a_set(val);
         0
     }
 
@@ -134,9 +126,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn ldx_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDX]");
-        self.regs.x = val;
-        self.regs.change_negative_by_value(self.regs.x);
-        self.regs.change_zero_by_value(self.regs.x);
+        self.regs.x_set(val);
         0
     }
 
