@@ -1,5 +1,7 @@
 //! Instruction decoder.
 
+use std::ops::Add;
+
 use super::Cpu;
 use super::executer::*;
 use super::exec_core_g1;
@@ -10,8 +12,6 @@ use super::exec_core_g3;
 /// TODO: matchで分岐する場合は、頻出するモードを先に置く。
 #[derive(Debug, PartialEq)]
 enum AddrMode {
-    /// 不正なアドレッシングモード。
-    // Invalid,
     /// Aレジスタに対して演算を行い、Aレジスタに格納する。
     Accumulator,
     /// オペランドの16bitの即値との演算。
@@ -22,6 +22,7 @@ enum AddrMode {
     ZeroPage,
     /// オペランドで指定した16bitのアドレスに、レジスタXの値を足して、
     /// そのアドレスが指す8bitの値に対して演算を行う。
+    /// 最終アドレスが16bitの最大値を超えた場合は、溢れた分を無視する。
     IndexedAbsolute_X,
     /// オペランドで指定した16bitのアドレスに、レジスタYの値を足して、
     /// そのアドレスが指す8bitの値に対して演算を行う。
@@ -102,7 +103,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b100 => {
                 // Group 1 の中では、STAのみ唯一 Immediate モードを持たない。
                 if addr_mode == AddrMode::Immediate {
-                    return None
+                    panic_invalid_op(opcode)
                 }
                 Some(make_executer(fn_exec, Cpu::sta_action, Destination::Memory))
             },
@@ -123,12 +124,26 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b001 => None,    // ROL
             0b010 => None,    // LSR
             0b011 => None,    // ROR
-            0b100 => None,    // STX
+            // STX
+            0b100 => {
+                // STXでは、IndexedZeroPage_X は Y を見る。
+                let fn_exec = match addr_mode {
+                    AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
+                    AddrMode::Immediate | 
+                    AddrMode::Accumulator | 
+                    AddrMode::IndexedAbsolute_X => panic_invalid_op(opcode),
+                    _ => fn_exec,
+                };
+                Some(make_executer(fn_exec, Cpu::stx_action, Destination::Memory))
+            },
             // LDX
             0b101 => {
+                // LDXでは、IndexedZeroPage_X は Y を見る。
+                // また、IndexedAbsolute_X は Y を見る。
                 let fn_exec = match addr_mode {
                     AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
                     AddrMode::IndexedAbsolute_X => Cpu::exec_indexed_absolute_y,
+                    AddrMode::Accumulator => panic_invalid_op(opcode),
                     _ => fn_exec,
                 };
                 Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
@@ -181,7 +196,7 @@ fn decode_addr_group1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
         0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
         0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
-        0b101 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x)),
         0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
         _ => None,
     }
