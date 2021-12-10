@@ -254,11 +254,6 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
 /// その他の1バイト命令をデコード
 fn decode_group3(opcode: u8) -> Option<Executer> {
     match opcode {
-        // BRK
-        0x00 => {
-            // BRKはfetchの段階で判別しているので、ここには来ない。
-            unreachable!();
-        }
         // JSR
         0x20 => Some(make_executer(Cpu::exec_jsr, Cpu::jsr_action, Destination::Register)),
         // RTI
@@ -309,6 +304,9 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         0xCA => Some(make_executer(Cpu::exec_implied, Cpu::dex_action, Destination::Register)),
         // NOP
         0xEA => Some(make_executer(Cpu::exec_implied, Cpu::nop_action, Destination::Register)),
+        // BRK
+        // BRKはfetchの段階で判別しているので、ここには来ない。
+        // 0x00 => unreachable!(),
         _ => None,
     }
 }
