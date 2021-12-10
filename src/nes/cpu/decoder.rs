@@ -56,11 +56,11 @@ fn make_executer(fn_exec: FnExec, fn_core: FnCore, dst: Destination) -> Executer
 }
 
 /// OPコードをフェッチして命令種別を判定し、実行を担う関数を返す。
-pub fn fetch_and_decode(cpu: &mut Cpu) -> Executer {
-    // Return Value Optimization が効くことを信じる(TODO: あとでチェック)
+pub fn decode(cpu: &mut Cpu, opcode: u8) -> Executer {
+    // 効率のいい命令デコードについてはここが詳しい。
+    // https://llx.com/Neil/a2/opcodes.html
 
     // 当面は非公式命令を検出した場合にpanicさせる。
-    let opcode = cpu.fetch();
     if let Some(e) = decode_group1(opcode) {
         return e
     }
@@ -254,7 +254,11 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
 /// その他の1バイト命令をデコード
 fn decode_group3(opcode: u8) -> Option<Executer> {
     match opcode {
-        0x00 => None,     // BRK
+        // BRK
+        0x00 => {
+            // BRKはfetchの段階で判別しているので、ここには来ない。
+            unreachable!();
+        }
         // JSR
         0x20 => Some(make_executer(Cpu::exec_jsr, Cpu::jsr_action, Destination::Register)),
         // RTI

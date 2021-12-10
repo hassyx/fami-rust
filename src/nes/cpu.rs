@@ -71,7 +71,7 @@ pub struct Cpu {
     /// こうした理由は、1クロックサイクルごとに走る条件判定処理をできるだけ減らしたかったのと、
     /// CPUのメインループ内で呼ばれる処理では、可能な限り動的なメモリ確保を避けたいため、
     /// 構造体ではなく関数ポインタで実現している。(動的な状態はCpu構造体の方に持たせている)
-    fn_step: fn(&mut Cpu),
+    fn_step: FnState,
     state: TmpState,
     //state_exec: Box<StateExec>,
     //state_int: Box<StateInt>,
@@ -322,9 +322,13 @@ impl Cpu {
     /// PCが指すメモリを1バイト読み、PCを1進める。
     pub fn fetch(&mut self) -> u8 {
         let data = self.mem.read(self.regs.pc);
-        // TODO: PCがオーバーフローした場合の挙動は？
-        self.regs.pc += 1;
+        self.regs.pc = self.regs.pc.wrapping_add(1);
         data
+    }
+
+    fn switch_state_fetch(&mut self) {
+        self.state = TmpState::default();
+        self.fn_step = Cpu::fetch_step;
     }
 
     fn switch_state_int(&mut self) {
@@ -339,6 +343,7 @@ impl Cpu {
 
     fn exec_finished(&mut self) {
         self.state = TmpState::default();
+        self.fn_step = Cpu::fetch_step;
         self.int_polling_enabled = true;
     }
 
