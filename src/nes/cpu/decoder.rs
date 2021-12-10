@@ -140,6 +140,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                     }
                     Some(make_executer(fn_exec, Cpu::dec_action, Destination::Memory))
                 },
+                // INC
                 0b111 => {
                     if addr_mode == AddrMode::Accumulator {
                         panic_invalid_op(opcode)
