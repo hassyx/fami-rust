@@ -116,41 +116,24 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             _ => None,
         }
     } else if cc == 0b10 {
-        // 注意：STXとLDXでは、IndexedZeroPage_X は Y を見る。
-        // また、LDXでは、IndexedAbsolute_X は Y を見る。
-        let (addr_mode, fn_exec) = decode_addr_group1_10(bbb)?;
-        match aaa {
-            0b000 => None,    // ASL
-            0b001 => None,    // ROL
-            0b010 => None,    // LSR
-            0b011 => None,    // ROR
-            // STX
-            0b100 => {
-                // STXでは、IndexedZeroPage_X は Y を見る。
-                let fn_exec = match addr_mode {
-                    AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
-                    AddrMode::Immediate | 
-                    AddrMode::Accumulator | 
-                    AddrMode::IndexedAbsolute_X => panic_invalid_op(opcode),
-                    _ => fn_exec,
-                };
-                Some(make_executer(fn_exec, Cpu::stx_action, Destination::Memory))
-            },
-            // LDX
-            0b101 => {
-                // LDXでは、IndexedZeroPage_X は Y を見る。
-                // また、IndexedAbsolute_X は Y を見る。
-                let fn_exec = match addr_mode {
-                    AddrMode::IndexedZeroPage_X => Cpu::exec_indexed_zeropage_y,
-                    AddrMode::IndexedAbsolute_X => Cpu::exec_indexed_absolute_y,
-                    AddrMode::Accumulator => panic_invalid_op(opcode),
-                    _ => fn_exec,
-                };
-                Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
+        if aaa == 0b100 {   // STX
+            let (_, fn_exec) = decode_addr_group1_10_stx(bbb)?;
+            Some(make_executer(fn_exec, Cpu::stx_action, Destination::Memory))
+        } else if aaa == 0b101 {    // LDX
+            let (_, fn_exec) = decode_addr_group1_10_ldx(bbb)?;
+            Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
+        } else {
+            let (addr_mode, fn_exec) = decode_addr_group1_10_rwm(bbb)?;
+            match aaa {
+                0b000 => None,    // ASL
+                0b001 => None,    // ROL
+                0b010 => None,    // LSR
+                // ROR
+                0b011 => Some(make_executer(fn_exec, Cpu::ror_action, Destination::Register)),
+                0b110 => None,    // DEC
+                0b111 => None,    // INC
+                _ => None,
             }
-            0b110 => None,    // DEC
-            0b111 => None,    // INC
-            _ => None,
         }
     } else if cc == 0b00 {
         let (addr_mode, fn_exec) = decode_addr_group1_00(bbb)?;
@@ -190,22 +173,52 @@ fn decode_addr_group1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
 
 /// "aaabbbcc" 形式の命令で cc=10 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_group1_10(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_10_rwm(bbb: u8) -> Option<(AddrMode, FnExec)> {
+    // ここでは Read-Modified-Write なアドレッシングモードの実行関数を返す。
+    // 対象となる命令は ASL,LSR,INC,DEC,ROR,ROL.
+    match bbb {
+        0b000 => None,
+        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage_rmw)),
+        0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
+        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute_rmw)),
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x_rmw)),
+        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x_rmw)),
+        _ => None,
+    }
+}
+
+/// STX用。"aaabbbcc" 形式の命令で cc=10 の場合。
+fn decode_addr_group1_10_stx(bbb: u8) -> Option<(AddrMode, FnExec)> {
+    match bbb {
+        0b000 => None,  // Immediateは無し
+        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b010 => None,  // Accumulatorは無し
+        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        // STXでは、IndexedZeroPage_X で Y を見る。
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_y)),
+        0b111 => None,  // IndexedAbsolute_Xは無し
+        _ => None,
+    }
+}
+
+/// LDX用。"aaabbbcc" 形式の命令で cc=10 の場合。
+fn decode_addr_group1_10_ldx(bbb: u8) -> Option<(AddrMode, FnExec)> {
     match bbb {
         0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
-        0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
+        0b010 => None,  // Accumulatorは無し
         0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x)),
-        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
+        // LDXでは、IndexedZeroPage_X は Y を見る。
+        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_y)),
+        // LDXでは、IndexedAbsolute_X は Y を見る。
+        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_y)),
         _ => None,
     }
 }
 
 /*
     全命令：
-    ORA AND EOR ADC STA LDA CMP SBC
-    ASL ROL LSR ROR STX LDX DEC INC
+    BIT JMP JMP STY LDY CPY CPX
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。

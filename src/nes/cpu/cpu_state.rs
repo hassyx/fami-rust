@@ -11,10 +11,12 @@ const ADDR_INT_IRQ: u16        = 0xFFFE;
 pub type FnState = fn(&mut Cpu);
 
 /// 一時的な状態保持用
+// TODO: 同時に利用しないメンバはunionとして扱った方がいいかも。
 pub struct TmpState {
     pub counter: u8,
     pub op_1: u8,
     pub op_2: u8,
+    pub addr: u16,
     pub int: IntType,
     pub executer: Executer,
 }
@@ -25,6 +27,7 @@ impl Default for TmpState {
             counter: 0,
             op_1: 0,
             op_2: 0,
+            addr: 0,
             int: IntType::None,
             executer: Default::default(),
         }

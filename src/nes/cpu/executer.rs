@@ -14,7 +14,8 @@ pub type FnCore = fn(cpu: &mut Cpu, val: u8) -> u8;
 #[derive(PartialEq)]
 /// 最終的な演算結果を、レジスタに書き込むのか、それともメモリに書き込むのか。
 pub enum Destination {
-    /// レジスタに書き込む。NOPのような書き込み対象が存在しない命令もこちらに分類する。
+    /// レジスタに書き込む。NOPのような書き込み対象が存在しない命令や、
+    /// レジスタ・メモリのどちらにも書き込む命令も、こちらに分類する。
     Register,
     /// メモリへ書き込む。
     Memory,
@@ -125,16 +126,6 @@ impl Cpu {
                     let val = (self.state.executer.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
-                self.exec_finished();
-            },
-            _ => unreachable!(),
-        }
-    }
-
-    pub fn exec_accumulator(&mut self) {
-        match self.state.counter {
-            2 => {
-                (self.state.executer.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -357,5 +348,100 @@ impl Cpu {
             },
             _ => unreachable!(),
         };
+    }
+
+    pub fn exec_accumulator(&mut self) {
+        match self.state.counter {
+            2 => {
+                let result = (self.state.executer.fn_core)(self, self.regs.a);
+                // フラグは変更済みなので、ここでは代入するだけ
+                self.regs.a = result;
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    /// Read-Modify-WriteなZeropageアドレッシング
+    pub fn exec_zeropage_rmw(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => {
+                self.state.op_2 = self.mem.read(self.state.op_1 as u16);
+            },
+            4 => {
+                self.state.op_2 = (self.state.executer.fn_core)(self, self.state.op_2);
+            },
+            5 => {
+                let addr = self.state.op_1 as u16;
+                let val = self.state.op_2;
+                self.mem.write(addr, val);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    /// Read-Modify-WriteなIndexedZeropage(X)アドレッシング
+    pub fn exec_indexed_zeropage_x_rmw(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x),
+            4 => {
+                self.state.addr = self.state.op_1 as u16;
+                self.state.op_2 = self.mem.read(self.state.addr);
+            },
+            5 => {
+                self.state.op_2 = (self.state.executer.fn_core)(self, self.state.op_2);
+            },
+            6 => {
+                let addr = self.state.addr;
+                let val = self.state.op_2;
+                self.mem.write(addr, val);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    /// Read-Modify-WriteなAbsoluteアドレッシング
+    pub fn exec_absolute_rmw(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_2 = self.fetch(),
+            4 => {
+                let addr = make_addr(self.state.op_2, self.state.op_1);
+                self.state.addr = addr;
+                self.state.op_2 = self.mem.read(addr);
+            },
+            5 => {
+                self.state.op_2 = (self.state.executer.fn_core)(self, self.state.op_2);
+            },
+            6 => {
+                let addr = self.state.addr;
+                let val = self.state.op_2;
+                self.mem.write(addr, val);
+                self.exec_finished();
+            },
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indexed_absolute_x_rmw(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => {
+                let low = self.state.op_1;
+                let high = self.fetch();
+                self.state.addr = make_addr(high, low).wrapping_add(self.regs.x as u16);
+            },
+            4 => (),
+            5 => self.state.op_1 = self.mem.read(self.state.addr),
+            6 => self.state.op_2 = (self.state.executer.fn_core)(self, self.state.op_1),
+            7 => {
+                self.mem.write(self.state.addr, self.state.op_2);
+            },
+            _ => unreachable!(),
+        }
     }
 }
