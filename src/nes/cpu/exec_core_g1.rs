@@ -118,6 +118,46 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// LSR (group 1):
+    /// レジスタA、または指定されたアドレス上の値を右に1bitシフト。
+    /// 空いたMSBには0を設定する。溢れたLSBはCarryに設定する。
+    /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  0 + + - - -
+    //////////////////////////////////////////////
+    pub fn lsr_action(&mut self, val: u8) -> u8 {
+        log::debug!("[LSR]");
+        // valを右シフトして、フラグを操作したあと戻り値として返す。
+        let to_carry = val & Flags::CARRY.bits;
+        let val = val >> 1;
+        self.regs.p |= to_carry;
+        self.regs.change_negative_by_value(val);
+        self.regs.change_zero_by_value(val);
+        val
+    }
+
+    //////////////////////////////////////////////
+    /// ASL (group 1):
+    /// レジスタA、または指定されたアドレス上の値を左に1bitシフト。
+    /// 空いたLSBには0を設定する。溢れたMSBはCarryに設定する。
+    /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + + - - -
+    //////////////////////////////////////////////
+    pub fn asl_action(&mut self, val: u8) -> u8 {
+        log::debug!("[ASL]");
+        // valを左シフトして、フラグを操作したあと戻り値として返す。
+        let to_carry = val & 0b1000_0000 >> 7;
+        let val = val << 1;
+        self.regs.p |= to_carry;
+        self.regs.change_negative_by_value(val);
+        self.regs.change_zero_by_value(val);
+        val
+    }
+
+    //////////////////////////////////////////////
     /// ROR (group 1):
     /// レジスタA、または指定されたアドレス上の値を右に1bitローテート。
     /// 空いたMSBにはCarryを設定する。溢れたLSBはCarryに設定する。
@@ -130,29 +170,8 @@ impl Cpu {
         log::debug!("[ROR]");
         // valを右ローテートして、フラグを操作したあと戻り値として返す。
         let from_carry = (self.regs.p & Flags::CARRY.bits) << 7;
-        let to_carry = val & !Flags::CARRY.bits;
+        let to_carry = val & Flags::CARRY.bits;
         let val = (val >> 1) | from_carry;
-        self.regs.p |= to_carry;
-        self.regs.change_negative_by_value(val);
-        self.regs.change_zero_by_value(val);
-        val
-    }
-
-    //////////////////////////////////////////////
-    /// ASL (group 1):
-    /// レジスタA、または指定されたアドレス上の値を左に1bitシフト。
-    /// 空いたLSBにはCarryを設定する。溢れたMSBはCarryに設定する。
-    /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
-    //////////////////////////////////////////////
-    //  N Z C I D V
-    //  + + + - - -
-    //////////////////////////////////////////////
-    pub fn asl_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ASL]");
-        // valを左シフトして、フラグを操作したあと戻り値として返す。
-        let from_carry = self.regs.p & Flags::CARRY.bits;
-        let to_carry = val & !0b1000_0000 >> 7;
-        let val = (val << 1) | from_carry;
         self.regs.p |= to_carry;
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
@@ -171,8 +190,8 @@ impl Cpu {
     pub fn rol_action(&mut self, val: u8) -> u8 {
         log::debug!("[ROL]");
         // valを左ローテートして、フラグを操作したあと戻り値として返す。
-        let from_carry = (self.regs.p & Flags::CARRY.bits);
-        let to_carry = val & !0b1000_0000 >> 7;
+        let from_carry = self.regs.p & Flags::CARRY.bits;
+        let to_carry = val & 0b1000_0000 >> 7;
         let val = (val << 1) | from_carry;
         self.regs.p |= to_carry;
         self.regs.change_negative_by_value(val);

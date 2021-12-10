@@ -129,7 +129,8 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                 0b000 => Some(make_executer(fn_exec, Cpu::asl_action, Destination::Register)),
                 // ROL
                 0b001 => Some(make_executer(fn_exec, Cpu::rol_action, Destination::Register)),
-                0b010 => None,    // LSR
+                // LSR
+                0b010 => Some(make_executer(fn_exec, Cpu::lsr_action, Destination::Register)),
                 // ROR
                 0b011 => Some(make_executer(fn_exec, Cpu::ror_action, Destination::Register)),
                 0b110 => None,    // DEC
