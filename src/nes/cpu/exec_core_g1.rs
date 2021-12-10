@@ -139,6 +139,27 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// ROL (group 1):
+    /// レジスタA、または指定されたアドレス上の値を左に1bitローテート。
+    /// 空いたLSBにはCarryを設定する。溢れたMSBはCarryに設定する。
+    /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + + - - -
+    //////////////////////////////////////////////
+    pub fn rol_action(&mut self, val: u8) -> u8 {
+        log::debug!("[ROL]");
+        // valを左ローテートして、フラグを操作したあと戻り値として返す。
+        let from_carry = (self.regs.p & Flags::CARRY.bits);
+        let to_carry = val & !0b1000_0000 >> 7;
+        let val = (val << 1) | from_carry;
+        self.regs.p |= to_carry;
+        self.regs.change_negative_by_value(val);
+        self.regs.change_zero_by_value(val);
+        val
+    }
+
+    //////////////////////////////////////////////
     /// STX (group 1):
     /// レジスタXをメモリにストア。
     //////////////////////////////////////////////
