@@ -124,7 +124,7 @@ impl Cpu {
     //  N Z C I D V
     //  - - - - - -
     //////////////////////////////////////////////
-    pub fn stx_action(&mut self, val: u8) -> u8 {
+    pub fn stx_action(&mut self, _: u8) -> u8 {
         log::debug!("[STX]");
         self.regs.x
     }
