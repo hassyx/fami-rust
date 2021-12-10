@@ -133,8 +133,19 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                 0b010 => Some(make_executer(fn_exec, Cpu::lsr_action, Destination::Register)),
                 // ROR
                 0b011 => Some(make_executer(fn_exec, Cpu::ror_action, Destination::Register)),
-                0b110 => None,    // DEC
-                0b111 => None,    // INC
+                // DEC
+                0b110 => {
+                    if addr_mode == AddrMode::Accumulator {
+                        panic_invalid_op(opcode)
+                    }
+                    Some(make_executer(fn_exec, Cpu::dec_action, Destination::Memory))
+                },
+                0b111 => {
+                    if addr_mode == AddrMode::Accumulator {
+                        panic_invalid_op(opcode)
+                    }
+                    Some(make_executer(fn_exec, Cpu::inc_action, Destination::Memory))
+                }
                 _ => None,
             }
         }
@@ -180,7 +191,7 @@ fn decode_addr_group1_10_rwm(bbb: u8) -> Option<(AddrMode, FnExec)> {
     // ここでは Read-Modified-Write なアドレッシングモードの実行関数を返す。
     // 対象となる命令は ASL,LSR,INC,DEC,ROR,ROL.
     match bbb {
-        0b000 => None,
+        0b000 => None, // Immediateな命令は存在しない
         0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage_rmw)),
         0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
         0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute_rmw)),

@@ -200,6 +200,36 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
+    /// DEC (group 1):
+    /// メモリ上の値を1デクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn dec_action(&mut self, val: u8) -> u8 {
+        log::debug!("[DEC]");
+        let val = val.wrapping_sub(1);
+        self.regs.change_negative_by_value(val);
+        self.regs.change_zero_by_value(val);
+        val
+    }
+
+    //////////////////////////////////////////////
+    /// INC (group 1):
+    /// メモリ上の値を1インクリメント。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + - - - -
+    //////////////////////////////////////////////
+    pub fn inc_action(&mut self, val: u8) -> u8 {
+        log::debug!("[INC]");
+        let val = val.wrapping_add(1);
+        self.regs.change_negative_by_value(val);
+        self.regs.change_zero_by_value(val);
+        val
+    }
+
+    //////////////////////////////////////////////
     /// STX (group 1):
     /// レジスタXをメモリにストア。
     //////////////////////////////////////////////
@@ -223,6 +253,5 @@ impl Cpu {
         self.regs.x_set(val);
         0
     }
-
 }
 
