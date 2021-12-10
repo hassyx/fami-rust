@@ -125,7 +125,8 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
         } else {
             let (addr_mode, fn_exec) = decode_addr_group1_10_rwm(bbb)?;
             match aaa {
-                0b000 => None,    // ASL
+                // ASL
+                0b000 => Some(make_executer(fn_exec, Cpu::asl_action, Destination::Register)),
                 // ROL
                 0b001 => Some(make_executer(fn_exec, Cpu::rol_action, Destination::Register)),
                 0b010 => None,    // LSR
