@@ -163,8 +163,10 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                 }
                 Some(make_executer(fn_exec, Cpu::bit_action, Destination::Register))
             }
-            0b010 => None,    //JMP
-            0b011 => None,    //JMP (abs)
+            // JMP
+            0b010 => Some(make_executer(Cpu::exec_indirect_jmp, Cpu::jmp_action, Destination::Register)),
+            // JMP (abs)
+            0b011 => Some(make_executer(Cpu::exec_absolute_jmp, Cpu::jmp_action, Destination::Register)),
             // STY
             0b100 => {
                 if (addr_mode != AddrMode::ZeroPage) && 
@@ -270,7 +272,7 @@ fn decode_addr_group1_10_ldx(bbb: u8) -> Option<(AddrMode, FnExec)> {
 
 /*
     全命令：
-    BIT JMP JMP STY LDY CPY CPX
+    BIT JMP JMP(abs) STY LDY CPY CPX
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
@@ -287,14 +289,14 @@ fn decode_addr_group1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
 
 /*
     全命令:
-    BIT JMP JMP STY LDY CPY CPX
+    BPL BMI BVC BVS BCC BCS BNE BEQ
 */
 /// OPコードの末尾5ビットを使った解析
 fn decode_group2(opcode: u8) -> Option<Executer> {
-    // "xxy10000" は全て条件付きブランチ。
+    // "xxy10000" は全て条件付きブランチ命令。
     // xx = OPコード, y = 比較に用いる値
-    let op = (opcode & 0b1100_0000) >> 6;
-    let val = (opcode & 0b0010_0000) >> 5;
+    let op   = (opcode & 0b1100_0000) >> 6;
+    let val  = (opcode & 0b0010_0000) >> 5;
     let tail = opcode & 0b0001_1111;
 
     if tail != 0b0001_0000 {
@@ -303,23 +305,43 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
         match op {
             // check negative flag
             0b00 => {
-                // BPL or BMI
-                None
+                if val == 0 {
+                    // BPL
+                    Some(make_executer(Cpu::exec_relative, Cpu::bpl_action, Destination::Register))
+                } else {
+                    //BMI
+                    Some(make_executer(Cpu::exec_relative, Cpu::bmi_action, Destination::Register))
+                }
             },
             // check overflow flag
             0b01 => {
-                // BVC or BVS
-                None
+                if val == 0 {
+                    // BVC
+                    Some(make_executer(Cpu::exec_relative, Cpu::bvc_action, Destination::Register))
+                } else {
+                    // BVS
+                    Some(make_executer(Cpu::exec_relative, Cpu::bvs_action, Destination::Register))
+                }
             },
             // check carry flag
             0b10 => {
-                // BCC or BCS
-                None
+                if val == 0 {
+                    // BCC
+                    Some(make_executer(Cpu::exec_relative, Cpu::bcc_action, Destination::Register))
+                } else {
+                    // BCS
+                    Some(make_executer(Cpu::exec_relative, Cpu::bcs_action, Destination::Register))
+                }
             },
             // check zero flag
             0b11 => {
-                // BNE or BEQ
-                None
+                if val == 0 {
+                    // BNE
+                    Some(make_executer(Cpu::exec_relative, Cpu::bne_action, Destination::Register))
+                } else {
+                    // BEQ
+                    Some(make_executer(Cpu::exec_relative, Cpu::beq_action, Destination::Register))
+                }
             },
             _ => None,
         }

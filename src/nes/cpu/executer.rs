@@ -440,7 +440,78 @@ impl Cpu {
             6 => self.state.op_2 = (self.state.executer.fn_core)(self, self.state.op_1),
             7 => {
                 self.mem.write(self.state.addr, self.state.op_2);
+                self.exec_finished();
             },
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_absolute_jmp(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => {
+                let low = self.state.op_1;
+                let high = self.fetch();
+                self.regs.pc = make_addr(high, low);
+                // 何もしないが呼んでおく
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_indirect_jmp(&mut self) {
+        match self.state.counter {
+            2 => self.state.op_1 = self.fetch(),
+            3 => self.state.op_2 = self.fetch(),
+            4 => {
+                let low = self.state.op_1;
+                let high = self.fetch();
+                self.state.addr = make_addr(high, low);
+                self.state.op_1 = self.mem.read(self.state.addr);
+            },
+            5 => {
+                let low = self.state.op_1;
+                let high = self.mem.read(self.state.addr.wrapping_add(1));
+                self.regs.pc = make_addr(high, low);
+                // 何もしないが呼んでおく
+                (self.state.executer.fn_core)(self, 0);
+                self.exec_finished();
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn exec_relative(&mut self) {
+        match self.state.counter {
+            2 => {
+                let offset = self.fetch();
+                if (self.state.executer.fn_core)(self, 0) == 0 {
+                    // 分岐が発生しない場合はここで終わり
+                    self.exec_finished();
+                } else {
+                    let addr = self.regs.pc.wrapping_add(offset as u16);
+                    if (addr & 0xFF00) == (self.regs.pc & 0xFF00) {
+                        // 同じページ内でジャンプするなら +1 クロック
+                        self.state.op_1 = 1;
+                    } else {
+                        // 違うページへジャンプするなら +2 クロック
+                        self.state.op_1 = 2;
+                    }
+                    // 先にPCを更新、まだジャンプはしない
+                    self.regs.pc = addr;
+                }
+            },
+            3 => {
+                self.state.op_1 -= 1;
+                if self.state.op_1 <= 0 {
+                    self.exec_finished();
+                }
+            }
+            4 => {
+                self.exec_finished();
+            }
             _ => unreachable!(),
         }
     }
