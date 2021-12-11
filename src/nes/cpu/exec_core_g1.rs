@@ -118,7 +118,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// LSR (group 1):
+    /// LSR (group 1, Read-Modify-Write):
     /// レジスタA、または指定されたアドレス上の値を右に1bitシフト。
     /// 空いたMSBには0を設定する。溢れたLSBはCarryに設定する。
     /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
@@ -138,7 +138,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// ASL (group 1):
+    /// ASL (group 1, Read-Modify-Write):
     /// レジスタA、または指定されたアドレス上の値を左に1bitシフト。
     /// 空いたLSBには0を設定する。溢れたMSBはCarryに設定する。
     /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
@@ -158,7 +158,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// ROR (group 1):
+    /// ROR (group 1, Read-Modify-Write):
     /// レジスタA、または指定されたアドレス上の値を右に1bitローテート。
     /// 空いたMSBにはCarryを設定する。溢れたLSBはCarryに設定する。
     /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
@@ -179,7 +179,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// ROL (group 1):
+    /// ROL (group 1, Read-Modify-Write):
     /// レジスタA、または指定されたアドレス上の値を左に1bitローテート。
     /// 空いたLSBにはCarryを設定する。溢れたMSBはCarryに設定する。
     /// 先頭ビットが立っていればNegativeを、結果が0ならZeroを立てる。
@@ -200,7 +200,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// DEC (group 1):
+    /// DEC (group 1, Read-Modify-Write):
     /// メモリ上の値を1デクリメント。
     //////////////////////////////////////////////
     //  N Z C I D V
@@ -215,7 +215,7 @@ impl Cpu {
     }
 
     //////////////////////////////////////////////
-    /// INC (group 1):
+    /// INC (group 1, Read-Modify-Write):
     /// メモリ上の値を1インクリメント。
     //////////////////////////////////////////////
     //  N Z C I D V
@@ -251,6 +251,29 @@ impl Cpu {
     pub fn ldx_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDX]");
         self.regs.x_set(val);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// BIT (group 1):
+    /// レジスタAとメモリ上の値(M)をAND。
+    /// レジスタもメモリも汚さず、フラグだけ変動。
+    /// 演算結果=0ならZeroが1。
+    /// NegativeとOverflowは、演算結果ではなく、Mの値で変動する。
+    /// M7がNegative、M6がOverflow、
+    //////////////////////////////////////////////
+    //  N  Z C I D V
+    //  M7 + - - - M6
+    //////////////////////////////////////////////
+    pub fn bit_action(&mut self, val: u8) -> u8 {
+        log::debug!("[BIT]");
+        let new_val = self.regs.a & val;
+        // 演算対象となるメモリ上の値によってフラグレジスタが変動
+        let flags_nv = (val & !Flags::NEGATIVE.bits) | (val & !Flags::OVERFLOW.bits);
+        // Zeroに限っては演算結果の方を見る
+        let flags_z = ((new_val == 0) as u8) << 1;
+        let flag_origin = self.regs.p & (!Flags::NEGATIVE.bits | !Flags::OVERFLOW.bits | !Flags::ZERO.bits);
+        self.regs.p = flag_origin | flags_nv | flags_z;
         0
     }
 }

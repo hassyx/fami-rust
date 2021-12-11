@@ -101,7 +101,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b011 => Some(make_executer(fn_exec, Cpu::adc_action, Destination::Register)),
             // STA
             0b100 => {
-                // Group 1 の中では、STAのみ唯一 Immediate モードを持たない。
+                // OPコードの末尾 "01" のグループの中では、STAのみ唯一 Immediate モードを持たない。
                 if addr_mode == AddrMode::Immediate {
                     panic_invalid_op(opcode)
                 }
@@ -116,13 +116,16 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             _ => None,
         }
     } else if cc == 0b10 {
-        if aaa == 0b100 {   // STX
+        if aaa == 0b100 {
+            // STX
             let (_, fn_exec) = decode_addr_group1_10_stx(bbb)?;
             Some(make_executer(fn_exec, Cpu::stx_action, Destination::Memory))
-        } else if aaa == 0b101 {    // LDX
+        } else if aaa == 0b101 {
+            // LDX
             let (_, fn_exec) = decode_addr_group1_10_ldx(bbb)?;
             Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
         } else {
+            // Read-Modify-Writeな命令
             let (addr_mode, fn_exec) = decode_addr_group1_10_rwm(bbb)?;
             match aaa {
                 // ASL
@@ -153,7 +156,13 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
     } else if cc == 0b00 {
         let (addr_mode, fn_exec) = decode_addr_group1_00(bbb)?;
         match aaa {
-            0b001 => None,    //BIT
+            //BIT
+            0b001 => {
+                if (addr_mode != AddrMode::ZeroPage) && (addr_mode != AddrMode::Absolute) {
+                    panic_invalid_op(opcode)
+                }
+                Some(make_executer(fn_exec, Cpu::bit_action, Destination::Register))
+            }
             0b010 => None,    //JMP
             0b011 => None,    //JMP (abs)
             0b100 => None,    //STY
