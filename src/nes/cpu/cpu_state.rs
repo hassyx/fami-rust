@@ -53,6 +53,7 @@ impl Cpu {
         self.int_polling_enabled = false;
 
         let opcode = self.fetch();
+        log::debug!("[Fetch] opcode={:#04X}", opcode);
         if opcode == 0 {
             self.irq_trigger = true;
             self.irq_is_brake = true;

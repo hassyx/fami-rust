@@ -68,7 +68,7 @@ impl MemCon {
                 // 実機ではROMへの書き込みはエラーとならないが、
                 // 当面はROMへの書き込みが行われた場合、命令デコードの不具合である
                 // 可能性が高いため、panic させる。
-                panic!("Error: Write to read-only area. addr={:#4}, data={:#2}", addr, data);
+                panic!("Error: Write to read-only area. addr={:#06X}, data={:#04X}", addr, data);
             },
             // TODO: APUの対応が必要
             _ => {
