@@ -48,38 +48,6 @@ impl MemCon {
 
     pub fn write(&mut self, addr: u16, data: u8) {
         log::debug!("write: addr={:#6X}, data={:#4X}({})", addr, data, data);
-        if !self.write_to_dev(addr, data) {
-            self.ram[addr as usize] = data;
-        }
-    }
-    
-    pub fn read(&mut self, addr: u16) -> u8 {
-        let data = 
-            if let Some(data) = self.read_from_dev(addr) {
-                data
-            } else {
-                self.ram[addr as usize]
-            };
-        log::debug!("read: addr={:#6X}, data={:#4X}({})", addr, data, data);
-        data
-    }
-
-    // 8bit CPUなので、複数バイトの同時書き込みは不要？
-    /*
-    pub fn write(&mut self, addr: usize, data: &[u8]) {
-        println!("mem::MemCon::write() addr={}, data.len()={}", addr, data.len());
-        self.ram[addr..addr+data.len()].copy_from_slice(data);
-    }
-
-    pub fn read(&self, range: Range<usize>) -> &[u8] {
-        println!("mem::MemCon::read() range={:?}", range);
-        &self.ram[range]
-    }
-    */
-
-    /// メモリ空間上に存在するデバイスへの書き込みや、ミラー領域への反映を(必要であれば)行う。
-    /// 書き込みが行われた場合はtrueを返す。
-    fn write_to_dev(&mut self, addr: u16, data: u8) -> bool {
         match addr {
             0x0000..=0x1FFF => {
                 // 物理RAMのミラー領域への反映
@@ -89,26 +57,40 @@ impl MemCon {
                 self.ram[0x0800+addr] = data;
                 self.ram[0x1000+addr] = data;
                 self.ram[0x1800+addr] = data;
-                return true;
             },
             0x2000..=0x3FFF | 0x4014 => {
                 // PPUのレジスタへ値を設定し、ミラー領域への反映を行う
                 self.write_ppu_register(addr, data);
-                return true;
+            },
+            0x8000..=0xFFFF => {
+                // TODO: MapperによってはROMへの書き込みを検出する機構がある。
+
+                // 実機ではROMへの書き込みはエラーとならないが、
+                // 当面はROMへの書き込みが行われた場合、命令デコードの不具合である
+                // 可能性が高いため、panic させる。
+                panic!("Error: Write to read-only area. addr={:#4}, data={:#2}", addr, data);
             },
             // TODO: APUの対応が必要
-            _ => return false,
+            _ => {
+                // デバイスではなくRAMへ書き込む
+                self.ram[addr as usize] = data
+            },
         }
     }
-
-    fn read_from_dev(&mut self, addr: u16) -> Option<u8> {
-        match addr {
+    
+    pub fn read(&mut self, addr: u16) -> u8 {
+        let data = match addr {
             0x2000..=0x3FFF | 0x4014 => {
-                Some(self.read_ppu_register(addr))
+                self.read_ppu_register(addr)
             },
             // TODO: APUの対応が必要
-            _ => None,
-        }
+            _ => {
+                // デバイスではなくRAMから読み込む
+                self.ram[addr as usize]
+            },
+        };
+        log::debug!("read: addr={:#6X}, data={:#4X}({})", addr, data, data);
+        data
     }
 
     /// CPUのメモリ空間に露出した、PPUのレジスタへの書き込み
@@ -146,42 +128,4 @@ impl MemCon {
             return self.ppu_databus.read(reg_type)
         }
     }
-
-    pub fn dump(&self) {
-        println!("{:?}", self.ram);
-    }
 }
-
-/*
-// 配列のように添字でアクセスできてもいいかなーと思ったが、
-// 書き込み前に割り込んで独自処理を入れるのが面倒なので諦めた。
-// 読み込み時に関しては Index を使うことで問題なく実装できる。
-// (読み込みだけ添字アクセスが有効だと、対称性が失われて嫌なので断念)
-
-use std::ops::Index;
-use std::ops::IndexMut;
-use std::ops::Range;
-impl Index<usize> for MemCon<'_> {
-    type Output = u8;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.ram[index]
-    }
-}
-impl<'a> Index<Range<usize>> for MemCon<'a> {
-    type Output = [u8];
-    fn index(&self, range: Range<usize>) -> &Self::Output {
-        &self.ram[range]
-    }
-}
-
-impl IndexMut<usize> for MemCon<'_> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.ram[index]
-    }
-}
-impl IndexMut<Range<usize>> for MemCon<'_> {
-    fn index_mut(&mut self, range: Range<usize>) -> &mut Self::Output {
-        &mut self.ram[range]
-    }
-}
-*/
