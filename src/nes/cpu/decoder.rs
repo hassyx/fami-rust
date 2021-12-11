@@ -165,8 +165,17 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             }
             0b010 => None,    //JMP
             0b011 => None,    //JMP (abs)
-            0b100 => None,    //STY
-            0b101 => None,    //LDY
+            //STY
+            0b100 => {
+                if (addr_mode != AddrMode::ZeroPage) && 
+                    (addr_mode != AddrMode::IndexedZeroPage_X) &&
+                    (addr_mode != AddrMode::Absolute) {
+                    panic_invalid_op(opcode)
+                }
+                Some(make_executer(fn_exec, Cpu::sty_action, Destination::Register))
+            },
+            //LDY
+            0b101 => Some(make_executer(fn_exec, Cpu::ldy_action, Destination::Register)),
             0b110 => None,    //CPY
             0b111 => None,    //CPX
             _ => None,
