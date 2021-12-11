@@ -103,7 +103,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             0b100 => {
                 // OPコードの末尾 "01" のグループの中では、STAのみ唯一 Immediate モードを持たない。
                 if addr_mode == AddrMode::Immediate {
-                    panic_invalid_op(opcode)
+                    return None
                 }
                 Some(make_executer(fn_exec, Cpu::sta_action, Destination::Memory))
             },
@@ -139,14 +139,14 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                 // DEC
                 0b110 => {
                     if addr_mode == AddrMode::Accumulator {
-                        panic_invalid_op(opcode)
+                        return None
                     }
                     Some(make_executer(fn_exec, Cpu::dec_action, Destination::Memory))
                 },
                 // INC
                 0b111 => {
                     if addr_mode == AddrMode::Accumulator {
-                        panic_invalid_op(opcode)
+                        return None
                     }
                     Some(make_executer(fn_exec, Cpu::inc_action, Destination::Memory))
                 }
@@ -159,7 +159,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             // BIT
             0b001 => {
                 if (addr_mode != AddrMode::ZeroPage) && (addr_mode != AddrMode::Absolute) {
-                    panic_invalid_op(opcode)
+                    return None
                 }
                 Some(make_executer(fn_exec, Cpu::bit_action, Destination::Register))
             }
@@ -173,7 +173,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                     (addr_mode != AddrMode::IndexedZeroPage_X) &&
                     (addr_mode != AddrMode::Absolute)
                 {
-                    panic_invalid_op(opcode)
+                    return None
                 }
                 Some(make_executer(fn_exec, Cpu::sty_action, Destination::Register))
             },
@@ -185,7 +185,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                     (addr_mode != AddrMode::ZeroPage) &&
                     (addr_mode != AddrMode::Absolute)
                 {
-                    panic_invalid_op(opcode)
+                    return None
                 } 
                 Some(make_executer(fn_exec, Cpu::cpy_action, Destination::Register))
             },
@@ -195,7 +195,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
                     (addr_mode != AddrMode::ZeroPage) &&
                     (addr_mode != AddrMode::Absolute)
                 {
-                    panic_invalid_op(opcode)
+                    return None
                 }
                 Some(make_executer(fn_exec, Cpu::cpx_action, Destination::Register))
             }

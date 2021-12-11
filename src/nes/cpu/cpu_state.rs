@@ -48,6 +48,7 @@ impl Cpu {
     /// OPコードをフェッチする。
     /// Brkだった場合は割り込み状態へ遷移、それ以外は実行状態へ遷移。
     pub fn fetch_step(&mut self) {
+        log::debug!("[Fetch] counter={}", self.state.counter);
         // 命令の実行が完了するまで、割り込み処理のポーリングを止める。
         self.int_polling_enabled = false;
 
@@ -65,6 +66,7 @@ impl Cpu {
 
     /// 命令実行のステップ処理
     pub fn exec_step(&mut self) {
+        log::debug!("[Execute] counter={}", self.state.counter);
         (self.state.executer.fn_exec)(self);
     }
 
@@ -72,6 +74,7 @@ impl Cpu {
     /// 割り込み発生を検知、またはフェッチした命令がBrkだった場合にここに来る。
     /// 割り込み種別を判別し、適切なアドレスへジャンプする。
     pub fn int_step(&mut self) {
+        log::debug!("[Interrupt] counter={}", self.state.counter);
         match self.state.counter {
             1 => {
                 // Brkの場合はすでに1クロック目を通過済みなので、ここには入らない。
