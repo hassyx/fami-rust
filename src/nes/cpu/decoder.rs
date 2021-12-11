@@ -156,7 +156,7 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
     } else if cc == 0b00 {
         let (addr_mode, fn_exec) = decode_addr_group1_00(bbb)?;
         match aaa {
-            //BIT
+            // BIT
             0b001 => {
                 if (addr_mode != AddrMode::ZeroPage) && (addr_mode != AddrMode::Absolute) {
                     panic_invalid_op(opcode)
@@ -165,19 +165,38 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
             }
             0b010 => None,    //JMP
             0b011 => None,    //JMP (abs)
-            //STY
+            // STY
             0b100 => {
                 if (addr_mode != AddrMode::ZeroPage) && 
                     (addr_mode != AddrMode::IndexedZeroPage_X) &&
-                    (addr_mode != AddrMode::Absolute) {
+                    (addr_mode != AddrMode::Absolute)
+                {
                     panic_invalid_op(opcode)
                 }
                 Some(make_executer(fn_exec, Cpu::sty_action, Destination::Register))
             },
-            //LDY
+            // LDY
             0b101 => Some(make_executer(fn_exec, Cpu::ldy_action, Destination::Register)),
-            0b110 => None,    //CPY
-            0b111 => None,    //CPX
+            // CPY
+            0b110 => {
+                if (addr_mode != AddrMode::Immediate) && 
+                    (addr_mode != AddrMode::ZeroPage) &&
+                    (addr_mode != AddrMode::Absolute)
+                {
+                    panic_invalid_op(opcode)
+                } 
+                Some(make_executer(fn_exec, Cpu::cpy_action, Destination::Register))
+            },
+            // CPX
+            0b111 => {
+                if (addr_mode != AddrMode::Immediate) && 
+                    (addr_mode != AddrMode::ZeroPage) &&
+                    (addr_mode != AddrMode::Absolute)
+                {
+                    panic_invalid_op(opcode)
+                }
+                Some(make_executer(fn_exec, Cpu::cpx_action, Destination::Register))
+            }
             _ => None,
         }
     } else if cc == 0b11 {

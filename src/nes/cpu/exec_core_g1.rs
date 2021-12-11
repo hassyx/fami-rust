@@ -100,7 +100,7 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn cmp_action(&mut self, val: u8) -> u8 {
         log::debug!("[CMP]");
-        self.regs.a_cmp(val);
+        self.regs.cmp(self.regs.a, val);
         0
     }
 
@@ -260,7 +260,7 @@ impl Cpu {
     /// レジスタもメモリも汚さず、フラグだけ変動。
     /// 演算結果=0ならZeroが1。
     /// NegativeとOverflowは、演算結果ではなく、Mの値で変動する。
-    /// M7がNegative、M6がOverflow、
+    /// M7がNegative、M6がOverflow。
     //////////////////////////////////////////////
     //  N  Z C I D V
     //  M7 + - - - M6
@@ -299,6 +299,40 @@ impl Cpu {
     pub fn ldy_action(&mut self, val: u8) -> u8 {
         log::debug!("[LDY]");
         self.regs.y_set(val);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// CPY (group 1):
+    /// レジスタYとメモリを比較(A - memory)し、
+    /// 同じ値ならZreoをon、違うならOff。
+    /// 結果のMSBが1ならNegativeをOn、0ならOff。
+    /// Y >= memory ならCarryをOn、そうでなければOff。
+    /// なお、レジスタYの内容には影響を与えない。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + + - - -
+    //////////////////////////////////////////////
+    pub fn cpy_action(&mut self, val: u8) -> u8 {
+        log::debug!("[CPY]");
+        self.regs.cmp(self.regs.y, val);
+        0
+    }
+
+    //////////////////////////////////////////////
+    /// CPX (group 1):
+    /// レジスタXとメモリを比較(A - memory)し、
+    /// 同じ値ならZreoをon、違うならOff。
+    /// 結果のMSBが1ならNegativeをOn、0ならOff。
+    /// X >= memory ならCarryをOn、そうでなければOff。
+    /// なお、レジスタXの内容には影響を与えない。
+    //////////////////////////////////////////////
+    //  N Z C I D V
+    //  + + + - - -
+    //////////////////////////////////////////////
+    pub fn cpx_action(&mut self, val: u8) -> u8 {
+        log::debug!("[CPX]");
+        self.regs.cmp(self.regs.x, val);
         0
     }
 }

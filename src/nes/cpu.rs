@@ -118,13 +118,16 @@ impl Registers {
         self.p = (self.p & !Flags::ZERO.bits) | z_flag;
     }
 
+    /// val1 + val2 + carry
     fn add_with_carry(val1: u8, val2: u8, carry: bool) -> (u8, bool) {
         // 全ての値をu8から16bitに拡張した上で加算を行う。
         // u8が取りうる最大の値が、Carry含めて加算された場合の結果は、以下の通り。
         //
-        // $FF + $FF + 1 = $1FE(=0b0000_0001_1111_1111)
+        // $FF + $FF = $1FE(=0b0000_0001_1111_1110)
+        // $1FE + 1  = $1FF(=0b0000_0001_1111_1111)
         //
-        // つまりキャリー含めて全て加算しても結果は $1FF となり、
+        // つまりキャリー含めて全て加算しても結果は最大 $1FF となり、
+        // これらを加算する順番を考慮する必要はなく、合計して得られた値の
         // 先頭ビットの値をそのままCarryフラグとして利用できる。
         let result: u16 = (val1 as u16) + (val2 as u16) + (carry as u16);
         let new_carry = (result & 0x0100) != 0;
@@ -175,10 +178,13 @@ impl Registers {
         self.a_add(!val);
     }
 
-    pub fn a_cmp(&mut self, val: u8) {
-        // CMP = Aに対して2の補数を加算し、加算の際にCarryを考慮せず、計算後にOverflowが変化しないADC。
+    /// val1とval2の比較
+    fn cmp(&mut self, val1: u8, val2: u8) {
+        // 比較処理の実際は、val1 に対して val2 の2の補数を加算し、
+        // 加算の際にCarryを考慮せず、計算後にOverflowが変化しないADC。
+
         let (result, carry) = 
-            Self::add_with_carry(self.a, val.wrapping_neg(), false);
+            Self::add_with_carry(val1, val2.wrapping_neg(), false);
 
         // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
         self.p = (self.p & !Flags::CARRY.bits) | carry as u8;
