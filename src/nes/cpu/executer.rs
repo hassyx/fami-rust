@@ -43,6 +43,7 @@ impl Cpu {
     pub fn fn_core_cummy(&mut self, _val: u8) -> u8 { 0 }
     
     pub fn exec_immediate(&mut self) {
+        log::debug!("exec_immediate, counter={}", self.state.counter);
         match self.state.counter {
             2 => {
                 if self.state.executer.dst == Destination::Register {
@@ -58,6 +59,7 @@ impl Cpu {
     }
 
     pub fn exec_zeropage(&mut self) {
+        log::debug!("exec_zeropage, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
@@ -76,6 +78,7 @@ impl Cpu {
     }
 
     pub fn exec_indexed_zeropage_x(&mut self) {
+        log::debug!("exec_indexed_zeropage_x, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x),
@@ -95,6 +98,7 @@ impl Cpu {
     }
 
     pub fn exec_indexed_zeropage_y(&mut self) {
+        log::debug!("exec_indexed_zeropage_y, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.y),
@@ -114,6 +118,7 @@ impl Cpu {
     }
 
     pub fn exec_absolute(&mut self) {
+        log::debug!("exec_absolute, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_2 = self.fetch(),
@@ -133,6 +138,7 @@ impl Cpu {
     }
 
     pub fn exec_implied(&mut self) {
+        log::debug!("exec_implied, counter={}", self.state.counter);
         match self.state.counter {
             2 => {
                 (self.state.executer.fn_core)(self, 0);
@@ -143,6 +149,7 @@ impl Cpu {
     }
     
     pub fn exec_indexed_absolute_x(&mut self) {
+        log::debug!("exec_indexed_absolute_x, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_2 = self.fetch(),
@@ -167,6 +174,7 @@ impl Cpu {
     }
 
     pub fn exec_indexed_absolute_y(&mut self) {
+        log::debug!("exec_indexed_absolute_y, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_2 = self.fetch(),
@@ -191,32 +199,29 @@ impl Cpu {
     }
 
     pub fn exec_indexed_indirect_x(&mut self) {
+        log::debug!("exec_indexed_indirect_x, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
-                let addr = self.state.op_1.wrapping_add(self.regs.x) as u16;
-                self.state.op_1 = self.mem.read(addr);
+                self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x);
             }
             4 => {
                 let low = self.mem.read(self.state.op_1 as u16);
-                self.state.op_1 = low;
+                self.state.op_2 = low;
             },
             5 => {
-                let low = self.state.op_1;
-                let addr = low.wrapping_add(1);
-                let high = self.mem.read(addr as u16);
-                self.state.op_2 = high;
+                let addr = self.state.op_1.wrapping_add(1) as u16;
+                let high = self.mem.read(addr);
+                let low = self.state.op_2;
+                self.state.addr = make_addr(high, low);
             },
             6 => {
-                let low = self.state.op_1;
-                let high = self.state.op_2;
-                let addr = make_addr(high, low);
                 if self.state.executer.dst == Destination::Register {
-                    let val = self.mem.read(addr);
+                    let val = self.mem.read(self.state.addr);
                     (self.state.executer.fn_core)(self, val);
                 } else {
                     let val = (self.state.executer.fn_core)(self, 0);
-                    self.mem.write(addr, val);
+                    self.mem.write(self.state.addr, val);
                 }
                 self.exec_finished();
             }
@@ -225,6 +230,7 @@ impl Cpu {
     }
 
     pub fn exec_indirect_indexed_y(&mut self) {
+        log::debug!("exec_indirect_indexed_y, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
@@ -259,6 +265,7 @@ impl Cpu {
     }
 
     pub fn exec_pull_stack(&mut self) {
+        log::debug!("exec_pull_stack, counter={}", self.state.counter);
         match self.state.counter {
             2 => (),
             3 => {
@@ -273,6 +280,7 @@ impl Cpu {
     }
 
     pub fn exec_push_stack(&mut self) {
+        log::debug!("exec_push_stack, counter={}", self.state.counter);
         match self.state.counter {
             2 => (),
             3 => {
@@ -284,6 +292,7 @@ impl Cpu {
     }
 
     pub fn exec_rti(&mut self) {
+        log::debug!("exec_rti, counter={}", self.state.counter);
         match self.state.counter {
             2 => (),
             3 => (),
@@ -306,6 +315,7 @@ impl Cpu {
     }
 
     pub fn exec_rts(&mut self) {
+        log::debug!("exec_rts, counter={}", self.state.counter);
         match self.state.counter {
             2 => (),
             3 => self.inc_stack(),
@@ -327,6 +337,7 @@ impl Cpu {
     }
 
     pub fn exec_jsr(&mut self) {
+        log::debug!("exec_jsr, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => (),
@@ -351,6 +362,7 @@ impl Cpu {
     }
 
     pub fn exec_accumulator(&mut self) {
+        log::debug!("exec_accumulator, counter={}", self.state.counter);
         match self.state.counter {
             2 => {
                 let result = (self.state.executer.fn_core)(self, self.regs.a);
@@ -364,6 +376,7 @@ impl Cpu {
 
     /// Read-Modify-WriteなZeropageアドレッシング
     pub fn exec_zeropage_rmw(&mut self) {
+        log::debug!("exec_zeropage_rmw, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
@@ -384,6 +397,7 @@ impl Cpu {
 
     /// Read-Modify-WriteなIndexedZeropage(X)アドレッシング
     pub fn exec_indexed_zeropage_x_rmw(&mut self) {
+        log::debug!("exec_indexed_zeropage_x_rmw, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x),
@@ -406,6 +420,7 @@ impl Cpu {
 
     /// Read-Modify-WriteなAbsoluteアドレッシング
     pub fn exec_absolute_rmw(&mut self) {
+        log::debug!("exec_absolute_rmw, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_2 = self.fetch(),
@@ -428,6 +443,7 @@ impl Cpu {
     }
 
     pub fn exec_indexed_absolute_x_rmw(&mut self) {
+        log::debug!("exec_indexed_absolute_x_rmw, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
@@ -447,6 +463,7 @@ impl Cpu {
     }
 
     pub fn exec_absolute_jmp(&mut self) {
+        log::debug!("exec_absolute_jmp, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
@@ -462,6 +479,7 @@ impl Cpu {
     }
 
     pub fn exec_indirect_jmp(&mut self) {
+        log::debug!("exec_indirect_jmp, counter={}", self.state.counter);
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => self.state.op_2 = self.fetch(),
@@ -484,6 +502,7 @@ impl Cpu {
     }
 
     pub fn exec_relative(&mut self) {
+        log::debug!("exec_relative, counter={}", self.state.counter);
         match self.state.counter {
             2 => {
                 let offset = self.fetch();
