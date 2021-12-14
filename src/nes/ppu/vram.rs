@@ -4,7 +4,7 @@
 /// PPUに搭載されているVRAM容量(bytes)
 pub const REAL_VRAM_SIZE: usize = 0x800;
 /// メモリ空間の広さ(bytes)
-pub const VRAM_SPACE: usize = 0xFFFF;
+pub const VRAM_SPACE: usize = 0x4000;
 
 /// 64KBのメモリ空間を持ち、物理的には16KBの容量を持つVRAMのメモリコントローラー。
 pub struct MemCon {
@@ -22,7 +22,6 @@ impl MemCon {
     /// 主に初期化処理に利用する。
     pub fn raw_write(&mut self, addr: usize, data: &[u8]) {
         println!("addr={}, data.len()={}", addr, data.len());
-
         self.ram[addr..addr+data.len()].copy_from_slice(data);
     }
 }

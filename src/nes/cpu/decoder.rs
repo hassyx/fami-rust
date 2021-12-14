@@ -45,7 +45,7 @@ enum AddrMode {
 }
 
 fn panic_invalid_op(opcode: u8) -> ! {
-    panic!("\"{:#0X}\" is invalid opcode.", opcode);
+    panic!("\"{:#04X}\" is invalid opcode.", opcode);
 }
 
 fn make_executer(fn_exec: FnExec, fn_core: FnCore, dst: Destination) -> Executer {

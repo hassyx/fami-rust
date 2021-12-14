@@ -446,9 +446,9 @@ impl Cpu {
     #[cfg(debug_assertions)]
     fn print_cpu_state(&self) {
         log::debug!("#### CPU STATE: BEGIN");
-        log::debug!("PC = {:#X}({})", self.regs.pc, self.regs.pc);
+        log::debug!("PC = {:#06X}({})", self.regs.pc, self.regs.pc);
         log::debug!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
-        log::debug!("S = {:#X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
+        log::debug!("S = {:#04X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
         log::debug!("#### END");
     }
 

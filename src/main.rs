@@ -59,13 +59,19 @@ fn main() {
         &TextureSettings::new()
     ).unwrap();
 
+    let mut cpu_counter: u8 = 3;
+
     // Start main loop.
     while let Some(e) = window.next() {
         if let Some(_) = e.render_args() {
-            // CPUの処理を進める
-            cpu.step();
 
-            // TODO: 3回に1回、ppuが動作する
+            // 3回に1回、CPUが動作する
+            if cpu_counter >= 3 {
+                // CPUの処理を進める
+                cpu.step();
+                cpu_counter = 0;
+            }
+
             ppu.borrow_mut().step();
 
             // 試しに点を打ってみる
@@ -88,6 +94,8 @@ fn main() {
         if let Some(Button::Keyboard(key)) = e.press_args() {
 
         }
+
+        cpu_counter += 1;
     }
 }
 
