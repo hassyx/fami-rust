@@ -25,12 +25,63 @@ TODO: 実装に必要な情報
 ・
 */
 
+/*
+[背景の描画：大まかな流れ]
+・描画するピクセルの位置から、ネームテーブルの1つのタイルを割り出す。
+・1個のネームテーブルのタイル(1バイト=0〜255)がパターンテーブルの
+  インデックスになっているので、パターンテーブルのタイルを1個選択。
+・パターンテーブルを見ることによって、8x8の各ピクセルが持っている2bitの
+  情報を元に、どのパレットを利用すべきかがわかる。
+・属性テーブルを読んで、パレット内のどの色を使うかを2bitの情報で割り出す。
+[背景の描画：詳細]
+・4枚のネームテーブルのうち1枚を選択。PPUCTRLの 0, 1 ビットで指定される。
+  ネームテーブルの個々の要素は1バイトで、パターンテーブルへのインデックス
+  (0-255)になっている。
+  (ここではスクロール位置を考慮してネームテーブル中の描画対象タイルを決める)
+・2枚あるパターンテーブルのうち1枚を選択。PPUCTRLの第4ビットで指定される。
+  ネームテーブルのインデックスによって参照されているパターンテーブルを選択。
+・ネームテーブルのインデックスから、描画に利用するパターンテーブルのタイルを選択。
+  これによって描画すべきピクセルと、その色(？？？？)が判明する。
+・描画に利用する色を割り出す。描画に利用するネームテーブルが分かれば、
+  属性テーブルも自動的に決まる。ただし属性テーブルは「4タイルを1まとめ」にして
+  色を指定していることに注意。
+*/
+
+/*
+[スプライトの描画：詳細]
+・
+*/
+
+/*
+スプライトについても処理をまとめる。
+BGとスプライトの合成について調べる。
+書き込み専用、読み取り専用レジスタにアクセスした際の振る舞いを調べる。
+*/
+
 bitflags! {
     /// PPUCTRL
     pub struct CtrlFlags: u8 {
-        /// Base NameTable Address  
+        /// Base NameTable Address.  
         /// (0 = $2000; 1 = $2400; 2 = $2800; 3 = $2C00)
-        const SPRITE_OVERFLOW   = 0b0000_0011;
+        const BASE_NAME_TABLE       = 0b0000_0011;
+        /// PPUDATAでVRAMのデータを読み書きする際に増加するアドレス.  
+        /// (0: add 1, going across; 1: add 32, going down)
+        const VRAM_INCREMENT        = 0b0000_0100;
+        /// Sprite pattern table address for 8x8 sprites.  
+        /// (0: $0000; 1: $1000; ignored in 8x16 mode)
+        const SPRITE_PATTERN_TABLE  = 0b0000_1000;
+        /// Background pattern table address.  
+        /// (0: $0000; 1: $1000)
+        const BG_PATTERN_TABLE      = 0b0001_0000;
+        ///  Sprite size.  
+        /// (0: 8x8 pixels; 1: 8x16 pixels)
+        const SPRITE_SIZE           = 0b0010_0000;
+        /// PPU master/slave select.  
+        /// (0: read backdrop from EXT pins; 1: output color on EXT pins)
+        const PPU_MASTER_SLAVE      = 0b0100_0000;
+        /// Generate an NMI at the start of the vertical blanking interval  
+        /// (0: off; 1: on)
+        const NMI_ON_VBRANK         = 0b1000_0000;
     }
 }
 
@@ -45,7 +96,7 @@ bitflags! {
         /// 一度設定されると、次のVBlankが終わるまでクリアされない。
         const SPRITE_ZERO_HIT   = 0b0100_0000;
         /// VBlank発生時に1。
-        const VBLANK            = 0b1000_0000;
+        const VBLANK_OCCURRED   = 0b1000_0000;
     }
 }
 
@@ -108,22 +159,20 @@ impl Ppu {
             state: Default::default(),
         };
         
-        {
-            // CHR-ROM を VRAM に展開。
-            // VRAM上にCHR-ROMを置く領域は2KB分存在するが、CHR-ROMが1枚(1024Kバイト)しか
-            // 存在しないROMがある。その場合でも1枚分をコピー済みなので、ここで一括転送可能。
-            // TODO: マッパーによってはCHR-ROMが複数載っている可能性あり。
-            let chr_rom = rom.chr_rom();
-            let len = rom::CHR_ROM_UNIT_SIZE;
-            if chr_rom.len() >= len {
-                my.vram.raw_write(0, &chr_rom[0..len]);
-            }
+        // CHR-ROM(パターンテーブル) を VRAM に展開。
+        // VRAM上にCHR-ROMを置く領域は16KB分存在するが、CHR-ROMが1枚(8KB)のみの
+        // ROMがある。その場合でも1枚分を追加でコピー済みなので、ここで一括転送可能。
+        // TODO: マッパーによってはCHR-ROMが複数載っている可能性あり。
+        let chr_rom = rom.chr_rom();
+        let len = rom::CHR_ROM_UNIT_SIZE;
+        if chr_rom.len() >= len {
+            my.vram.raw_write(0, &chr_rom[0..len]);
         }
 
         return my
     }
 
-    /// 起動後、PPU換算で29658クロックに「到達した」時点から書き込みを許可する。
+    /// 起動後、29658クロックに「到達した」時点から書き込みを許可する。
     pub fn is_ready(&self) -> bool {
         self.clock_counter >= WARM_UP_TIME
     }
@@ -222,7 +271,7 @@ impl Ppu {
         // [0 cc]  
         //      アイドル。PPUは何も行わない。
         // [1-256 cc]
-        //      PPUはメモリからデータを読みなが1ら、1ピクセルずつラインを埋めていく。
+        //      PPUはメモリからデータを読みながら、1ピクセルずつラインを埋めていく。
         //      描画の裏で、以下の4つのテーブルから、それぞれ 2cc かけて 1バイトずつメモリを読む。
         //        - Name Table
         //        - Attribute Table
