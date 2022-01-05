@@ -2,14 +2,11 @@
 
 mod ppu_state;
 mod vram;
-mod paterntable;
 
 use bitflags::bitflags;
 
 use crate::nes::rom;
 use crate::nes::ppu::ppu_state::*;
-
-use self::paterntable::PatternTable;
 
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
