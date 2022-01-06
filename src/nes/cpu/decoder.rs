@@ -52,7 +52,7 @@ fn make_executer(fn_exec: FnExec, fn_core: FnCore, dst: Destination) -> Executer
 }
 
 /// OPコードをフェッチして命令種別を判定し、実行を担う関数を返す。
-pub fn decode(cpu: &mut Cpu, opcode: u8) -> Executer {
+pub fn decode(opcode: u8) -> Executer {
     // 効率のいい命令デコードについてはここが詳しい。
     // https://llx.com/Neil/a2/opcodes.html
 
