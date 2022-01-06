@@ -10,7 +10,7 @@ pub const VRAM_SPACE: usize = 0x4000;
 /// VRAMに直接アクセスできるのはPPUだけ。CPUは、CPU側のメモリ空間に露出している
 /// PPUの2つのレジスタ、PPUADDR($2006)とPPUDATA($2007)を利用してVRAMへアクセスする。
 pub struct MemCon {
-    ram: Box<[u8]>,
+    vram: Box<[u8]>,
 }
 
 /*
@@ -100,14 +100,19 @@ $3F1D-$3F1F Sprite palette 3
 impl MemCon {
     pub fn new() -> Self {
         Self {
-            ram: Box::new([0; VRAM_SPACE]),
+            vram: Box::new([0; VRAM_SPACE]),
         }
     }
 
     /// ミラーリング等を考慮せず、メモリに直にデータを書き込む。
     /// 主に初期化処理に利用する。
     pub fn raw_write(&mut self, addr: usize, data: &[u8]) {
-        println!("addr={}, data.len()={}", addr, data.len());
-        self.ram[addr..addr+data.len()].copy_from_slice(data);
+        log::debug!("raw_write: addr={:#06X}, data.len={}", addr, data.len());
+        self.vram[addr..addr+data.len()].copy_from_slice(data);
+    }
+
+    pub fn write(&mut self, addr: u16, data: u8) {
+        log::debug!("write: addr={:#06X}, data={:#04X}({})", addr, data, data);
+        
     }
 }

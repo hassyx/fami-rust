@@ -81,7 +81,7 @@ bitflags! {
         /// Background pattern table address.  
         /// (0: $0000; 1: $1000)
         const BG_PATTERN_TABLE      = 0b0001_0000;
-        ///  Sprite size.  
+        /// Sprite size.  
         /// (0: 8x8 pixels; 1: 8x16 pixels)
         const SPRITE_SIZE           = 0b0010_0000;
         /// PPU master/slave select.  
@@ -174,7 +174,7 @@ impl Ppu {
         // CHR-ROM(パターンテーブル) を VRAM に展開。
         // VRAM上にCHR-ROMを置く領域は16KB分存在するが、CHR-ROMが1枚(8KB)のみの
         // ROMがある。その場合でも1枚分を追加でコピー済みなので、ここで一括転送可能。
-        // TODO: マッパーによってはCHR-ROMが複数載っている可能性あり。
+        // TODO: マッパーによってはCHR-ROMが2枚以上載っている可能性あり。
         let chr_rom = rom.chr_rom();
         let len = rom::CHR_ROM_UNIT_SIZE;
         if chr_rom.len() >= len {

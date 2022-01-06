@@ -28,21 +28,21 @@ impl MemCon {
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_write(&mut self, addr: u16, data: &[u8]) {
-        log::debug!("addr={:#06X}, data.len={}", addr, data.len());
+        log::debug!("raw_write: addr={:#06X}, data.len={}", addr, data.len());
         let addr = addr as usize;
         self.ram[addr..addr+data.len()].copy_from_slice(data);
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_write_b(&mut self, addr: u16, data: u8) {
-        log::debug!("raw_write_b(): addr={:#06X}, data={:#04X}({})", addr, data, data);
+        log::debug!("raw_write_b: addr={:#06X}, data={:#04X}({})", addr, data, data);
         let addr = addr as usize;
         self.ram[addr] = data;
     }
 
     /// メモリマップドI/Oやミラー領域を考慮せず、メモリに直にデータを書き込む。
     pub fn raw_fill(&mut self, range: RangeInclusive<usize>, data: u8) {
-        log::debug!("raw_fill(): range=({:?}), data={:#04X}({})", range, data, data);
+        log::debug!("raw_fill: range=({:?}), data={:#04X}({})", range, data, data);
         self.ram[range].fill(data);
     }
 
