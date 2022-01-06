@@ -94,6 +94,29 @@ bitflags! {
 }
 
 bitflags! {
+    /// PPUMASK
+    pub struct MaskFlags: u8 {
+        /// Greyscale
+        /// (0: normal color, 1: produce a greyscale display)
+        const GRAYSCALE             = 0b0000_0001;
+        /// (0:画面上の左端8ピクセルでBGを隠す)
+        const SHOW_BG_LEFTMOST      = 0b0000_0010;
+        /// (0:画面上の左端8ピクセルでスプライトを隠す)
+        const SHOW_SPRITE_LEFTMOST  = 0b0000_0100;
+        /// (0:BGを非表示)
+        const SHOW_BG               = 0b0000_1000;
+        /// (0:スプライトを非表示)
+        const SHOW_SPRITE           = 0b0001_0000;
+        /// (1:赤を強調)
+        const EMPHASIZE_RED         = 0b0010_0000;
+        /// (1:緑を強調)
+        const EMPHASIZE_GREEN       = 0b0100_0000;
+        /// (1:青を強調)
+        const EMPHASIZE_BLUE        = 0b1000_0000;
+    }
+}
+
+bitflags! {
     /// PPUSTATUS
     pub struct StatusFlags: u8 {
         /// スキャンライン上のスプライトが8個以下なら1、9個以上なら1。
