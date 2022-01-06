@@ -1,12 +1,7 @@
 //! Instruction decoder.
 
-use std::ops::Add;
-
 use super::Cpu;
 use super::executer::*;
-use super::exec_core_g1;
-use super::exec_core_g2;
-use super::exec_core_g3;
 
 /// アドレッシングモード
 /// TODO: matchで分岐する場合は、頻出するモードを先に置く。
