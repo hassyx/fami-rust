@@ -40,8 +40,8 @@ impl Cpu {
     //   |                                               ^
     //   v                                               |
     // fetch ---+---(not BRK)---> exec --(exec finish)-->+
-    //        (BRK)           (exec finish)              ^
-    //          |                  |                     |
+    //          |                  |                     ^
+    //        (BRK)          (exec finish)               |
     //          v                  v                     |
     //          +---------------> int ------------------>+
 
