@@ -17,11 +17,13 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
-// TODO: 基本この関数からの出力は、verboseモード時のみ表示させたい。
-// ユーザーに表示するエラーを決めるため、エラーの大分類を指定する引数を追加すればいいのか？
 pub fn err_exit(msg: &str) -> ! {
     eprintln!("{}", msg);
     std::process::exit(1);
+}
+
+pub fn panic_write_to_read_only_area(addr: u16, data: u8) -> ! {
+    panic!("Error: Write to read-only area. addr={:#06X}, data={:#04X}", addr, data)
 }
 
 pub fn make_addr(high: u8, low: u8) -> u16{

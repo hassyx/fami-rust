@@ -3,8 +3,8 @@
 
 use std::ops::RangeInclusive;
 use num_traits::FromPrimitive;
-use range_check::Check;
 
+use crate::util;
 use crate::nes::ppu_databus::DataBus;
 
 /// NESに搭載されている物理RAM容量(bytes)
@@ -82,9 +82,9 @@ impl MemCon {
                 // TODO: MapperによってはROMへの書き込みを検出する機構がある。
 
                 // 実機ではROMへの書き込みはエラーとならないが、
-                // 当面はROMへの書き込みが行われた場合、
+                // 現状のエミュレーター実装でROMへの書き込みが行われた場合、
                 // 命令デコードの不具合である可能性が高いため、panic させる。
-                panic!("Error: Write to read-only area. addr={:#06X}, data={:#04X}", addr, data);
+                util::panic_write_to_read_only_area(addr, data)
             },
             // TODO: APUの対応が必要
             _ => {

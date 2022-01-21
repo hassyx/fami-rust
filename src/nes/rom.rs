@@ -19,7 +19,7 @@ pub struct NesRom {
     prg_rom: Vec<u8>,
     chr_rom: Vec<u8>,
     trainer: Option<Vec<u8>>,
-    mirroring_type: NameTableMirroring,
+    mirroring_type: MirroringType,
     battery_backed: bool,
     console_type: ConsoleType,
     mapper_no: u16,
@@ -41,9 +41,15 @@ impl NesRom {
     pub fn chr_rom(&self) -> &[u8] {
         &self.chr_rom
     }
+
+    pub fn mirroring_type(&self) -> MirroringType {
+        self.mirroring_type
+    }
 }
 
-pub enum NameTableMirroring {
+/// ネームテーブルのミラーリングタイプ
+#[derive(Copy, Clone)]
+pub enum MirroringType {
     None,
     Horizontal,
     Vertical,
@@ -259,7 +265,7 @@ fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
     }))
  }
 
-fn parse_flag6(flags: u8) -> (NameTableMirroring, bool, bool, u8) {
+fn parse_flag6(flags: u8) -> (MirroringType, bool, bool, u8) {
     // Flags 6
     // D~7654 3210
     //   ---------
@@ -280,11 +286,11 @@ fn parse_flag6(flags: u8) -> (NameTableMirroring, bool, bool, u8) {
 
     let mirroring_type = 
         if (flags & 0b0000_1000) != 0 {
-            NameTableMirroring::None
+            MirroringType::None
         } else if (flags & 0b0000_0001) != 0 {
-            NameTableMirroring::Vertical
+            MirroringType::Vertical
         } else {
-            NameTableMirroring::Horizontal
+            MirroringType::Horizontal
         };
     
     let battery_backed = (flags & 0b0000_0010) != 0;

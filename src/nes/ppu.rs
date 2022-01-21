@@ -188,7 +188,7 @@ impl Ppu {
         let mut my = Ppu {
             regs: Default::default(),
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
-            vram: Box::new(vram::MemCon::new()),
+            vram: Box::new(vram::MemCon::new(rom.mirroring_type())),
             clock_counter: 0,
             fn_step: Ppu::prepare_step,
             state: Default::default(),
