@@ -219,7 +219,7 @@ impl MemCon {
                 unimplemented!();
             },
             _ => {
-                unimplemented!();
+                unreachable!();
             }
         }
     }
