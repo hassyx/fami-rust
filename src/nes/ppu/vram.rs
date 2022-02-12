@@ -268,13 +268,14 @@ impl MemCon {
                 }
             },
             _ => {
-                unreachable!();
+                // ミラーを考慮せずに書き込み
+                self.vram[addr as usize] = data;
             }
         }
     }
 
-    pub fn read(&mut self) {
-        unimplemented!();
+    pub fn read(&mut self, addr: u16) -> u8 {
+        self.vram[addr as usize]
     }
 }
 
