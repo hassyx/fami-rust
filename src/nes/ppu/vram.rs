@@ -278,20 +278,3 @@ impl MemCon {
         self.vram[addr as usize]
     }
 }
-
-/*
-VRAM Memory Map:
-----------------------  ----------------------- --------------------
-アドレス                用途                    物理的な位置
-----------------------  ----------------------- --------------------
-$0000-$0FFF $1000(4KB)  Pattern table 0         (CHR-ROM) 
-$1000-$1FFF $1000(4KB)  Pattern table 1         (CHR-ROM)
-$2000-$23FF $0400(1KB)  Nametable 0 (左上)      (専用RAM or ミラー)
-$2400-$27FF $0400(1KB)  Nametable 1 (右上)      (専用RAM or ミラー)
-$2800-$2BFF $0400(1KB)  Nametable 2 (左下)      (専用RAM or ミラー)
-$2C00-$2FFF $0400(1KB)  Nametable 3 (右下)      (専用RAM or ミラー)
-$3000-$3EFF $0F00(4KB)  Mirrors of $2000-$2EFF
-$3F00-$3F1F $0020(32B)  Palette RAM indexes     (専用RAM)
-$3F20-$3FFF $00E0(224B) Mirrors of $3F00-$3F1F
-----------------------  --------------------------------------------
-*/
