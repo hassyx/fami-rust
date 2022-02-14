@@ -273,15 +273,21 @@ impl Cpu {
         //self.regs.p = 0x34;
         self.regs.flags_on(Flags::INT_DISABLE | Flags::BREAK | Flags::RESERVED);
 
-        // APU状態のリセット
-        // TODO: 厳密にはPPUのレジスタも書き換える必要がある(が、初期値0なので特に意味なし)
+        // 物理RAMの初期化。
+        // 機種によっては起動時のメモリ内容が一定でない場合もあるが、
+        // ここではゼロクリアとしておく。
+        self.mem.raw_fill(0x0000..=0x07FF, 0);
+
+        // 
+        // RAMは0で初期化されているので、以下のコードは不要
+        /*
         self.mem.raw_fill(0x4000..=0x400F, 0);
         self.mem.raw_fill(0x4010..=0x4013, 0);
         self.mem.write(0x4015, 0);
         self.mem.write(0x4017, 0);
+        */
 
-        // 物理RAMの初期化
-        self.mem.raw_fill(0x0000..=0x07FF, 0);
+         // TODO: APU状態のリセットが必要
 
         // 割り込み状態の初期化
         self.clear_all_int_trigger();

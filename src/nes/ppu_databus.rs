@@ -58,7 +58,7 @@ impl DataBus {
         };
     }
 
-    pub fn write_to_oamdma(&mut self, data: u8) {
+    pub fn write_oamdma(&mut self, data: u8) {
         let mut ppu = self.ppu.borrow_mut();
         // TODO: 要実装！ここに書きこんだ後にDMA転送が始まる。
         ppu.regs.oam_dma = data;
@@ -83,7 +83,7 @@ impl DataBus {
         data
     }
     
-    pub fn read_from_oamdma(&mut self) -> u8 {
+    pub fn read_oamdma(&mut self) -> u8 {
         let ppu = self.ppu.borrow();
         // データバスを介さないので、レジスタの値をそのまま返す。
         ppu.regs.oam_dma

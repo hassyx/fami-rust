@@ -61,7 +61,7 @@ impl MemCon {
             },
             // PPUのOAMDMAへの書き込み
             0x4014 => {
-                self.ppu_databus.write_to_oamdma(data);
+                self.ppu_databus.write_oamdma(data);
             },
             // PPUのレジスタへの書き込み
             0x2000..=0x3FFF => {
@@ -98,7 +98,7 @@ impl MemCon {
         let data = match addr {
             // PPUのOAMDMAを読む
             0x4014 => {
-                self.ppu_databus.read_from_oamdma()
+                self.ppu_databus.read_oamdma()
             },
             // PPUのレジスタを読む
             0x2000..=0x3FFF => {
