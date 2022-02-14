@@ -297,12 +297,6 @@ impl Cpu {
         self.switch_state_int();
     }
 
-    pub fn reset(&mut self, ram: &mut mem::MemCon) {
-        // リセット時にはRAMを初期化しない。初期化するのはゲーム側の仕事。
-        self.regs.s -= 3;
-        self.regs.flags_on(Flags::INT_DISABLE);
-    }
-
     /// 1クロックサイクル進める。
     pub fn step(&mut self){
         self.clock_counter += 1;
