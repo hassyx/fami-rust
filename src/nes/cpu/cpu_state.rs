@@ -116,6 +116,14 @@ impl Cpu {
                 let low = self.mem.read(vec_addr);
                 let high = self.mem.read(vec_addr+1);
                 self.regs.pc = make_addr(high, low);
+                if self.state.int == IntType::Reset {
+                    // リセット時の初期化処理の開始
+                    // スタックポインタを3減算(ただしスタックの内容自体は操作しない)
+                    self.regs.s = self.regs.s.wrapping_sub(3);
+                    // IRQ/BRK無視フラグを立てる
+                    self.regs.flags_on(Flags::INT_DISABLE);
+                    // TODO: APUの状態リセットが必要
+                }
                 // この時点ではまだ割り込み検出のポーリング処理は停止している。
                 // ポーリングが有効になるのは、少なくともこのあと、1つの命令の実行が完了してから。
                 self.switch_state_fetch();
