@@ -213,7 +213,7 @@ impl Ppu {
     }
 
     pub fn power_on(&mut self) {
-        // 起動時のPPU状態
+        // 電源ON時のPPU状態
         // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
 
         // スキャンラインを0に戻す

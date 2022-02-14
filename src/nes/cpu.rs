@@ -265,6 +265,9 @@ impl Cpu {
     
     /// 電源投入(リセット割り込み発生)
     pub fn power_on(&mut self) {
+        // 電源ON時のCPU状態
+        // https://wiki.nesdev.org/w/index.php/CPU_power_up_state
+
         // レジスタとメモリの初期化
         self.regs.a = 0;
         self.regs.x = 0;
@@ -275,19 +278,16 @@ impl Cpu {
 
         // 物理RAMの初期化。
         // 機種によっては起動時のメモリ内容が一定でない場合もあるが、
-        // ここではゼロクリアとしておく。
+        // ここでは0クリアとしておく。
         self.mem.raw_fill(0x0000..=0x07FF, 0);
-
-        // 
-        // RAMは0で初期化されているので、以下のコードは不要
+        
+        // APU状態のリセット…だが、既にメモリが0クリアされているので不要。
         /*
         self.mem.raw_fill(0x4000..=0x400F, 0);
         self.mem.raw_fill(0x4010..=0x4013, 0);
         self.mem.write(0x4015, 0);
         self.mem.write(0x4017, 0);
         */
-
-         // TODO: APU状態のリセットが必要
 
         // 割り込み状態の初期化
         self.clear_all_int_trigger();
