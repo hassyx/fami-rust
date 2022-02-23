@@ -27,7 +27,7 @@ fn main() {
     let rom: Box<NesRom> = load_rom(path);
 
     // PPUを初期化
-    // VRAM側に、PPUのレジスタとROMのCHR-ROM領域をマッピングする。
+    // VRAMにROMのCHR-ROM領域をマッピングする。
     let ppu = Rc::new(RefCell::new(Ppu::new(&rom)));
     ppu.borrow_mut().power_on();
 
