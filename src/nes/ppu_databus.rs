@@ -44,7 +44,7 @@ impl DataBus {
     pub fn write(&mut self, reg_type: PpuRegs, data: u8) {
         let mut ppu = self.ppu.borrow_mut();
         // バスを介した書き込みを行うと、ラッチも必ず更新される。
-        ppu.regs.latch = data;
+        self.latch = data;
         // PPUのレジスタへの値の設定、かつミラー領域への反映
         match reg_type {
             PpuRegs::Ctrl => if ppu.is_ready() { ppu.regs.ctrl = data },
@@ -66,20 +66,20 @@ impl DataBus {
 
     /// CPUからの、メモリを介したPPUからの読み込み要請
     pub fn read(&mut self, reg_type: PpuRegs) -> u8 {
-        let mut ppu = self.ppu.borrow_mut();
+        let ppu = self.ppu.borrow_mut();
         // 可能であればレジスタを読み込む。読み込み禁止の場合は、代わりにラッチの値を返す。
         let data = match reg_type {
-            PpuRegs::Ctrl => ppu.regs.latch,
-            PpuRegs::Mask => ppu.regs.latch,
+            PpuRegs::Ctrl => self.latch,
+            PpuRegs::Mask => self.latch,
             PpuRegs::Status => ppu.regs.status,
-            PpuRegs::OamAddr => ppu.regs.latch,
+            PpuRegs::OamAddr => self.latch,
             PpuRegs::OamData => ppu.regs.oam_data,
-            PpuRegs::Scroll => ppu.regs.latch,
-            PpuRegs::PpuAddr => ppu.regs.latch,
+            PpuRegs::Scroll => self.latch,
+            PpuRegs::PpuAddr => self.latch,
             PpuRegs::PpuData => ppu.regs.data,
         };
         // バスを介した読み込みを行うと、ラッチも必ず更新される。
-        ppu.regs.latch = data;
+        self.latch = data;
         data
     }
     

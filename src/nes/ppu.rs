@@ -152,9 +152,11 @@ pub struct Registers {
     /// OAMDMA ($4014): 書き込み専用。OAM(SPR-RAM)へのDMA転送に使用する、
     /// source(CPU側のRAM)側のアドレスを指定するレジスタ。  
     pub oam_dma: u8,
+    /*
     /// CPUとPPUのデータ転送に利用するバス。実体は8bitのラッチ。
     /// PPUSCROLLとPPUADDRに 2バイト分の書き込みを行うために存在する。
     pub latch: u8,
+    */
 }
 
 impl Registers {
