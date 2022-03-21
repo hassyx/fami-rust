@@ -51,21 +51,18 @@ bitflags! {
 /// 6502 (RICHO 2A03)
 pub struct Cpu {
     mem: Box<mem::MemCon>,
-    clock_freq: u32,
-    clock_cycle: f32,
+    // clock_freq: u32,
+    // clock_cycle: f32,
     /// 起動後、リセットまたは電源断まで増加し続けるカウンター
     clock_counter: u64,
     regs: Registers,
-    /// リセットピン
-    reset_trigger: bool,
-    /// エッジトリガな割り込み検出機(NMI用)。
-    nmi_trigger: bool,
-    /// レベルトリガな割り込み検出機(IRQ用)。
-    /// TODO: 正確なエミュレートのためには、トリガの有効期間を実装する必要がある。
-    irq_trigger: bool,
-    /// ソフトウェア割り込みの場合にtrue
-    irq_is_brake: bool,
-    /// 割り込み検出検出機のポーリング処理を停止
+    /// RESETが発生していたらtrue。物理的なPINはレベルセンシティブ。
+    reset_occurred: bool,
+    /// NMIが発生していたらtrue。物理的なPINはエッジセンシティブ。
+    nmi_occurred: bool,
+    /// IRQが発生していたらtrue。物理的なPINはレベルセンシティブ。
+    irq_occurred: bool,
+    /// trueで割り込み検出のポーリング処理を有効化
     int_polling_enabled: bool,
     /// CPUの状態ごとに切り替わる関数。いわゆるStateパターンを実現するための仕組み。
     /// こうした理由は、1クロックサイクルごとに走る条件判定処理をできるだけ減らしたかったのと、
@@ -231,13 +228,12 @@ impl Cpu {
 
         let mut my = Cpu {
             mem: ram,
-            clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
-            clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
+            // clock_freq: CLOCK_FREQ_NTSC, // Use NTSC as default.
+            // clock_cycle: 1f32 / (CLOCK_FREQ_NTSC as f32),
             clock_counter: 0,
-            reset_trigger: false,
-            nmi_trigger: false,
-            irq_trigger: false,
-            irq_is_brake: false,
+            reset_occurred: false,
+            nmi_occurred: false,
+            irq_occurred: false,
             int_polling_enabled: false,
             regs: Registers::default(),
             fn_step: Cpu::int_step,
@@ -293,7 +289,7 @@ impl Cpu {
         self.clear_all_int_trigger();
 
         // スタート時は直にReset割り込みから実行開始 
-        self.reset_trigger = true;
+        self.trigger_reset();
         self.switch_state_int();
     }
 
@@ -307,22 +303,47 @@ impl Cpu {
         print_cpu_state!(self);
     }
 
+    /// NMIの発生をCPUに通知。実機での「ピンをhighからlowへ」に相当。
+    /// NMIは投げっぱなしで問題ないので、外部から明示的にOFFにする必要はない。
+    /// (割り込みハンドラ遷移前にCPU側でOFFにするので)
+    pub fn trigger_nmi(&mut self) {
+        self.nmi_occurred = true;
+    }
+
+    /// IRQの発生をCPUに通知。実機での「ピンをhighからlowへ」に相当。
+    pub fn trigger_irq(&mut self) {
+        self.irq_occurred = true;
+    }
+
+    /// IRQの原因となった事象が解消されたことをCPUに通知。
+    /// 実機での「ピンをlowからhighへ」に相当。
+    pub fn stop_irq(&mut self) {
+        self.irq_occurred = false;
+    }
+
+    /// RESETの発生をCPUに通知。実機での「ピンをhighからlowへ」に相当。
+    /// IRQと同じく、本来は接続されたデバイス(リセットボタン？)によって、
+    /// 信号をhighに戻す必要があるのだが、そこまで厳密にエミュレートはしない。
+    /// NMIと同様に、割り込みハンドラ遷移前にCPU側が勝手にOFFにする実装としておく。
+    pub fn trigger_reset(&mut self) {
+        self.reset_occurred = true;
+    }
+
     fn check_int(&mut self) {
         if !self.int_polling_enabled {
             return
         }
-        if self.reset_trigger || self.nmi_trigger ||
-            (!self.regs.int_disabled() && self.irq_trigger) {
+        if self.reset_occurred || self.nmi_occurred ||
+            (!self.regs.int_disabled() && self.irq_occurred) {
             // 割り込みが発生しているなら、割り込みモードへ遷移。
             self.switch_state_int();
         }
     }
 
     fn clear_all_int_trigger(&mut self) {
-        self.reset_trigger = false;
-        self.nmi_trigger = false;
-        self.irq_trigger = false;
-        self.irq_is_brake = false;
+        self.reset_occurred = false;
+        self.nmi_occurred = false;
+        self.irq_occurred = false;
     }
 
     /// PCが指すメモリを1バイト読み、PCを1進める。
@@ -352,38 +373,6 @@ impl Cpu {
         self.fn_step = Cpu::fetch_step;
         self.int_polling_enabled = true;
     }
-
-    /*
-    // TODO: 割り込み処理はエッジトリガ・レベルトリガ等の厳密な対応が必要。
-    // ひとまず現状は、発生した割り込みを保存し続ける実装とする。
-    pub fn interrupt(&mut self) {
-        // 割り込み無効フラグが立っている場合、IRQとBRKの発生を無視する。
-        if self.int_disabled() &&
-            (int_type == IntType::Irq || int_type == IntType::Brk)
-        {
-            return
-        }
-        
-        match int_type {
-            IntType::Reset => {
-                self.reset_trigger = true;
-                self.is_brake = false;
-            }
-            IntType::Nmi => {
-                self.nmi_trigger = true;
-                self.is_brake = false;
-            }
-            IntType::Irq => {
-                self.nmi_trigger = true;
-                self.is_brake = false;
-            },
-            IntType::Brk => {
-                self.nmi_trigger = true;
-                self.is_brake = true;
-            },
-        }
-    }
-    */
 
     /// スタックへのPushと、スタックポインタの減算をまとめて行う。
     pub fn push_stack(&mut self, data: u8) {
@@ -451,22 +440,5 @@ impl Cpu {
         log::debug!("S = {:#04X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
         log::debug!("#### END");
     }
-
-    /*
-    /// クロック周波数(clock_freq)を設定。
-    /// 同時に clock_cycle も更新する。
-    fn set_clock_freq(&mut self, clock: u32) {
-        self.clock_freq = clock;
-        self.clock_cycle = 1f32 / (self.clock_freq as f32);
-    }
-
-    fn clock_freq(&self) -> u32 {
-        self.clock_freq
-    }
-
-    fn clock_cycle(&self) -> f32 {
-        self.clock_cycle
-    }
-    */
 }
 

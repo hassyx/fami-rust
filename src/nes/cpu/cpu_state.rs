@@ -8,6 +8,8 @@ const ADDR_INT_NMI: u16        = 0xFFFA;
 const ADDR_INT_RESET: u16      = 0xFFFC;
 const ADDR_INT_IRQ: u16        = 0xFFFE;
 
+const OPCODE_BRK: u8 = 0;
+
 pub type FnState = fn(&mut Cpu);
 
 /// 一時的な状態保持用
@@ -54,10 +56,15 @@ impl Cpu {
 
         let opcode = self.fetch();
         log::debug!("[Fetch] opcode={:#04X}", opcode);
-        if opcode == 0 {
-            self.irq_trigger = true;
-            self.irq_is_brake = true;
-            self.int_1st_clock();
+        if opcode == OPCODE_BRK {
+            // まず割り込み状態のポーリングを禁止
+            self.int_polling_enabled = false;
+            // IRQ/BRK無視フラグを立てる
+            self.regs.flags_on(Flags::INT_DISABLE);
+            // BRKはソフトウェア割り込みなので、物理的なピンは操作しないし、
+            // ピンの状態を上げ下げする必要もない。
+            // ここで内部的なフラグを直接立てる。
+            self.state.int = IntType::Brk;
             self.fn_step = Cpu::int_step;
         } else {
             self.state.executer = decoder::decode(opcode);
@@ -140,20 +147,18 @@ impl Cpu {
         self.regs.flags_on(Flags::INT_DISABLE);
         // 発生した割り込み種別をチェックして記憶
         // 優先度: Reset > NMI > IRQ = Brk
-        if self.reset_trigger {
+        if self.reset_occurred {
+            // RESETはリセットボタンの上げ下げによってPINの状態が変化するが、
+            // エミュレーター実装としてはここで離したものとする。
+            self.reset_occurred = false;
             self.state.int = IntType::Reset;
-        } else if self.nmi_trigger {
+        } else if self.nmi_occurred {
+            self.nmi_occurred = false;
             self.state.int = IntType::Nmi;
-        } else if self.irq_trigger {
-            if self.irq_is_brake {
-                self.state.int = IntType::Brk;
-            } else {
-                self.state.int = IntType::Irq;
-            }
+        } else if self.irq_occurred {
+            // BRKは命令フェッチ時に処理しているので、ここでは考えなくていい。
+            self.state.int = IntType::Irq;
+            // IRQは発生元のデバイスがピンを明示的にhighにする必要がある。
         }
-        // TODO: 本来は割り込み種別ごとにトリガーが解除されるタイミングが異なる。
-        // また、割り込みが競合した際の振る舞いも実装する必要がある。
-        // ここでは、ひとまず一括で現在の割り込み状態をリセットする。
-        self.clear_all_int_trigger();
     }
 }

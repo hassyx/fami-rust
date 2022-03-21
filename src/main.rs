@@ -72,7 +72,9 @@ fn main() {
                 cpu_counter = 0;
             }
 
-            ppu.borrow_mut().step();
+            if ppu.borrow_mut().step() {
+                cpu.trigger_nmi();
+            }
 
             // 試しに点を打ってみる
             screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
