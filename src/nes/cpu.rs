@@ -84,7 +84,11 @@ pub struct Registers {
     pub y: u8,
     /// Stack Pointer
     pub s: u8,
-    /// Status Flag
+    /// Status Flag:
+    /// 個々のフラグのON/OFFや、分岐命令を通したフラグの状態確認は可能だが、
+    /// ユーザー側がこのレジスタ「全体」を直接読み取る命令は存在しない。
+    /// PHPか、または割り込み処理の過程によって、メモリ上(スタック上)に
+    /// 積まれたレジスタの内容を読み取る必要がある。
     pub p: u8,
     /// Program Counter
     pub pc: u16,
@@ -298,7 +302,12 @@ impl Cpu {
         self.clock_counter += 1;
         self.state.counter += 1;
         (self.fn_step)(self);
-        self.check_int();
+
+        if self.int_polling_enabled {
+            self.check_int();
+            // ポーリングの無効化
+            self.int_polling_enabled = false;
+        }
 
         print_cpu_state!(self);
     }
@@ -329,10 +338,8 @@ impl Cpu {
         self.reset_occurred = true;
     }
 
+    /// 例外のポーリング動作
     fn check_int(&mut self) {
-        if !self.int_polling_enabled {
-            return
-        }
         if self.reset_occurred || self.nmi_occurred ||
             (!self.regs.int_disabled() && self.irq_occurred) {
             // 割り込みが発生しているなら、割り込みモードへ遷移。
@@ -371,7 +378,6 @@ impl Cpu {
     fn exec_finished(&mut self) {
         self.state = TmpState::default();
         self.fn_step = Cpu::fetch_step;
-        self.int_polling_enabled = true;
     }
 
     /// スタックへのPushと、スタックポインタの減算をまとめて行う。

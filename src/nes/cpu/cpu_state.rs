@@ -59,8 +59,6 @@ impl Cpu {
         if opcode == OPCODE_BRK {
             // まず割り込み状態のポーリングを禁止
             self.int_polling_enabled = false;
-            // IRQ/BRK無視フラグを立てる
-            self.regs.flags_on(Flags::INT_DISABLE);
             // BRKはソフトウェア割り込みなので、物理的なピンは操作しないし、
             // ピンの状態を上げ下げする必要もない。
             // ここで内部的なフラグを直接立てる。
@@ -110,10 +108,16 @@ impl Cpu {
                 let flags = self.regs.p | brk_flag;
                 self.push_stack(flags);
             },
-            6 => (),
+            6 => {
+                // ジャンプする先の割り込みハンドラのアドレス(下位8bit)を読み込む。
+                // が、エミュレーター実装としては何もしない(7クロック目でまとめて対応する)。
+
+                // ここでIRQ/BRK無視フラグを立てる
+                self.regs.flags_on(Flags::INT_DISABLE);
+            },
             7 => {
-                // clock 6,7: ジャンプする先の割り込みハンドラのアドレスを読み込む。
-                // 処理が重いのでこのクロック内でまとめて処理する。
+                // ジャンプする先の割り込みハンドラのアドレス(上位8bit)を読み込む。
+                // クロック6で何もしていないので、ここで下位と上位アドレスをまとめて読み込む。
                 let vec_addr = match self.state.int {
                     IntType::Reset => ADDR_INT_RESET,
                     IntType::Nmi => ADDR_INT_NMI,
@@ -143,22 +147,22 @@ impl Cpu {
     fn int_1st_clock(&mut self) {
         // まず割り込み状態のポーリングを禁止
         self.int_polling_enabled = false;
-        // IRQ/BRK無視フラグを立てる
-        self.regs.flags_on(Flags::INT_DISABLE);
         // 発生した割り込み種別をチェックして記憶
         // 優先度: Reset > NMI > IRQ = Brk
         if self.reset_occurred {
             // RESETはリセットボタンの上げ下げによってPINの状態が変化するが、
-            // エミュレーター実装としてはここで離したものとする。
+            // エミュレーター実装としてはここで離した(lowからhighになった)ものとする。
             self.reset_occurred = false;
             self.state.int = IntType::Reset;
         } else if self.nmi_occurred {
+            // NMIの発生状況はフリップフロップに記録されているので、ここで諸居。
             self.nmi_occurred = false;
             self.state.int = IntType::Nmi;
         } else if self.irq_occurred {
-            // BRKは命令フェッチ時に処理しているので、ここでは考えなくていい。
+            // ここはIRQの対応となる。BRKは命令フェッチ時に処理しているので、ここには来ない。
             self.state.int = IntType::Irq;
-            // IRQは発生元のデバイスがピンを明示的にhighにする必要がある。
+            // IRQは発生元のデバイスがピンを明示的にhighに戻す必要がある。
+            // なのでここではピンを操作しない。
         }
     }
 }

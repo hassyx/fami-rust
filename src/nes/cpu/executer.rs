@@ -501,6 +501,7 @@ impl Cpu {
         }
     }
 
+    /// 相対アドレッシングモード。このモードは分岐命令でのみ使われる。
     pub fn exec_relative(&mut self) {
         log::debug!("exec_relative, counter={}", self.state.counter);
         match self.state.counter {
@@ -510,7 +511,11 @@ impl Cpu {
                     // 分岐が発生しない場合はここで終わり
                     self.exec_finished();
                 } else {
-                    let addr = self.regs.pc.wrapping_add(offset as u16);
+                    // relativeでのオペランドは符号付きなので、u8からi8へ単純変換したあと、
+                    // i16に符号拡張した上で、最終的にu16とする必要がある。
+                    let offset = ((offset as i8) as i16) as u16;
+                    // 最終的に正しい2の補数がu16として得られれば、あとは加算するだけ。
+                    let addr = self.regs.pc.wrapping_add((offset as i16) as u16);
                     if (addr & 0xFF00) == (self.regs.pc & 0xFF00) {
                         // 同じページ内でジャンプするなら +1 クロック
                         self.state.op_1 = 1;
