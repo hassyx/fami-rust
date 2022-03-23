@@ -69,9 +69,9 @@ pub struct Cpu {
     /// CPUのメインループ内で呼ばれる処理では、可能な限り動的なメモリ確保を避けたいため、
     /// 構造体ではなく関数ポインタで実現している。(動的な状態はCpu構造体の方に持たせている)
     fn_step: FnState,
+    /// 現在実行中の命令が完了したら、次に処理されるべき割り込み。
+    int_requested: IntType,
     state: TmpState,
-    //state_exec: Box<StateExec>,
-    //state_int: Box<StateInt>,
 }
 
 #[derive(Default)]
@@ -241,6 +241,7 @@ impl Cpu {
             int_polling_enabled: false,
             regs: Registers::default(),
             fn_step: Cpu::int_step,
+            int_requested: IntType::None,
             state: TmpState::default(),
         };
 
@@ -292,8 +293,8 @@ impl Cpu {
         // 割り込み状態の初期化
         self.clear_all_int_trigger();
 
-        // スタート時は直にReset割り込みから実行開始 
-        self.trigger_reset();
+        // 電源投入時はReset割り込みから実行開始 
+        self.int_requested = IntType::Reset;
         self.switch_state_int();
     }
 
@@ -342,8 +343,8 @@ impl Cpu {
     fn check_int(&mut self) {
         if self.reset_occurred || self.nmi_occurred ||
             (!self.regs.int_disabled() && self.irq_occurred) {
-            // 割り込みが発生しているなら、割り込みモードへ遷移。
-            self.switch_state_int();
+            // 割り込みが発生しているなら、ひとまずその状態を記憶。
+            self.int_requested = self.resolve_int_type();
         }
     }
 
@@ -362,7 +363,14 @@ impl Cpu {
 
     fn switch_state_fetch(&mut self) {
         self.state = TmpState::default();
-        self.fn_step = Cpu::fetch_step;
+        // 割り込みまたは命令実行が完了していた場合で、
+        // かつ発生させる割り込みが予約されている場合は、割り込み処理へ遷移。
+        if self.state.counter == 0 &&
+            self.int_requested != IntType::None {
+            self.fn_step = Cpu::int_step;
+        } else {
+            self.fn_step = Cpu::fetch_step;
+        }
     }
 
     fn switch_state_int(&mut self) {
@@ -376,8 +384,7 @@ impl Cpu {
     }
 
     fn exec_finished(&mut self) {
-        self.state = TmpState::default();
-        self.fn_step = Cpu::fetch_step;
+        self.switch_state_fetch();
     }
 
     /// スタックへのPushと、スタックポインタの減算をまとめて行う。
@@ -420,6 +427,30 @@ impl Cpu {
         let addr = ADDR_STACK_UPPER | (self.regs.s as u16);
         let data = self.mem.read(addr);
         data
+    }
+
+    /// 割り込みピンの状態を調べ、どの割り込みを発生させるかを決定する。
+    /// 同時に、必要であればピンの状態を変更する。
+    fn resolve_int_type(&mut self) -> IntType {
+        // 発生した割り込み種別をチェックして記憶
+        // 優先度: Reset > NMI > IRQ = Brk
+        if self.reset_occurred {
+            // RESETはリセットボタンの上げ下げによってPINの状態が変化するが、
+            // エミュレーター実装としてはここで離した(lowからhighになった)ものとする。
+            self.reset_occurred = false;
+            return IntType::Reset
+        } else if self.nmi_occurred {
+            // NMIの発生状況はフリップフロップに記録されているので、ここで消去。
+            self.nmi_occurred = false;
+            return IntType::Nmi
+        } else if self.irq_occurred {
+            // BRKは命令フェッチ時に処理しているので、ここには来ない。
+            return IntType::Irq
+            // IRQは発生元のデバイスがピンを明示的にhighに戻す必要がある。
+            // なのでここではピンを操作しない。
+        }
+        // 割り込みの発生を前提としてこの関数を呼ぶので、ここに来たらバグ。
+        unreachable!()
     }
 
     #[cfg(debug_assertions)]

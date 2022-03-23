@@ -1,0 +1,2464 @@
+warning: variant `IndexedAbsolute_X` should have an upper camel case name
+  --> src/nes/cpu/decoder.rs:21:5
+   |
+21 |     IndexedAbsolute_X,
+   |     ^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `IndexedAbsoluteX`
+   |
+   = note: `#[warn(non_camel_case_types)]` on by default
+
+warning: variant `IndexedAbsolute_Y` should have an upper camel case name
+  --> src/nes/cpu/decoder.rs:25:5
+   |
+25 |     IndexedAbsolute_Y,
+   |     ^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `IndexedAbsoluteY`
+
+warning: variant `IndexedZeroPage_X` should have an upper camel case name
+  --> src/nes/cpu/decoder.rs:29:5
+   |
+29 |     IndexedZeroPage_X,
+   |     ^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `IndexedZeroPageX`
+
+warning: variant `IndexedIndirect_X` should have an upper camel case name
+  --> src/nes/cpu/decoder.rs:34:5
+   |
+34 |     IndexedIndirect_X,
+   |     ^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `IndexedIndirectX`
+
+warning: variant `IndirectIndexed_Y` should have an upper camel case name
+  --> src/nes/cpu/decoder.rs:39:5
+   |
+39 |     IndirectIndexed_Y,
+   |     ^^^^^^^^^^^^^^^^^ help: convert the identifier to upper camel case: `IndirectIndexedY`
+
+warning: unused variable: `key`
+  --> src/main.rs:92:38
+   |
+92 |         if let Some(Button::Keyboard(key)) = e.release_args() {
+   |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_key`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `key`
+  --> src/main.rs:96:38
+   |
+96 |         if let Some(Button::Keyboard(key)) = e.press_args() {
+   |                                      ^^^ help: if this is intentional, prefix it with an underscore: `_key`
+
+warning: variable `submapper` is assigned to, but never used
+   --> src/nes/rom.rs:123:9
+    |
+123 |     let submapper: u8;
+    |         ^^^^^^^^^
+    |
+    = note: consider using `_submapper` instead
+
+warning: value assigned to `submapper` is never read
+   --> src/nes/rom.rs:132:9
+    |
+132 |         submapper = sub;
+    |         ^^^^^^^^^
+    |
+    = note: `#[warn(unused_assignments)]` on by default
+    = help: maybe it is overwritten before being read?
+
+warning: value assigned to `submapper` is never read
+   --> src/nes/rom.rs:138:9
+    |
+138 |         submapper = 0;
+    |         ^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: unused variable: `misc_rom_count`
+   --> src/nes/rom.rs:194:9
+    |
+194 |     let misc_rom_count = 
+    |         ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_misc_rom_count`
+
+warning: unused variable: `expansion_device`
+   --> src/nes/rom.rs:203:9
+    |
+203 |     let expansion_device =
+    |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_expansion_device`
+
+warning: value assigned to `index` is never read
+   --> src/nes/rom.rs:239:9
+    |
+239 |         index += chr_rom_size;
+    |         ^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: field is never read: `trainer`
+  --> src/nes/rom.rs:21:5
+   |
+21 |     trainer: Option<Vec<u8>>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field is never read: `battery_backed`
+  --> src/nes/rom.rs:23:5
+   |
+23 |     battery_backed: bool,
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `console_type`
+  --> src/nes/rom.rs:24:5
+   |
+24 |     console_type: ConsoleType,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `mapper_no`
+  --> src/nes/rom.rs:25:5
+   |
+25 |     mapper_no: u16,
+   |     ^^^^^^^^^^^^^^
+
+warning: field is never read: `prg_ram_size`
+  --> src/nes/rom.rs:26:5
+   |
+26 |     prg_ram_size: u32,   // TODO:最大サイズは？
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `eeprom_size`
+  --> src/nes/rom.rs:27:5
+   |
+27 |     eeprom_size: u32,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: field is never read: `tv_format`
+  --> src/nes/rom.rs:28:5
+   |
+28 |     tv_format: TvFormat,
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `chr_ram_size`
+  --> src/nes/rom.rs:29:5
+   |
+29 |     chr_ram_size: u32,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `chr_nvram_size`
+  --> src/nes/rom.rs:30:5
+   |
+30 |     chr_nvram_size: u32,
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `cpu_timing`
+  --> src/nes/rom.rs:31:5
+   |
+31 |     cpu_timing: CPUTiming,
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `vssystem_type`
+  --> src/nes/rom.rs:32:5
+   |
+32 |     vssystem_type: u8,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `vshardware_type`
+  --> src/nes/rom.rs:33:5
+   |
+33 |     vshardware_type: u8,
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `CLOCK_FREQ_NTSC`
+  --> src/nes/cpu.rs:18:1
+   |
+18 | const CLOCK_FREQ_NTSC: u32 = 1789773;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `CLOCK_FREQ_PAL`
+  --> src/nes/cpu.rs:20:1
+   |
+20 | const CLOCK_FREQ_PAL: u32 = 1662607;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated function is never used: `trigger_irq`
+   --> src/nes/cpu.rs:324:12
+    |
+324 |     pub fn trigger_irq(&mut self) {
+    |            ^^^^^^^^^^^
+
+warning: associated function is never used: `stop_irq`
+   --> src/nes/cpu.rs:330:12
+    |
+330 |     pub fn stop_irq(&mut self) {
+    |            ^^^^^^^^
+
+warning: associated function is never used: `trigger_reset`
+   --> src/nes/cpu.rs:338:12
+    |
+338 |     pub fn trigger_reset(&mut self) {
+    |            ^^^^^^^^^^^^^
+
+warning: associated function is never used: `switch_state_exec`
+   --> src/nes/cpu.rs:381:8
+    |
+381 |     fn switch_state_exec(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `REAL_VRAM_SIZE`
+ --> src/nes/ppu/vram.rs:8:1
+  |
+8 | const REAL_VRAM_SIZE: usize = 0x800;
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `NAMETABLE_BASE_ADDR`
+  --> src/nes/ppu/vram.rs:12:1
+   |
+12 | const NAMETABLE_BASE_ADDR: u16 = 0x2000;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `NAMETABLE_MIRROR_BASE_ADDR`
+  --> src/nes/ppu/vram.rs:13:1
+   |
+13 | const NAMETABLE_MIRROR_BASE_ADDR: u16 = 0x3000;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `NAMETABLE_HORIZONTAL_OFFSET`
+  --> src/nes/ppu/vram.rs:15:1
+   |
+15 | const NAMETABLE_HORIZONTAL_OFFSET: u16 = 0x800;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant is never used: `NAMETABLE_VERTICAL_OFFSET`
+  --> src/nes/ppu/vram.rs:16:1
+   |
+16 | const NAMETABLE_VERTICAL_OFFSET: u16 = 0x400;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `mirroring_type`
+  --> src/nes/ppu/vram.rs:24:5
+   |
+24 |     mirroring_type: MirroringType,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated function is never used: `write`
+   --> src/nes/ppu/vram.rs:163:12
+    |
+163 |     pub fn write(&mut self, addr: u16, data: u8) {
+    |            ^^^^^
+
+warning: associated function is never used: `read`
+   --> src/nes/ppu/vram.rs:277:12
+    |
+277 |     pub fn read(&mut self, addr: u16) -> u8 {
+    |            ^^^^
+
+warning: associated function is never used: `read_reg_status`
+   --> src/nes/ppu.rs:164:12
+    |
+164 |     pub fn read_reg_status() {
+    |            ^^^^^^^^^^^^^^^
+
+warning: field is never read: `spr_ram`
+   --> src/nes/ppu.rs:176:5
+    |
+176 |     spr_ram: Box<[u8]>,
+    |     ^^^^^^^^^^^^^^^^^^
+
+warning: associated function is never used: `render`
+   --> src/nes/ppu.rs:248:12
+    |
+248 |     pub fn render() {
+    |            ^^^^^^
+
+warning: constant is never used: `PHYSICAL_RAM_SIZE`
+  --> src/nes/mem.rs:11:1
+   |
+11 | pub const PHYSICAL_RAM_SIZE: usize = 0x0800;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated function is never used: `raw_write_b`
+  --> src/nes/mem.rs:37:12
+   |
+37 |     pub fn raw_write_b(&mut self, addr: u16, data: u8) {
+   |            ^^^^^^^^^^^
+
+warning: `fami-rust` (bin "fami-rust") generated 44 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 0.11s
+     Running `target/debug/fami-rust`
+[DEBUG fami_rust::nes::ppu::vram] raw_write: addr=0x0000, data.len=8192
+[DEBUG fami_rust::nes::mem] raw_write: addr=0x8000, data.len=16384
+[DEBUG fami_rust::nes::mem] raw_write: addr=0xC000, data.len=16384
+[DEBUG fami_rust::nes::mem] raw_fill: range=(0..=2047), data=0x00(0)
+[INFO  gfx_device_gl::info] parsing version '4.1 Metal - 76.3'
+[INFO  gfx_device_gl::info] parsing version '4.10'
+[INFO  gfx_device_gl] Info { platform_name: PlatformName { vendor: "Apple", renderer: "Apple M1" }, version: 4.1, Metal - 76.3, shading_language: 4.10, extensions: {"GL_EXT_debug_marker", "GL_ARB_instanced_arrays", "GL_APPLE_container_object_shareable", "GL_ARB_blend_func_extended", "GL_EXT_texture_compression_s3tc", "GL_ARB_transform_feedback3", "GL_ARB_texture_cube_map_array", "GL_ARB_explicit_attrib_location", "GL_ARB_texture_query_lod", "GL_ARB_separate_shader_objects", "GL_ARB_texture_swizzle", "GL_ARB_gpu_shader_fp64", "GL_APPLE_rgb_422", "GL_ARB_shading_language_include", "GL_ARB_texture_storage", "GL_ARB_shader_subroutine", "GL_ARB_draw_buffers_blend", "GL_ARB_gpu_shader5", "GL_ARB_timer_query", "GL_ARB_vertex_type_2_10_10_10_rev", "GL_EXT_framebuffer_multisample_blit_scaled", "GL_ARB_vertex_attrib_64bit", "GL_ARB_texture_buffer_object_rgb32", "GL_ARB_texture_rgb10_a2ui", "GL_EXT_debug_label", "GL_APPLE_client_storage", "GL_ARB_shader_bit_encoding", "GL_ARB_transform_feedback2", "GL_EXT_texture_filter_anisotropic", "GL_NV_texture_barrier", "GL_EXT_texture_sRGB_decode", "GL_APPLE_texture_range", "GL_ARB_sample_shading", "GL_APPLE_flush_render", "GL_ARB_texture_gather", "GL_ARB_occlusion_query2", "GL_ARB_sampler_objects", "GL_ARB_tessellation_shader", "GL_ARB_ES2_compatibility", "GL_ARB_draw_indirect", "GL_ARB_viewport_array", "GL_APPLE_row_bytes", "GL_ARB_internalformat_query"} }
+[INFO  gfx_device_gl] Capabilities { max_vertex_count: 1048575, max_index_count: 150000, max_texture_size: 16384, max_patch_size: 32, instance_base_supported: false, instance_call_supported: true, instance_rate_supported: true, vertex_base_supported: true, srgb_color_supported: true, constant_buffer_supported: true, unordered_access_view_supported: true, separate_blending_slots_supported: true, copy_buffer_supported: true }
+[INFO  gfx_device_gl] PrivateCaps { array_buffer_supported: true, frame_buffer_supported: true, immutable_storage_supported: true, sampler_objects_supported: true, program_interface_supported: false, buffer_storage_supported: false, clear_buffer_supported: true, frag_data_location_supported: true, sampler_lod_bias_supported: true, texture_border_clamp_supported: true, texture_view_supported: false }
+[INFO  gfx_device_gl::shade] 	Compiled shader 1
+[INFO  gfx_device_gl::shade] 	Compiled shader 2
+[INFO  gfx_device_gl::shade] 	Linked program 3
+[WARN  gfx_device_gl::shade] 	Log: WARNING: Could not find fragment shader output 'Target2' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target3' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target1' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target0' to match FragDataBinding request.
+    
+[INFO  gfx_device_gl::shade] 		Attrib[0] = "color"	F32	Vector(4)
+[INFO  gfx_device_gl::shade] 		Attrib[1] = "pos"	F32	Vector(2)
+[DEBUG gfx_device_gl::shade] Program 3 reflection: ProgramInfo { vertex_attributes: [AttributeVar { name: "color", slot: 0, base_type: F32, container: Vector(4) }, AttributeVar { name: "pos", slot: 1, base_type: F32, container: Vector(2) }], globals: [], constant_buffers: [], textures: [], unordereds: [], samplers: [], outputs: [], output_depth: false, knows_outputs: false }
+[INFO  gfx_device_gl::shade] 	Compiled shader 4
+[INFO  gfx_device_gl::shade] 	Compiled shader 5
+[INFO  gfx_device_gl::shade] 	Linked program 6
+[WARN  gfx_device_gl::shade] 	Log: WARNING: Could not find fragment shader output 'Target2' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target3' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target1' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target0' to match FragDataBinding request.
+    
+[INFO  gfx_device_gl::shade] 		Sampler[0] = 's_texture'	F32	D2(NoArray, NoMultiSample)
+[INFO  gfx_device_gl::shade] 		Uniform[1] = 'color'	F32	Vector(4)
+[INFO  gfx_device_gl::shade] 		Attrib[0] = "uv"	F32	Vector(2)
+[INFO  gfx_device_gl::shade] 		Attrib[1] = "pos"	F32	Vector(2)
+[DEBUG gfx_device_gl::shade] Program 6 reflection: ProgramInfo { vertex_attributes: [AttributeVar { name: "uv", slot: 0, base_type: F32, container: Vector(2) }, AttributeVar { name: "pos", slot: 1, base_type: F32, container: Vector(2) }], globals: [ConstVar { name: "color", location: 1, count: 1, base_type: F32, container: Vector(4) }], constant_buffers: [], textures: [TextureVar { name: "s_texture", slot: 0, base_type: F32, ty: D2(NoArray, NoMultiSample), usage: VERTEX | PIXEL }], unordereds: [], samplers: [SamplerVar { name: "s_texture", slot: 0, ty: SamplerType(NoCompare, NoRect), usage: VERTEX | PIXEL }], outputs: [], output_depth: false, knows_outputs: false }
+[INFO  gfx_device_gl::shade] 	Compiled shader 7
+[INFO  gfx_device_gl::shade] 	Compiled shader 8
+[INFO  gfx_device_gl::shade] 	Linked program 9
+[WARN  gfx_device_gl::shade] 	Log: WARNING: Could not find fragment shader output 'Target2' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target3' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target1' to match FragDataBinding request.
+    WARNING: Could not find fragment shader output 'Target0' to match FragDataBinding request.
+    
+[INFO  gfx_device_gl::shade] 		Sampler[0] = 's_texture'	F32	D2(NoArray, NoMultiSample)
+[INFO  gfx_device_gl::shade] 		Attrib[0] = "uv"	F32	Vector(2)
+[INFO  gfx_device_gl::shade] 		Attrib[1] = "color"	F32	Vector(4)
+[INFO  gfx_device_gl::shade] 		Attrib[2] = "pos"	F32	Vector(2)
+[DEBUG gfx_device_gl::shade] Program 9 reflection: ProgramInfo { vertex_attributes: [AttributeVar { name: "uv", slot: 0, base_type: F32, container: Vector(2) }, AttributeVar { name: "color", slot: 1, base_type: F32, container: Vector(4) }, AttributeVar { name: "pos", slot: 2, base_type: F32, container: Vector(2) }], globals: [], constant_buffers: [], textures: [TextureVar { name: "s_texture", slot: 0, base_type: F32, ty: D2(NoArray, NoMultiSample), usage: VERTEX | PIXEL }], unordereds: [], samplers: [SamplerVar { name: "s_texture", slot: 0, ty: SamplerType(NoCompare, NoRect), usage: VERTEX | PIXEL }], outputs: [], output_depth: false, knows_outputs: false }
+[INFO  gfx_device_gl::factory] 	Created buffer 1
+[INFO  gfx_device_gl::factory] 	Created buffer 2
+[INFO  gfx_device_gl::factory] 	Created buffer 3
+[INFO  gfx_device_gl::factory] 	Created frame buffer 1
+[INFO  gfx_device_gl::factory] 	Created frame buffer 2
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=1
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=2
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=4
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=5
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=6
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0x0000(0)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFD(253), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Interrupt] counter=7
+[DEBUG fami_rust::nes::mem] read: addr=0xFFFC, data=0x9E(158)
+[DEBUG fami_rust::nes::mem] read: addr=0xFFFD, data=0xC7(199)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC79E(51102)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC79E, data=0x78(120)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x78
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC79F(51103)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_implied, counter=2
+[DEBUG fami_rust::nes::cpu::exec_core_g3] [SEI]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC79F(51103)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC79F, data=0xD8(216)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xD8
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A0(51104)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_implied, counter=2
+[DEBUG fami_rust::nes::cpu::exec_core_g3] [CLD]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A0(51104)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A0, data=0xA9(169)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xA9
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A1(51105)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A1, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A2(51106)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A2, data=0x8D(141)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x8D
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A3(51107)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A3, data=0x00(0)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A4(51108)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A4, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A5(51109)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [STA]
+[DEBUG fami_rust::nes::mem] write: addr=0x2000, data=0x10(16)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A5(51109)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A5, data=0xA2(162)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xA2
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A6(51110)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 0, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A6, data=0xFF(255)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDX]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A7(51111)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A7, data=0x9A(154)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x9A
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFA(250), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_implied, counter=2
+[DEBUG fami_rust::nes::cpu::exec_core_g3] [TXS]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b10110100(180)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A9, data=0x02(2)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AA(51114)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=3
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AA, data=0x20(32)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=4
+[DEBUG fami_rust::nes::cpu::executer] exec_absolute, counter=4
+[DEBUG fami_rust::nes::mem] read: addr=0x2002, data=0x10(16)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [LDA]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AB(51115)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AB, data=0x29(41)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0x29
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AC(51116)
+[DEBUG fami_rust::nes::cpu] A = 16, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110100(52)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_immediate, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AC, data=0x80(128)
+[DEBUG fami_rust::nes::cpu::exec_core_g1] [AND]
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AD(51117)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AD, data=0xF0(240)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xF0
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AE(51118)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=2
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=2
+[DEBUG fami_rust::nes::mem] read: addr=0xC7AE, data=0xF9(249)
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7AF(51119)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Execute] counter=3
+[DEBUG fami_rust::nes::cpu::executer] exec_relative, counter=3
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A8(51112)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] counter=1
+[DEBUG fami_rust::nes::mem] read: addr=0xC7A8, data=0xAD(173)
+[DEBUG fami_rust::nes::cpu::cpu_state] [Fetch] opcode=0xAD
+[DEBUG fami_rust::nes::cpu] #### CPU STATE: BEGIN
+[DEBUG fami_rust::nes::cpu] PC = 0xC7A9(51113)
+[DEBUG fami_rust::nes::cpu] A = 0, X = 255, Y = 0
+[DEBUG fami_rust::nes::cpu] S = 0xFF(255), P = 0b00110110(54)
+[DEBUG fami_rust::nes::cpu] #### END
+thread 'main' panicked at 'attempt to add with overflow', src/nes/ppu.rs:241:9
+stack backtrace:
+   0:        0x1030bd848 - std::backtrace_rs::backtrace::libunwind::trace::h5b8b2b4e70185bc2
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/../../backtrace/src/backtrace/libunwind.rs:90:5
+   1:        0x1030bd848 - std::backtrace_rs::backtrace::trace_unsynchronized::ha80f047f708cace5
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+   2:        0x1030bd848 - std::sys_common::backtrace::_print_fmt::h06cb233e3eb34785
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:67:5
+   3:        0x1030bd848 - <std::sys_common::backtrace::_print::DisplayBacktrace as core::fmt::Display>::fmt::ha34f1ac5cb7687f0
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:46:22
+   4:        0x1030d59a8 - core::fmt::write::h29b71d2fc769781c
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/core/src/fmt/mod.rs:1150:17
+   5:        0x1030bb228 - std::io::Write::write_fmt::haed0d0cabd7c1122
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/io/mod.rs:1667:15
+   6:        0x1030bf070 - std::sys_common::backtrace::_print::hf20ec31afa60cb45
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:49:5
+   7:        0x1030bf070 - std::sys_common::backtrace::print::hb0f3d9bb95907821
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:36:9
+   8:        0x1030bf070 - std::panicking::default_hook::{{closure}}::h9db6f35149e22d36
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:210:50
+   9:        0x1030bec3c - std::panicking::default_hook::hbfb79d95146f7f4f
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:227:9
+  10:        0x1030bf6b0 - std::panicking::rust_panic_with_hook::h7df6d15c9a18f1c1
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:624:17
+  11:        0x1030bf1d4 - std::panicking::begin_panic_handler::{{closure}}::h4d160f05f1246cc8
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:519:13
+  12:        0x1030bdd20 - std::sys_common::backtrace::__rust_end_short_backtrace::h99fe895a10131392
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:141:18
+  13:        0x1030bf164 - rust_begin_unwind
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:517:5
+  14:        0x1030e0560 - core::panicking::panic_fmt::h7c623de08f66c06e
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/core/src/panicking.rs:101:14
+  15:        0x1030e04e4 - core::panicking::panic::hb197399c1ece1d2b
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/core/src/panicking.rs:50:5
+  16:        0x102ddcd58 - fami_rust::nes::ppu::Ppu::step::h13ab863d3db98c6c
+                               at /Users/hassy/project/fami-rust/src/nes/ppu.rs:241:9
+  17:        0x102dde0c0 - fami_rust::main::hb63da05d32ad0252
+                               at /Users/hassy/project/fami-rust/src/main.rs:75:16
+  18:        0x102dd74c0 - core::ops::function::FnOnce::call_once::hb9f0f58dfca70543
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/core/src/ops/function.rs:227:5
+  19:        0x102dd45ac - std::sys_common::backtrace::__rust_begin_short_backtrace::h73160087d3f86217
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/sys_common/backtrace.rs:125:18
+  20:        0x102dc60cc - std::rt::lang_start::{{closure}}::h39cf4055d3e18513
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/rt.rs:63:18
+  21:        0x1030bfa3c - core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once::h424ae77ceab8e167
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/core/src/ops/function.rs:259:13
+  22:        0x1030bfa3c - std::panicking::try::do_call::h6b65dbfda2d5da84
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:403:40
+  23:        0x1030bfa3c - std::panicking::try::he9bcddd6655d3fe9
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:367:19
+  24:        0x1030bfa3c - std::panic::catch_unwind::h25f7f915a3f59a8e
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panic.rs:129:14
+  25:        0x1030bfa3c - std::rt::lang_start_internal::{{closure}}::he14b3579ba281bd5
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/rt.rs:45:48
+  26:        0x1030bfa3c - std::panicking::try::do_call::h9be5794528fcc495
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:403:40
+  27:        0x1030bfa3c - std::panicking::try::hac6e5b6ea8a026df
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panicking.rs:367:19
+  28:        0x1030bfa3c - std::panic::catch_unwind::h3c2fa97240067736
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/panic.rs:129:14
+  29:        0x1030bfa3c - std::rt::lang_start_internal::h0e2dbdd870579c9a
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/rt.rs:45:20
+  30:        0x102dc6090 - std::rt::lang_start::h0c9568b7f3a050e5
+                               at /rustc/09c42c45858d5f3aedfa670698275303a3d19afa/library/std/src/rt.rs:62:5
+  31:        0x102dde3e0 - <unknown>
+                               at /Users/hassy/project/fami-rust/src/main.rs:104:1

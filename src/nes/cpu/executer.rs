@@ -511,8 +511,8 @@ impl Cpu {
                     // 分岐が発生しない場合はここで終わり
                     self.exec_finished();
                 } else {
-                    // relativeでのオペランドは符号付きなので、u8からi8へ単純変換したあと、
-                    // i16に符号拡張した上で、最終的にu16とする必要がある。
+                    // relativeで加算されるオペランドは符号付きなので、
+                    // u8からi18へ、ビットを落とすことなく符合拡張を行う。
                     let offset = ((offset as i8) as i16) as u16;
                     // 最終的に正しい2の補数がu16として得られれば、あとは加算するだけ。
                     let addr = self.regs.pc.wrapping_add((offset as i16) as u16);
@@ -523,17 +523,20 @@ impl Cpu {
                         // 違うページへジャンプするなら +2 クロック
                         self.state.op_1 = 2;
                     }
-                    // 先にPCを更新、まだジャンプはしない
-                    self.regs.pc = addr;
+                    self.state.addr = addr;
                 }
             },
             3 => {
                 self.state.op_1 -= 1;
                 if self.state.op_1 <= 0 {
+                    // 分岐が発生して、かつ同じページ内へジャンプする場合は、
+                    // 例外のポーリングが発生しない。6502のバグ。
+                    self.regs.pc = self.state.addr;
                     self.exec_finished();
                 }
             }
             4 => {
+                self.regs.pc = self.state.addr;
                 self.exec_finished();
             }
             _ => unreachable!(),

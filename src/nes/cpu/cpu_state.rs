@@ -57,8 +57,6 @@ impl Cpu {
         let opcode = self.fetch();
         log::debug!("[Fetch] opcode={:#04X}", opcode);
         if opcode == OPCODE_BRK {
-            // まず割り込み状態のポーリングを禁止
-            self.int_polling_enabled = false;
             // BRKはソフトウェア割り込みなので、物理的なピンは操作しないし、
             // ピンの状態を上げ下げする必要もない。
             // ここで内部的なフラグを直接立てる。
@@ -83,8 +81,11 @@ impl Cpu {
         log::debug!("[Interrupt] counter={}", self.state.counter);
         match self.state.counter {
             1 => {
-                // Brkの場合はすでに1クロック目を通過済みなので、ここには入らない。
-                self.int_1st_clock();
+                // **** Brkの場合はすでに1クロック目を通過済みなので、ここには入らない。 ***
+                // まず割り込み状態のポーリングを禁止
+                self.int_polling_enabled = false;
+                self.state.int = self.int_requested;
+                self.int_requested = IntType::None;
             },
             2 => {
                 if self.state.int == IntType::Brk {
@@ -141,28 +142,5 @@ impl Cpu {
             },
             _ => unreachable!(),
         };
-    }
-
-    /// 割り込みの第1クロック目に行う処理。
-    fn int_1st_clock(&mut self) {
-        // まず割り込み状態のポーリングを禁止
-        self.int_polling_enabled = false;
-        // 発生した割り込み種別をチェックして記憶
-        // 優先度: Reset > NMI > IRQ = Brk
-        if self.reset_occurred {
-            // RESETはリセットボタンの上げ下げによってPINの状態が変化するが、
-            // エミュレーター実装としてはここで離した(lowからhighになった)ものとする。
-            self.reset_occurred = false;
-            self.state.int = IntType::Reset;
-        } else if self.nmi_occurred {
-            // NMIの発生状況はフリップフロップに記録されているので、ここで諸居。
-            self.nmi_occurred = false;
-            self.state.int = IntType::Nmi;
-        } else if self.irq_occurred {
-            // ここはIRQの対応となる。BRKは命令フェッチ時に処理しているので、ここには来ない。
-            self.state.int = IntType::Irq;
-            // IRQは発生元のデバイスがピンを明示的にhighに戻す必要がある。
-            // なのでここではピンを操作しない。
-        }
     }
 }

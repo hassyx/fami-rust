@@ -238,7 +238,7 @@ impl Ppu {
     /// NMI(vblank)が発生した場合はtrueを返す。
     pub fn step(&mut self) -> bool {
         self.clock_counter += 1;
-        self.state.counter += 1;
+        //self.state.counter += 1;
         (self.fn_step)(self);
 
         // print_ppu_state!(self);
