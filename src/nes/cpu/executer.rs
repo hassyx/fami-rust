@@ -4,6 +4,7 @@ use super::{Cpu, Flags};
 use crate::nes::util::make_addr;
 use super::is_template::*;
 use super::is_core::*;
+use super::instruction::Destination;
 
 // TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から2クロック前で行う。
 // 現状は、命令が終了したタイミングでポーリングを解禁している。
@@ -12,16 +13,6 @@ use super::is_core::*;
 pub type FnExec = fn(cpu: &mut Cpu);
 /// 命令実行処理のうち、命令ごとに異なるコア部分の処理を担う関数
 pub type FnCore = fn(cpu: &mut Cpu, val: u8) -> u8;
-
-#[derive(PartialEq)]
-/// 最終的な演算結果を、レジスタに書き込むのか、それともメモリに書き込むのか。
-pub enum Destination {
-    /// レジスタに書き込む。NOPのような書き込み対象が存在しない命令や、
-    /// レジスタ・メモリのどちらにも書き込む命令も、こちらに分類する。
-    Register,
-    /// メモリへ書き込む。
-    Memory,
-}
 
 pub struct Executer {
     /// 命令の実行に必要な合計クロックサイクル数。分岐命令の場合は動的に変化する。

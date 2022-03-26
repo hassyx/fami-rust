@@ -1,5 +1,6 @@
 use super::Cpu;
-use super::executer::{FnCore, Destination};
+use super::executer::FnCore;
+use super::instruction::Destination;
 
 /// 命令のコア部分。特定のレジスタへの書き込みなど。
 pub struct IsCore {

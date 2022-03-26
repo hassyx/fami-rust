@@ -9,6 +9,7 @@ mod exec_core_g2;
 mod exec_core_g3;
 mod is_template;
 mod is_core;
+mod instruction;
 
 use bitflags::bitflags;
 

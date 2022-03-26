@@ -1,5 +1,5 @@
 use super::Cpu;
-use super::decoder::AddrMode;
+use super::instruction::AddrMode;
 use super::executer::FnExec;
 
 /// 命令の外枠。複数の命令に共通するテンプレート部分。
