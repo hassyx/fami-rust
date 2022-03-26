@@ -1,6 +1,8 @@
 //! CPUの状態遷移
 
-use super::{Cpu, Flags, IntType, decoder, executer::Executer};
+use super::{Cpu, Flags, IntType};
+use super::decoder;
+use super::executer::Executer;
 use crate::util::*;
 
 // 割り込みハンドラのアドレス:
@@ -51,8 +53,6 @@ impl Cpu {
     /// Brkだった場合は割り込み状態へ遷移、それ以外は実行状態へ遷移。
     pub fn fetch_step(&mut self) {
         log::debug!("[Fetch] counter={}", self.state.counter);
-        // 命令の実行が完了するまで、割り込み処理のポーリングを止める。
-        self.int_polling_enabled = false;
 
         let opcode = self.fetch();
         log::debug!("[Fetch] opcode={:#04X}", opcode);
@@ -62,28 +62,26 @@ impl Cpu {
             // ここで内部的なフラグを直接立てる。
             self.state.int = IntType::Brk;
             self.fn_step = Cpu::int_step;
+            self.int_polling_enabled = false;
         } else {
             self.state.executer = decoder::decode(opcode);
             self.fn_step = Cpu::exec_step;
+            self.int_polling_enabled = true;
         }
     }
 
     /// 命令実行のステップ処理
     pub fn exec_step(&mut self) {
         log::debug!("[Execute] counter={}", self.state.counter);
-        (self.state.executer.fn_exec)(self);
+        (self.state.executer.template.fn_exec)(self);
     }
 
-    /// 割り込みシーケンスのステップ処理。
-    /// 割り込み発生を検知、またはフェッチした命令がBrkだった場合にここに来る。
-    /// 割り込み種別を判別し、適切なアドレスへジャンプする。
+    /// 割り込みシーケンス(＝割り込みハンドラへジャンプする直前まで)のステップ処理。
     pub fn int_step(&mut self) {
         log::debug!("[Interrupt] counter={}", self.state.counter);
         match self.state.counter {
             1 => {
-                // **** Brkの場合はすでに1クロック目を通過済みなので、ここには入らない。 ***
-                // まず割り込み状態のポーリングを禁止
-                self.int_polling_enabled = false;
+                // *** Brkの場合はすでに1クロック目を通過済みなので、ここには入らない ***
                 self.state.int = self.int_requested;
                 self.int_requested = IntType::None;
             },

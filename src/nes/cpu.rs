@@ -7,6 +7,8 @@ mod executer;
 mod exec_core_g1;
 mod exec_core_g2;
 mod exec_core_g3;
+mod is_template;
+mod is_core;
 
 use bitflags::bitflags;
 
@@ -62,7 +64,7 @@ pub struct Cpu {
     nmi_occurred: bool,
     /// IRQが発生していたらtrue。物理的なPINはレベルセンシティブ。
     irq_occurred: bool,
-    /// trueで割り込み検出のポーリング処理を有効化
+    /// 割り込みピンの状態をポーリング可能かどうか。割り込み発生中にはfalseになる。
     int_polling_enabled: bool,
     /// CPUの状態ごとに切り替わる関数。いわゆるStateパターンを実現するための仕組み。
     /// こうした理由は、1クロックサイクルごとに走る条件判定処理をできるだけ減らしたかったのと、
@@ -304,10 +306,11 @@ impl Cpu {
         self.state.counter += 1;
         (self.fn_step)(self);
 
-        if self.int_polling_enabled {
+        // 最後から2クロック目にのみ、例外のチェックを行う。
+        if self.int_polling_enabled &&
+            ((self.state.executer.total_clock_var - self.state.counter) == 1)
+        {
             self.check_int();
-            // ポーリングの無効化
-            self.int_polling_enabled = false;
         }
 
         print_cpu_state!(self);
@@ -376,11 +379,13 @@ impl Cpu {
     fn switch_state_int(&mut self) {
         self.state = TmpState::default();
         self.fn_step = Cpu::int_step;
+        self.int_polling_enabled = false;
     }
 
     fn switch_state_exec(&mut self) {
         self.state = TmpState::default();
         self.fn_step = Cpu::exec_step;
+        self.int_polling_enabled = true;
     }
 
     fn exec_finished(&mut self) {

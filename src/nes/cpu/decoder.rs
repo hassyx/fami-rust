@@ -2,11 +2,13 @@
 
 use super::Cpu;
 use super::executer::*;
+use super::is_template::*;
+use super::is_core::*;
 
 /// アドレッシングモード
 /// TODO: matchで分岐する場合は、頻出するモードを先に置く。
 #[derive(Debug, PartialEq)]
-enum AddrMode {
+pub enum AddrMode {
     /// Aレジスタに対して演算を行い、Aレジスタに格納する。
     Accumulator,
     /// オペランドの16bitの即値との演算。
@@ -37,17 +39,28 @@ enum AddrMode {
     /// 最終アドレスの指す先の8bitの値に対して操作を行う。
     /// なお、1段階目と2段階目で算出したアドレスが8bitを越える、越えないに関わらず、常に下位の8bitのみを見る。
     IndirectIndexed_Y,
+    /// JMPでのみ使用。オペランドで指定した16bitのアドレスを下位8bit、
+    /// そのアドレス+1 の指す内容を上位8bitとして、16bitのアドレスを得る。
+    Indirect,
+    /// 比較命令でのみ使用。現在のPCに8bitのオペランドを加算し、そのアドレスにジャンプする。
+    /// なお、オペランドは符号ありの整数値として扱われる。
+    Relative,
+    /// 実行アドレスを必要としない命令。
+    Implied,
 }
+
+
 
 fn panic_invalid_op(opcode: u8) -> ! {
     panic!("\"{:#04X}\" is invalid opcode.", opcode);
 }
 
-fn make_executer(fn_exec: FnExec, fn_core: FnCore, dst: Destination) -> Executer {
+fn make_executer(template: &'static IsTemplate, core: &'static IsCore) -> Executer {
     Executer {
-        fn_exec,
-        fn_core,
-        dst,
+        // ひとまず最大所要クロックを設定しておくが、命令内で変動する可能性がある。
+        total_clock_var: template.total_clock,
+        template,
+        core,
     }
 }
 
@@ -84,115 +97,112 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
     let cc = opcode & 0b0000_0011;
 
     if cc == 0b01 {
-        let (addr_mode, fn_exec) = decode_addr_group1_01(bbb)?;
+        let template = decode_addr_group1_01(bbb)?;
         match aaa {
             // ORA
-            0b000 => Some(make_executer(fn_exec, Cpu::ora_action, Destination::Register)),
+            0b000 => Some(make_executer(template, &IS_ORA)),
             // AND
-            0b001 => Some(make_executer(fn_exec, Cpu::and_action, Destination::Register)),
+            0b001 => Some(make_executer(template, &IS_AND)),
             // EOR
-            0b010 => Some(make_executer(fn_exec, Cpu::eor_action, Destination::Register)),
+            0b010 => Some(make_executer(template, &IS_EOR)),
             // ADC
-            0b011 => Some(make_executer(fn_exec, Cpu::adc_action, Destination::Register)),
+            0b011 => Some(make_executer(template, &IS_ADC)),
             // STA
             0b100 => {
                 // OPコードの末尾 "01" のグループの中では、STAのみ唯一 Immediate モードを持たない。
-                if addr_mode == AddrMode::Immediate {
+                if template.addr_mode == AddrMode::Immediate {
                     return None
                 }
-                Some(make_executer(fn_exec, Cpu::sta_action, Destination::Memory))
+                Some(make_executer(template, &IS_STA))
             },
             // LDA
-            0b101 => Some(make_executer(fn_exec, Cpu::lda_action, Destination::Register)),
+            0b101 => Some(make_executer(template, &IS_LDA)),
             // CMP
-            0b110 => Some(make_executer(fn_exec, Cpu::cmp_action, Destination::Register)),
+            0b110 => Some(make_executer(template, &IS_CMP)),
             // SBC
-            0b111 => Some(make_executer(fn_exec, Cpu::sbc_action, Destination::Register)),
+            0b111 => Some(make_executer(template, &IS_SBC)),
             _ => None,
         }
     } else if cc == 0b10 {
         if aaa == 0b100 {
             // STX
-            let (_, fn_exec) = decode_addr_group1_10_stx(bbb)?;
-            Some(make_executer(fn_exec, Cpu::stx_action, Destination::Memory))
+            let template = decode_addr_group1_10_stx(bbb)?;
+            Some(make_executer(template, &IS_STX))
         } else if aaa == 0b101 {
             // LDX
-            let (_, fn_exec) = decode_addr_group1_10_ldx(bbb)?;
-            Some(make_executer(fn_exec, Cpu::ldx_action, Destination::Register))
+            let template = decode_addr_group1_10_ldx(bbb)?;
+            Some(make_executer(template, &IS_LDX))
         } else {
             // Read-Modify-Writeな命令
-            let (addr_mode, fn_exec) = decode_addr_group1_10_rwm(bbb)?;
+            let template = decode_addr_group1_10_rwm(bbb)?;
             match aaa {
                 // ASL
-                0b000 => Some(make_executer(fn_exec, Cpu::asl_action, Destination::Register)),
+                0b000 => Some(make_executer(template, &IS_ASL)),
                 // ROL
-                0b001 => Some(make_executer(fn_exec, Cpu::rol_action, Destination::Register)),
+                0b001 => Some(make_executer(template, &IS_ROL)),
                 // LSR
-                0b010 => Some(make_executer(fn_exec, Cpu::lsr_action, Destination::Register)),
+                0b010 => Some(make_executer(template, &IS_LSR)),
                 // ROR
-                0b011 => Some(make_executer(fn_exec, Cpu::ror_action, Destination::Register)),
+                0b011 => Some(make_executer(template, &IS_ROR)),
                 // DEC
                 0b110 => {
-                    if addr_mode == AddrMode::Accumulator {
+                    if template.addr_mode == AddrMode::Accumulator {
                         return None
                     }
-                    Some(make_executer(fn_exec, Cpu::dec_action, Destination::Memory))
+                    Some(make_executer(template, &IS_DEC))
                 },
                 // INC
                 0b111 => {
-                    if addr_mode == AddrMode::Accumulator {
+                    if template.addr_mode == AddrMode::Accumulator {
                         return None
                     }
-                    Some(make_executer(fn_exec, Cpu::inc_action, Destination::Memory))
+                    Some(make_executer(template, &IS_INC))
                 }
                 _ => None,
             }
         }
     } else if cc == 0b00 {
-        let (addr_mode, fn_exec) = decode_addr_group1_00(bbb)?;
+        let template = decode_addr_group1_00(bbb)?;
         match aaa {
             // BIT
             0b001 => {
-                if (addr_mode != AddrMode::ZeroPage) && (addr_mode != AddrMode::Absolute) {
+                if (template.addr_mode != AddrMode::ZeroPage) && (template.addr_mode != AddrMode::Absolute) {
                     return None
                 }
-                Some(make_executer(fn_exec, Cpu::bit_action, Destination::Register))
+                Some(make_executer(template, &IS_BIT))
             }
             // JMP
-            0b010 => Some(make_executer(Cpu::exec_indirect_jmp, Cpu::jmp_action, Destination::Register)),
+            0b010 => Some(make_executer(&IS_TEMP_INDIRECT_JMP, &IS_JMP)),
             // JMP (abs)
-            0b011 => Some(make_executer(Cpu::exec_absolute_jmp, Cpu::jmp_action, Destination::Register)),
+            0b011 => Some(make_executer(&IS_TEMP_ABSOLUTE_JMP, &IS_JMP)),
             // STY
             0b100 => {
-                if (addr_mode != AddrMode::ZeroPage) && 
-                    (addr_mode != AddrMode::IndexedZeroPage_X) &&
-                    (addr_mode != AddrMode::Absolute)
-                {
-                    return None
+                match template.addr_mode {
+                    AddrMode::ZeroPage | AddrMode::IndexedZeroPage_X | AddrMode::Absolute => {
+                        Some(make_executer(template, &IS_STY))
+                    },
+                    _ => None
                 }
-                Some(make_executer(fn_exec, Cpu::sty_action, Destination::Register))
             },
             // LDY
-            0b101 => Some(make_executer(fn_exec, Cpu::ldy_action, Destination::Register)),
+            0b101 => Some(make_executer(template, &IS_LDY)),
             // CPY
             0b110 => {
-                if (addr_mode != AddrMode::Immediate) && 
-                    (addr_mode != AddrMode::ZeroPage) &&
-                    (addr_mode != AddrMode::Absolute)
-                {
-                    return None
-                } 
-                Some(make_executer(fn_exec, Cpu::cpy_action, Destination::Register))
+                match template.addr_mode {
+                    AddrMode::Immediate | AddrMode::ZeroPage | AddrMode::Absolute => {
+                        Some(make_executer(template, &IS_CPY))
+                    },
+                    _ => None
+                }
             },
             // CPX
             0b111 => {
-                if (addr_mode != AddrMode::Immediate) && 
-                    (addr_mode != AddrMode::ZeroPage) &&
-                    (addr_mode != AddrMode::Absolute)
-                {
-                    return None
+                match template.addr_mode {
+                    AddrMode::Immediate | AddrMode::ZeroPage | AddrMode::Absolute => {
+                        Some(make_executer(template, &IS_CPX))
+                    },
+                    _ => None
                 }
-                Some(make_executer(fn_exec, Cpu::cpx_action, Destination::Register))
             }
             _ => None,
         }
@@ -206,61 +216,61 @@ fn decode_group1(opcode: u8) -> Option<Executer> {
 
 /// "aaabbbcc" 形式の命令で cc=01 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_group1_01(bbb: u8) -> Option<(AddrMode,FnExec)> {
+fn decode_addr_group1_01(bbb: u8) -> Option<&'static IsTemplate> {
     match bbb {
-        0b000 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
-        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
-        0b010 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
-        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
-        0b100 => Some((AddrMode::IndirectIndexed_Y, Cpu::exec_indirect_indexed_y)),
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x)),
-        0b110 => Some((AddrMode::IndexedAbsolute_Y, Cpu::exec_indexed_absolute_y)),
-        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
+        0b000 => Some(&IS_TEMP_INDEXED_INDIRECT_X),
+        0b001 => Some(&IS_TEMP_ZEROPAGE),
+        0b010 => Some(&IS_TEMP_IMMEDIATE),
+        0b011 => Some(&IS_TEMP_ABSOLUTE),
+        0b100 => Some(&IS_TEMP_INDIRECT_INDEXED_Y),
+        0b101 => Some(&IS_TEMP_INDEXED_ZEROPAGE_X),
+        0b110 => Some(&IS_TEMP_INDEXED_ABSOLUTE_Y),
+        0b111 => Some(&IS_TEMP_INDEXED_ABSOLUTE_X),
         _ => None,
     }
 }
 
 /// "aaabbbcc" 形式の命令で cc=10 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_group1_10_rwm(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_10_rwm(bbb: u8) -> Option<&'static IsTemplate> {
     // ここでは Read-Modified-Write なアドレッシングモードの実行関数を返す。
     // 対象となる命令は ASL,LSR,INC,DEC,ROR,ROL.
     match bbb {
         0b000 => None, // Immediateな命令は存在しない
-        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage_rmw)),
-        0b010 => Some((AddrMode::Accumulator, Cpu::exec_accumulator)),
-        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute_rmw)),
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_x_rmw)),
-        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x_rmw)),
+        0b001 => Some(&IS_TEMP_ZEROPAGE_RMW),
+        0b010 => Some(&IS_TEMP_ACCUMULATOR_RMW),
+        0b011 => Some(&IS_TEMP_ABSOLUTE_RMW),
+        0b101 => Some(&IS_TEMP_INDEXED_ZEROPAGE_X_RMW),
+        0b111 => Some(&IS_TEMP_INDEXED_ABSOLUTE_X_RMW),
         _ => None,
     }
 }
 
 /// STX用。"aaabbbcc" 形式の命令で cc=10 の場合。
-fn decode_addr_group1_10_stx(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_10_stx(bbb: u8) -> Option<&'static IsTemplate> {
     match bbb {
         0b000 => None,  // Immediateは無し
-        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b001 => Some(&IS_TEMP_ZEROPAGE),
         0b010 => None,  // Accumulatorは無し
-        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        0b011 => Some(&IS_TEMP_ABSOLUTE),
         // STXでは、IndexedZeroPage_X で Y を見る。
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_y)),
+        0b101 => Some(&IS_TEMP_INDEXED_ZEROPAGE_Y),
         0b111 => None,  // IndexedAbsolute_Xは無し
         _ => None,
     }
 }
 
 /// LDX用。"aaabbbcc" 形式の命令で cc=10 の場合。
-fn decode_addr_group1_10_ldx(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_10_ldx(bbb: u8) -> Option<&'static IsTemplate> {
     match bbb {
-        0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
-        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
+        0b000 => Some(&IS_TEMP_IMMEDIATE),
+        0b001 => Some(&IS_TEMP_ZEROPAGE),
         0b010 => None,  // Accumulatorは無し
-        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
+        0b011 => Some(&IS_TEMP_ABSOLUTE),
         // LDXでは、IndexedZeroPage_X は Y を見る。
-        0b101 => Some((AddrMode::IndexedZeroPage_X, Cpu::exec_indexed_zeropage_y)),
+        0b101 => Some(&IS_TEMP_INDEXED_ZEROPAGE_Y),
         // LDXでは、IndexedAbsolute_X は Y を見る。
-        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_y)),
+        0b111 => Some(&IS_TEMP_INDEXED_ABSOLUTE_Y),
         _ => None,
     }
 }
@@ -271,13 +281,13 @@ fn decode_addr_group1_10_ldx(bbb: u8) -> Option<(AddrMode, FnExec)> {
 */
 /// "aaabbbcc" 形式の命令で cc=00 の場合。
 /// "bbb" を利用したアドレッシングモードのデコード。
-fn decode_addr_group1_00(bbb: u8) -> Option<(AddrMode, FnExec)> {
+fn decode_addr_group1_00(bbb: u8) -> Option<&'static IsTemplate> {
     match bbb {
-        0b000 => Some((AddrMode::Immediate, Cpu::exec_immediate)),
-        0b001 => Some((AddrMode::ZeroPage, Cpu::exec_zeropage)),
-        0b011 => Some((AddrMode::Absolute, Cpu::exec_absolute)),
-        0b101 => Some((AddrMode::IndexedIndirect_X, Cpu::exec_indexed_indirect_x)),
-        0b111 => Some((AddrMode::IndexedAbsolute_X, Cpu::exec_indexed_absolute_x)),
+        0b000 => Some(&IS_TEMP_ABSOLUTE),
+        0b001 => Some(&IS_TEMP_ZEROPAGE),
+        0b011 => Some(&IS_TEMP_ABSOLUTE),
+        0b101 => Some(&IS_TEMP_INDEXED_INDIRECT_X),
+        0b111 => Some(&IS_TEMP_INDEXED_ABSOLUTE_X),
         _ => None,
     }
 }
@@ -302,40 +312,40 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
             0b00 => {
                 if val == 0 {
                     // BPL
-                    Some(make_executer(Cpu::exec_relative, Cpu::bpl_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BPL))
                 } else {
                     //BMI
-                    Some(make_executer(Cpu::exec_relative, Cpu::bmi_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BMI))
                 }
             },
             // check overflow flag
             0b01 => {
                 if val == 0 {
                     // BVC
-                    Some(make_executer(Cpu::exec_relative, Cpu::bvc_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BVC))
                 } else {
                     // BVS
-                    Some(make_executer(Cpu::exec_relative, Cpu::bvs_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BVS))
                 }
             },
             // check carry flag
             0b10 => {
                 if val == 0 {
                     // BCC
-                    Some(make_executer(Cpu::exec_relative, Cpu::bcc_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BCC))
                 } else {
                     // BCS
-                    Some(make_executer(Cpu::exec_relative, Cpu::bcs_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BCS))
                 }
             },
             // check zero flag
             0b11 => {
                 if val == 0 {
                     // BNE
-                    Some(make_executer(Cpu::exec_relative, Cpu::bne_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BNE))
                 } else {
                     // BEQ
-                    Some(make_executer(Cpu::exec_relative, Cpu::beq_action, Destination::Register))
+                    Some(make_executer(&IS_TEMP_RELATIVE, &IS_BEQ))
                 }
             },
             _ => None,
@@ -352,55 +362,55 @@ fn decode_group2(opcode: u8) -> Option<Executer> {
 fn decode_group3(opcode: u8) -> Option<Executer> {
     match opcode {
         // JSR
-        0x20 => Some(make_executer(Cpu::exec_jsr, Cpu::jsr_action, Destination::Register)),
+        0x20 => Some(make_executer(&IS_TEMP_JSR, &IS_JSR)),
         // RTI
-        0x40 => Some(make_executer(Cpu::exec_rti, Cpu::rti_action, Destination::Register)),
+        0x40 => Some(make_executer(&IS_TEMP_RTI, &IS_RTI)),
         // RTS
-        0x60 => Some(make_executer(Cpu::exec_rts, Cpu::rts_action, Destination::Register)),
+        0x60 => Some(make_executer(&IS_TEMP_RTS, &IS_RTS)),
         // PHP
-        0x08 => Some(make_executer(Cpu::exec_push_stack, Cpu::php_action, Destination::Register)),
+        0x08 => Some(make_executer(&IS_TEMP_PUSH_STACK, &IS_PHP)),
         // PLP
-        0x28 => Some(make_executer(Cpu::exec_pull_stack, Cpu::plp_action, Destination::Register)),
+        0x28 => Some(make_executer(&IS_TEMP_PULL_STACK, &IS_PLP)),
         // PHA
-        0x48 => Some(make_executer(Cpu::exec_push_stack, Cpu::pha_action, Destination::Register)),
+        0x48 => Some(make_executer(&IS_TEMP_PUSH_STACK, &IS_PHA)),
         // PLA
-        0x68 => Some(make_executer(Cpu::exec_pull_stack, Cpu::pla_action, Destination::Register)),
+        0x68 => Some(make_executer(&IS_TEMP_PULL_STACK, &IS_PLA)),
         // DEY
-        0x88 => Some(make_executer(Cpu::exec_implied, Cpu::dey_action, Destination::Register)),
+        0x88 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_DEY)),
         // TAY
-        0xA8 => Some(make_executer(Cpu::exec_implied, Cpu::tay_action, Destination::Register)),
+        0xA8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TAY)),
         // INY
-        0xC8 => Some(make_executer(Cpu::exec_implied, Cpu::inx_action, Destination::Register)),
+        0xC8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INX)),
         // INX
-        0xE8 => Some(make_executer(Cpu::exec_implied, Cpu::iny_action, Destination::Register)),
+        0xE8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INY)),
         // CLC
-        0x18 => Some(make_executer(Cpu::exec_implied, Cpu::clc_action, Destination::Register)),
+        0x18 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_CLC)),
         // SEC
-        0x38 => Some(make_executer(Cpu::exec_implied, Cpu::sec_action, Destination::Register)),
+        0x38 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_SEC)),
         // CLI
-        0x58 => Some(make_executer(Cpu::exec_implied, Cpu::cli_action, Destination::Register)),
+        0x58 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_CLI)),
         // SEI
-        0x78 => Some(make_executer(Cpu::exec_implied, Cpu::sei_action, Destination::Register)),
+        0x78 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_SEI)),
         // TYA
-        0x98 => Some(make_executer(Cpu::exec_implied, Cpu::tya_action, Destination::Register)),
+        0x98 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TYA)),
         // CLV
-        0xB8 => Some(make_executer(Cpu::exec_implied, Cpu::clv_action, Destination::Register)),
+        0xB8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_CLV)),
         // CLD
-        0xD8 => Some(make_executer(Cpu::exec_implied, Cpu::cld_action, Destination::Register)),
+        0xD8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_CLD)),
         // SED
-        0xF8 => Some(make_executer(Cpu::exec_implied, Cpu::sed_action, Destination::Register)),
+        0xF8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_SED)),
         // TXA
-        0x8A => Some(make_executer(Cpu::exec_implied, Cpu::txa_action, Destination::Register)),
+        0x8A => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TXA)),
         // TXS
-        0x9A => Some(make_executer(Cpu::exec_implied, Cpu::txs_action, Destination::Register)),
+        0x9A => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TXS)),
         // TAX
-        0xAA => Some(make_executer(Cpu::exec_implied, Cpu::tax_action, Destination::Register)),
+        0xAA => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TAX)),
         // TSX
-        0xBA => Some(make_executer(Cpu::exec_implied, Cpu::tsx_action, Destination::Register)),
+        0xBA => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TSX)),
         // DEX
-        0xCA => Some(make_executer(Cpu::exec_implied, Cpu::dex_action, Destination::Register)),
+        0xCA => Some(make_executer(&IS_TEMP_IMPLIED, &IS_DEX)),
         // NOP
-        0xEA => Some(make_executer(Cpu::exec_implied, Cpu::nop_action, Destination::Register)),
+        0xEA => Some(make_executer(&IS_TEMP_IMPLIED, &IS_NOP)),
         // BRK
         // BRKはfetchの段階で判別しているので、ここには来ない。
         // 0x00 => unreachable!(),
