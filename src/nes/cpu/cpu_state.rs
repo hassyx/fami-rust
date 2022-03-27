@@ -62,8 +62,7 @@ impl Cpu {
         log::debug!("[Fetch] opcode={:#04X}", opcode);
         if opcode == OPCODE_BRK {
             // BRKはソフトウェア割り込みなので、物理的なピンは操作しないし、
-            // ピンの状態を上げ下げする必要もない。
-            // ここで内部的なフラグを直接立てる。
+            // ピンの状態を上げ下げする必要もない。ここで内部的なフラグを直接立てる。
             self.state.int = IntType::Brk;
             self.fn_step = Cpu::int_step;
             self.int_polling_enabled = false;
@@ -88,8 +87,6 @@ impl Cpu {
         match self.state.counter {
             1 => {
                 // *** Brkの場合はすでに1クロック目を通過済みなので、ここには入らない ***
-                self.state.int = self.int_requested;
-                self.int_requested = IntType::None;
             },
             2 => {
                 if self.state.int == IntType::Brk {

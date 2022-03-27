@@ -367,28 +367,30 @@ impl Cpu {
     }
 
     fn switch_state_fetch(&mut self) {
-        self.state = TmpState::default();
-        // 割り込みまたは命令実行が完了した時点で、発生させるべき
-        // 割り込みが予約されている場合は、割り込み処理へ遷移。
-        if self.state.counter == 0 &&
-            self.int_requested != IntType::None {
-            self.fn_step = Cpu::int_step;
+        // 次の命令をフェッチする前に、予約されている割り込みが
+        // 存在すれば例外処理へ遷移。
+        if self.int_requested != IntType::None {
+            self.switch_state_int();
         } else {
+            self.state = TmpState::default();
             self.fn_step = Cpu::fetch_step;
         }
     }
 
     fn switch_state_int(&mut self) {
         self.state = TmpState::default();
+        self.state.int = self.int_requested;
+        self.int_requested = IntType::None;
         self.fn_step = Cpu::int_step;
         self.int_polling_enabled = false;
     }
 
+    /*
     fn switch_state_exec(&mut self) {
         self.state = TmpState::default();
         self.fn_step = Cpu::exec_step;
-        self.int_polling_enabled = true;
     }
+    */
 
     fn exec_finished(&mut self) {
         self.switch_state_fetch();
