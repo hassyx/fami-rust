@@ -14,8 +14,7 @@ const OPCODE_BRK: u8 = 0;
 
 pub type FnState = fn(&mut Cpu);
 
-/// 一時的な状態保持用
-// TODO: 同時に利用しないメンバはunionとして扱った方がいいかも。
+/// 1つの命令、または割り込み処理が完了するまでの、一時的な状態を保持する。
 pub struct TmpState {
     pub counter: u8,
     pub op_1: u8,
@@ -40,15 +39,20 @@ impl Default for TmpState {
 
 impl Cpu {
 
-    //   +-----------------------------------------------+
-    //   |                                               ^
-    //   v                                               |
-    // fetch ---+---(not BRK)---> exec --(exec finish)-->+
-    //          |                  |                     ^
-    //        (BRK)          (exec finish)               |
-    //          v                  v                     |
-    //          +---------------> int ------------------>+
-
+    // [CPUの状態遷移表]
+    // *********************************************************************************
+    //
+    //                 +<----------------------------<-----------------------------<+
+    //                 |                                                            ^
+    //                 v                                                            |
+    // [begin] --> check int --> not occurred --> [fetch] --> not BRK --> [exec] -->+
+    //                 |                             |                              ^
+    //           int occurred                   BRK fetched                         |
+    //                 v                             v                              |
+    //                 +>------------>-----------> [int] >------------>------------>+
+    //
+    // *********************************************************************************
+    
     /// OPコードをフェッチする。
     /// Brkだった場合は割り込み状態へ遷移、それ以外は実行状態へ遷移。
     pub fn fetch_step(&mut self) {
@@ -67,12 +71,14 @@ impl Cpu {
             self.state.executer = decoder::decode(opcode);
             self.fn_step = Cpu::exec_step;
             self.int_polling_enabled = true;
+
+            log::debug!("[Fetch] completed. op={}", self.state.executer.core.name);
         }
     }
 
     /// 命令実行のステップ処理
     pub fn exec_step(&mut self) {
-        log::debug!("[Execute] counter={}", self.state.counter);
+        log::debug!("[Execute] op={}, counter={}", self.state.executer.core.name, self.state.counter);
         (self.state.executer.template.fn_exec)(self);
     }
 

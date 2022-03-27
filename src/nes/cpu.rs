@@ -65,7 +65,7 @@ pub struct Cpu {
     nmi_occurred: bool,
     /// IRQが発生していたらtrue。物理的なPINはレベルセンシティブ。
     irq_occurred: bool,
-    /// 割り込みピンの状態をポーリング可能かどうか。割り込み発生中にはfalseになる。
+    /// 割り込みピンの状態をポーリング可能かどうか。割り込み処理中(ハンドラに遷移する前)にはfalseになる。
     int_polling_enabled: bool,
     /// CPUの状態ごとに切り替わる関数。いわゆるStateパターンを実現するための仕組み。
     /// こうした理由は、1クロックサイクルごとに走る条件判定処理をできるだけ減らしたかったのと、
@@ -307,7 +307,7 @@ impl Cpu {
         self.state.counter += 1;
         (self.fn_step)(self);
 
-        // 最後から2クロック目にのみ、例外のチェックを行う。
+        // 最後の1クロック目の直前にのみ、例外のチェックを行う。
         if self.int_polling_enabled &&
             ((self.state.executer.total_clock_var - self.state.counter) == 1)
         {
@@ -348,6 +348,7 @@ impl Cpu {
         if self.reset_occurred || self.nmi_occurred ||
             (!self.regs.int_disabled() && self.irq_occurred) {
             // 割り込みが発生しているなら、ひとまずその状態を記憶。
+            // ここに来た時点でまだ命令の実行中なので、命令終了時に割り込み処理に移る。
             self.int_requested = self.resolve_int_type();
         }
     }
@@ -367,8 +368,8 @@ impl Cpu {
 
     fn switch_state_fetch(&mut self) {
         self.state = TmpState::default();
-        // 割り込みまたは命令実行が完了していた場合で、
-        // かつ発生させる割り込みが予約されている場合は、割り込み処理へ遷移。
+        // 割り込みまたは命令実行が完了した時点で、発生させるべき
+        // 割り込みが予約されている場合は、割り込み処理へ遷移。
         if self.state.counter == 0 &&
             self.int_requested != IntType::None {
             self.fn_step = Cpu::int_step;
