@@ -11,8 +11,8 @@ fn panic_invalid_op(opcode: u8) -> ! {
 
 fn make_executer(template: &'static IsTemplate, core: &'static IsCore) -> Executer {
     Executer {
-        // ひとまず最大所要クロックを設定しておくが、命令内で変動する可能性がある。
-        total_clock_var: template.total_clock,
+        // ひとまず最小の所要クロックを設定しておくが、命令内で変動する可能性がある。
+        last_cycle: template.min_clock,
         template,
         core,
     }

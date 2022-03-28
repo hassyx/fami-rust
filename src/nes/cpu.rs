@@ -309,7 +309,7 @@ impl Cpu {
 
         // 最後の1クロック目の直前にのみ、例外のチェックを行う。
         if self.int_polling_enabled &&
-            ((self.state.executer.total_clock_var - self.state.counter) == 1)
+            ((self.state.executer.last_cycle - self.state.counter) == 1)
         {
             self.check_int();
         }

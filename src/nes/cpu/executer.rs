@@ -15,8 +15,10 @@ pub type FnExec = fn(cpu: &mut Cpu);
 pub type FnCore = fn(cpu: &mut Cpu, val: u8) -> u8;
 
 pub struct Executer {
-    /// 命令の実行に必要な合計クロックサイクル数。分岐命令の場合は動的に変化する。
-    pub total_clock_var: u8,
+    /// 命令が完了するクロックサイクル数。
+    /// 分岐命令や、ページをまたぐメモリアクセスが発生した場合に、
+    /// 動的に変動する場合がある。
+    pub last_cycle: u8,
     pub template: &'static IsTemplate,
     pub core: &'static IsCore,
 }
@@ -24,7 +26,7 @@ pub struct Executer {
 impl Default for Executer {
     fn default() -> Self {
         Self {
-            total_clock_var: 0,
+            last_cycle: 0,
             template: &IS_TEMP_DUMMY,
             core: &IS_DUMMY,
         }
