@@ -77,7 +77,10 @@ impl Cpu {
 
     /// 命令実行のステップ処理
     pub fn exec_step(&mut self) {
-        log::debug!("[Execute] op={}, counter={}", self.state.executer.core.name, self.state.counter);
+        log::debug!("[Execute] op={}, exec={} counter={}",
+            self.state.executer.core.name,
+            self.state.executer.template.name,
+            self.state.counter);
         (self.state.executer.template.fn_exec)(self);
     }
 
