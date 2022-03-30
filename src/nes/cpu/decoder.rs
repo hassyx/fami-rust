@@ -334,9 +334,9 @@ fn decode_group3(opcode: u8) -> Option<Executer> {
         // TAY
         0xA8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_TAY)),
         // INY
-        0xC8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INX)),
+        0xC8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INY)),
         // INX
-        0xE8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INY)),
+        0xE8 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_INX)),
         // CLC
         0x18 => Some(make_executer(&IS_TEMP_IMPLIED, &IS_CLC)),
         // SEC
