@@ -73,7 +73,8 @@ pub struct Cpu {
     /// 構造体ではなく関数ポインタで実現している。(動的な状態はCpu構造体の方に持たせている)
     fn_step: FnState,
     /// 現在実行中の命令が完了したら、次に処理されるべき割り込み。
-    int_requested: IntType,
+    int_requested: Interrupt,
+    /// 1つの状態が終わるまでの間、必要な情報を一時的に保持する。
     state: TmpState,
 }
 
@@ -230,6 +231,23 @@ pub enum IntType {
     Brk,
 }
 
+pub struct Interrupt {
+    kind: IntType,
+    /// 現在の命令の完了時ではなく、次の命令の完了時まで発生が遅延されている割り込みの場合はtrue。
+    /// 6502のバグを再現するために必要。(具体的には、分岐命令でジャンプが発生し、ジャンプ先の
+    /// アドレスがページ内だった場合に、割り込みの発生が1命令遅延される挙動を再現するため。)
+    is_force_delayed: bool,
+}
+
+impl Default for Interrupt {
+    fn default() -> Self {
+        Self {
+            kind: IntType::None,
+            is_force_delayed: false,
+        }
+    }
+}
+
 impl Cpu {
     pub fn new(rom: &Box<rom::NesRom>, ram: Box<mem::MemCon>) -> Self {
 
@@ -244,7 +262,7 @@ impl Cpu {
             int_polling_enabled: false,
             regs: Registers::default(),
             fn_step: Cpu::int_step,
-            int_requested: IntType::None,
+            int_requested: Default::default(),
             state: TmpState::default(),
         };
 
@@ -297,7 +315,8 @@ impl Cpu {
         self.clear_all_int_trigger();
 
         // 電源投入時はReset割り込みから実行開始 
-        self.int_requested = IntType::Reset;
+        self.int_requested.kind = IntType::Reset;
+        self.int_requested.is_force_delayed = false;
         self.switch_state_int();
     }
 
@@ -309,6 +328,7 @@ impl Cpu {
 
         // 最後の1クロック目の直前にのみ、例外のチェックを行う。
         if self.int_polling_enabled &&
+            (self.int_requested.kind == IntType::None) &&
             ((self.state.executer.last_cycle - self.state.counter) == 1)
         {
             self.check_int();
@@ -349,7 +369,8 @@ impl Cpu {
             (!self.regs.int_disabled() && self.irq_occurred) {
             // 割り込みが発生しているなら、ひとまずその状態を記憶。
             // ここに来た時点でまだ命令の実行中なので、命令終了時に割り込み処理に移る。
-            self.int_requested = self.resolve_int_type();
+            self.int_requested.kind = self.resolve_int_type();
+            self.int_requested.is_force_delayed = false;
         }
     }
 
@@ -367,20 +388,27 @@ impl Cpu {
     }
 
     fn switch_state_fetch(&mut self) {
-        // 次の命令をフェッチする前に、予約されている割り込みが
-        // 存在すれば例外処理へ遷移。
-        if self.int_requested != IntType::None {
-            self.switch_state_int();
-        } else {
-            self.state = TmpState::default();
-            self.fn_step = Cpu::fetch_step;
+        // 次の命令をフェッチする前に、予約されている割り込みがあればそちらを先に処理。
+        if self.int_requested.kind != IntType::None {
+            // 割り込みの発生を1命令遅延するように指定されているか？
+            if self.int_requested.is_force_delayed {
+                // 割り込みは「次の命令」の直前に処理するので、今回はフラグを落とすだけで何もしない。
+                self.int_requested.is_force_delayed = false;
+            } else {
+                self.switch_state_int();
+                return;
+            }
         }
+
+        // 割り込みを処理しない場合は、命令のフェッチ処理へ遷移。
+        self.state = TmpState::default();
+        self.fn_step = Cpu::fetch_step;
     }
 
     fn switch_state_int(&mut self) {
         self.state = TmpState::default();
-        self.state.int = self.int_requested;
-        self.int_requested = IntType::None;
+        self.state.int = self.int_requested.kind;
+        self.int_requested = Default::default();
         self.fn_step = Cpu::int_step;
         self.int_polling_enabled = false;
     }

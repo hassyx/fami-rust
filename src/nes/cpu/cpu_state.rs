@@ -66,11 +66,11 @@ impl Cpu {
             self.state.int = IntType::Brk;
             self.fn_step = Cpu::int_step;
             self.int_polling_enabled = false;
+            log::debug!("[Fetch] completed. op=BRK");
         } else {
             self.state.executer = decoder::decode(opcode);
             self.fn_step = Cpu::exec_step;
             self.int_polling_enabled = true;
-
             log::debug!("[Fetch] completed. op={}", self.state.executer.core.name);
         }
     }

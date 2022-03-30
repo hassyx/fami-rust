@@ -1,6 +1,6 @@
 //! Instruction executer.
 
-use super::{Cpu, Flags};
+use super::{Cpu, Flags, IntType};
 use crate::nes::util::make_addr;
 use super::is_template::*;
 use super::is_core::*;
@@ -15,9 +15,9 @@ pub type FnExec = fn(cpu: &mut Cpu);
 pub type FnCore = fn(cpu: &mut Cpu, val: u8) -> u8;
 
 pub struct Executer {
-    /// 命令が完了するクロックサイクル数。
+    /// 命令が完了する最小クロックサイクル数。
     /// 分岐命令や、ページをまたぐメモリアクセスが発生した場合に、
-    /// 動的に変動する場合がある。
+    /// 動的に増加する場合がある。
     pub last_cycle: u8,
     pub template: &'static IsTemplate,
     pub core: &'static IsCore,
@@ -155,6 +155,8 @@ impl Cpu {
                 }
                 if let Some(_) = low.checked_add(self.regs.x) {
                     self.exec_finished();
+                } else {
+                    self.state.executer.last_cycle += 1;
                 }
             },
             5 => self.exec_finished(),
@@ -179,6 +181,8 @@ impl Cpu {
                 }
                 if let Some(_) = low.checked_add(self.regs.y) {
                     self.exec_finished();
+                } else {
+                    self.state.executer.last_cycle += 1;
                 }
             },
             5 => self.exec_finished(),
@@ -243,6 +247,8 @@ impl Cpu {
                 }
                 if let Some(_) = low.checked_add(self.regs.y) {
                     self.exec_finished();
+                } else {
+                    self.state.executer.last_cycle += 1;
                 }
             }
             6 => self.exec_finished(),
@@ -475,7 +481,7 @@ impl Cpu {
         }
     }
 
-    /// 相対アドレッシングモード。このモードは分岐命令でのみ使われる。
+        /// 相対アドレッシングモード。このモードは分岐命令でのみ使われる。
     pub fn exec_relative(&mut self) {
         match self.state.counter {
             2 => {
@@ -484,6 +490,7 @@ impl Cpu {
                     // 分岐が発生しない場合はここで終わり
                     self.exec_finished();
                 } else {
+                    self.state.executer.last_cycle += 1;
                     // relativeで加算されるオペランドは符号付きなので、
                     // u8からi18へ、ビットを落とすことなく符合拡張を行う。
                     let offset = ((offset as i8) as i16) as u16;
@@ -502,10 +509,14 @@ impl Cpu {
             3 => {
                 self.state.op_1 -= 1;
                 if self.state.op_1 <= 0 {
-                    // 分岐が発生して、かつ同じページ内へジャンプする場合は、
-                    // 例外のポーリングが発生しない。6502のバグ。
+                    // 分岐が発生して、かつ同じページ内へジャンプする場合は、例外の発生が1命令遅れる。
+                    if self.int_requested.kind != IntType::None {
+                        self.int_requested.is_force_delayed = true;
+                    }
                     self.regs.pc = self.state.addr;
                     self.exec_finished();
+                } else {
+                    self.state.executer.last_cycle += 1;
                 }
             }
             4 => {
