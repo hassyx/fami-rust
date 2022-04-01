@@ -71,17 +71,18 @@ impl Cpu {
             self.state.executer = decoder::decode(opcode);
             self.fn_step = Cpu::exec_step;
             self.int_polling_enabled = true;
-            log::debug!("[Fetch] completed. op={}", self.state.executer.core.name);
+            log::debug!("[Fetch] completed. op={}", self.state.executer.inst);
         }
     }
 
     /// 命令実行のステップ処理
     pub fn exec_step(&mut self) {
-        log::debug!("[Execute] op={}, exec={} counter={}",
-            self.state.executer.core.name,
-            self.state.executer.template.name,
-            self.state.counter);
-        (self.state.executer.template.fn_exec)(self);
+        let exec = &self.state.executer;
+        log::debug!("[Execute] op={}, counter={}",
+            exec.inst,
+            self.state.counter
+        );
+        (exec.inst.fn_exec)(self);
     }
 
     /// 割り込みシーケンス(＝割り込みハンドラへジャンプする直前まで)のステップ処理。

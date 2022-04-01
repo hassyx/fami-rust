@@ -7,7 +7,6 @@ pub struct IsTemplate {
     pub name: &'static str,
     /// 命令の実行に必要な最小クロックサイクル数。
     pub min_clock: u8,
-    /// 命令のクロックごとの処理のテンプレート。
     pub fn_exec: FnExec,
     pub addr_mode: AddrMode,
 }

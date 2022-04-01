@@ -2,9 +2,7 @@
 
 use super::{Cpu, Flags, IntType};
 use crate::nes::util::make_addr;
-use super::is_template::*;
-use super::is_core::*;
-use super::instruction::Destination;
+use super::instruction::*;
 
 // TODO: 割り込みのポーリングのタイミングは、本来は命令の最後から2クロック前で行う。
 // 現状は、命令が終了したタイミングでポーリングを解禁している。
@@ -19,16 +17,14 @@ pub struct Executer {
     /// 分岐命令や、ページをまたぐメモリアクセスが発生した場合に、
     /// 動的に増加する場合がある。
     pub last_cycle: u8,
-    pub template: &'static IsTemplate,
-    pub core: &'static IsCore,
+    pub inst: &'static Instruction,
 }
 
 impl Default for Executer {
     fn default() -> Self {
         Self {
             last_cycle: 0,
-            template: &IS_TEMP_DUMMY,
-            core: &IS_DUMMY,
+            inst: &DUMMY_INSTRUCTION,
         }
     }
 }
@@ -41,9 +37,9 @@ impl Cpu {
     pub fn exec_immediate(&mut self) {
         match self.state.counter {
             2 => {
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let operand = self.fetch();
-                    (self.state.executer.core.fn_core)(self, operand);
+                    (self.state.executer.inst.fn_core)(self, operand);
                 } else {
                     unreachable!("Immediate does not support read instruction.");
                 }
@@ -58,11 +54,11 @@ impl Cpu {
             2 => self.state.op_1 = self.fetch(),
             3 => {
                 let val;
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     val = self.mem.read(self.state.op_1 as u16);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    val = (self.state.executer.core.fn_core)(self, 0);
+                    val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(self.state.op_1 as u16, val);
                 }
                 self.exec_finished();
@@ -77,11 +73,11 @@ impl Cpu {
             3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.x),
             4 => {
                 let addr = self.state.op_1 as u16;
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 self.exec_finished();
@@ -96,11 +92,11 @@ impl Cpu {
             3 => self.state.op_1 = self.state.op_1.wrapping_add(self.regs.y),
             4 => {
                 let addr = self.state.op_1 as u16;
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 self.exec_finished();
@@ -115,11 +111,11 @@ impl Cpu {
             3 => self.state.op_2 = self.fetch(),
             4 => {
                 let addr = make_addr(self.state.op_2, self.state.op_1);
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 self.exec_finished();
@@ -131,7 +127,7 @@ impl Cpu {
     pub fn exec_implied(&mut self) {
         match self.state.counter {
             2 => {
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -146,11 +142,11 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.state.op_2;
                 let addr = make_addr(high, low).wrapping_add(self.regs.x as u16);
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 if let Some(_) = low.checked_add(self.regs.x) {
@@ -172,11 +168,11 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.state.op_2;
                 let addr = make_addr(high, low).wrapping_add(self.regs.y as u16);
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 if let Some(_) = low.checked_add(self.regs.y) {
@@ -207,11 +203,11 @@ impl Cpu {
                 self.state.addr = make_addr(high, low);
             },
             6 => {
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(self.state.addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(self.state.addr, val);
                 }
                 self.exec_finished();
@@ -238,11 +234,11 @@ impl Cpu {
                 let low = self.state.op_2;
                 let addr = make_addr(high, low);
                 let addr = addr.wrapping_add(self.regs.y as u16);
-                if self.state.executer.core.dst == Destination::Register {
+                if self.state.executer.inst.dst == Destination::Register {
                     let val = self.mem.read(addr);
-                    (self.state.executer.core.fn_core)(self, val);
+                    (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    let val = (self.state.executer.core.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(addr, val);
                 }
                 if let Some(_) = low.checked_add(self.regs.y) {
@@ -263,7 +259,7 @@ impl Cpu {
                 self.inc_stack();
             }
             4 => { 
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -274,7 +270,7 @@ impl Cpu {
         match self.state.counter {
             2 => (),
             3 => {
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -296,7 +292,7 @@ impl Cpu {
                 let high = self.pull_stack();
                 self.regs.pc = make_addr(high, low);
                 // 何もしないが呼んでおく。
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -317,7 +313,7 @@ impl Cpu {
                 let high = self.state.op_2;
                 self.regs.pc = make_addr(high, low).wrapping_add(1);
                 // 何もしないが呼んでおく。
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -341,7 +337,7 @@ impl Cpu {
                 let high = self.fetch();
                 self.regs.pc = make_addr(high, low);
                 // 何もしないが呼んでおく。
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -351,7 +347,7 @@ impl Cpu {
     pub fn exec_accumulator(&mut self) {
         match self.state.counter {
             2 => {
-                let result = (self.state.executer.core.fn_core)(self, self.regs.a);
+                let result = (self.state.executer.inst.fn_core)(self, self.regs.a);
                 // フラグは変更済みなので、ここでは代入するだけ
                 self.regs.a = result;
                 self.exec_finished();
@@ -368,7 +364,7 @@ impl Cpu {
                 self.state.op_2 = self.mem.read(self.state.op_1 as u16);
             },
             4 => {
-                self.state.op_2 = (self.state.executer.core.fn_core)(self, self.state.op_2);
+                self.state.op_2 = (self.state.executer.inst.fn_core)(self, self.state.op_2);
             },
             5 => {
                 let addr = self.state.op_1 as u16;
@@ -390,7 +386,7 @@ impl Cpu {
                 self.state.op_2 = self.mem.read(self.state.addr);
             },
             5 => {
-                self.state.op_2 = (self.state.executer.core.fn_core)(self, self.state.op_2);
+                self.state.op_2 = (self.state.executer.inst.fn_core)(self, self.state.op_2);
             },
             6 => {
                 let addr = self.state.addr;
@@ -413,7 +409,7 @@ impl Cpu {
                 self.state.op_2 = self.mem.read(addr);
             },
             5 => {
-                self.state.op_2 = (self.state.executer.core.fn_core)(self, self.state.op_2);
+                self.state.op_2 = (self.state.executer.inst.fn_core)(self, self.state.op_2);
             },
             6 => {
                 let addr = self.state.addr;
@@ -435,7 +431,7 @@ impl Cpu {
             },
             4 => (),
             5 => self.state.op_1 = self.mem.read(self.state.addr),
-            6 => self.state.op_2 = (self.state.executer.core.fn_core)(self, self.state.op_1),
+            6 => self.state.op_2 = (self.state.executer.inst.fn_core)(self, self.state.op_1),
             7 => {
                 self.mem.write(self.state.addr, self.state.op_2);
                 self.exec_finished();
@@ -452,7 +448,7 @@ impl Cpu {
                 let high = self.fetch();
                 self.regs.pc = make_addr(high, low);
                 // 何もしないが呼んでおく
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             }
             _ => unreachable!(),
@@ -474,7 +470,7 @@ impl Cpu {
                 let high = self.mem.read(self.state.addr.wrapping_add(1));
                 self.regs.pc = make_addr(high, low);
                 // 何もしないが呼んでおく
-                (self.state.executer.core.fn_core)(self, 0);
+                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             }
             _ => unreachable!(),
@@ -486,7 +482,7 @@ impl Cpu {
         match self.state.counter {
             2 => {
                 let offset = self.fetch();
-                if (self.state.executer.core.fn_core)(self, 0) == 0 {
+                if (self.state.executer.inst.fn_core)(self, 0) == 0 {
                     // 分岐が発生しない場合はここで終わり
                     self.exec_finished();
                 } else {
