@@ -119,13 +119,11 @@ pub const IS_BIT :IsCore = IsCore {
     dst: Destination::Register,
 };
 
-/*/
 pub const IS_JMP :IsCore = IsCore {
     name: "JMP",
     fn_core: Cpu::jmp_action,
     dst: Destination::Register,
 };
-*/
 
 pub const IS_STY :IsCore = IsCore {
     name: "STY",
@@ -199,7 +197,6 @@ pub const IS_BEQ :IsCore = IsCore {
     dst: Destination::Register,
 };
 
-/*
 pub const IS_JSR :IsCore = IsCore {
     name: "JSR",
     fn_core: Cpu::jsr_action,
@@ -217,7 +214,6 @@ pub const IS_RTS :IsCore = IsCore {
     fn_core: Cpu::rts_action,
     dst: Destination::Register,
 };
-*/
 
 pub const IS_PHP :IsCore = IsCore {
     name: "PHP",

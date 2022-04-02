@@ -486,8 +486,8 @@ const BIT_ZEROPAGE: Instruction = new_instruction!(&IS_TEMP_ZEROPAGE, &IS_BIT);
 const BIT_ABSOLUTE: Instruction = new_instruction!(&IS_TEMP_ABSOLUTE, &IS_BIT);
 
 // *********** JMP ***********
-const JMP_INDIRECT: Instruction = new_instruction!(&IS_TEMP_INDIRECT_JMP, &IS_DUMMY);
-const JMP_ABSOLUTE: Instruction = new_instruction!(&IS_TEMP_ABSOLUTE_JMP, &IS_DUMMY);
+const JMP_INDIRECT: Instruction = new_instruction!(&IS_TEMP_INDIRECT_JMP, &IS_JMP);
+const JMP_ABSOLUTE: Instruction = new_instruction!(&IS_TEMP_ABSOLUTE_JMP, &IS_JMP);
 
 // *********** STY ***********
 const STY_ZEROPAGE: Instruction = new_instruction!(&IS_TEMP_ZEROPAGE, &IS_STY);
@@ -528,11 +528,11 @@ const BNE: Instruction = new_instruction!(&IS_TEMP_RELATIVE, &IS_BNE);
 // *********** BEQ ***********
 const BEQ: Instruction = new_instruction!(&IS_TEMP_RELATIVE, &IS_BEQ);
 // *********** JSR ***********
-const JSR: Instruction = new_instruction!(&IS_TEMP_JSR, &IS_DUMMY);
+const JSR: Instruction = new_instruction!(&IS_TEMP_JSR, &IS_JSR);
 // *********** RTI ***********
-const RTI: Instruction = new_instruction!(&IS_TEMP_RTI, &IS_DUMMY);
+const RTI: Instruction = new_instruction!(&IS_TEMP_RTI, &IS_RTI);
 // *********** RTS ***********
-const RTS: Instruction = new_instruction!(&IS_TEMP_RTS, &IS_DUMMY);
+const RTS: Instruction = new_instruction!(&IS_TEMP_RTS, &IS_RTS);
 // *********** PHP ***********
 const PHP: Instruction = new_instruction!(&IS_TEMP_PUSH_STACK, &IS_PHP);
 // *********** PLP ***********
