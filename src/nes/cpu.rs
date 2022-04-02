@@ -1,6 +1,5 @@
 //! 6502 emulator.
 
-#[macro_use] mod macros;
 mod cpu_state;
 mod decoder;
 mod executer;
@@ -334,7 +333,8 @@ impl Cpu {
             self.check_int();
         }
 
-        print_cpu_state!(self);
+        #[cfg(debug_assertions)]
+        self.print_cpu_state();
     }
 
     /// NMIの発生をCPUに通知。実機での「ピンをhighからlowへ」に相当。
@@ -435,7 +435,8 @@ impl Cpu {
     pub fn dec_stack(&mut self) {
         // スタックに積みすぎて天井を超えていないか？
         // つまり減算しすぎて $00 -> $FF にオーバーラップしていないか？のチェック。
-        check_stack_overflow!(self);
+        #[cfg(debug_assertions)]
+        self.check_stack_overflow();
         self.regs.s = self.regs.s.wrapping_sub(1);
     }
 
@@ -455,7 +456,8 @@ impl Cpu {
     pub fn inc_stack(&mut self) {
         // スタックから取り出しすぎて底が抜けていないか？
         // つまり加算しすぎて $FF -> $00 にオーバーラップしていないか？のチェック。
-        check_stack_underflow!(self);
+        #[cfg(debug_assertions)]
+        self.check_stack_underflow();
         self.regs.s = self.regs.s.wrapping_add(1);
     }
 
@@ -490,7 +492,6 @@ impl Cpu {
         unreachable!()
     }
 
-    #[cfg(debug_assertions)]
     /// スタックが天井を突き破らないかチェック。
     fn check_stack_overflow(&self) {
         if self.regs.s <= 0 {
@@ -498,7 +499,6 @@ impl Cpu {
         }
     }
 
-    #[cfg(debug_assertions)]
     /// スタックの底が抜けないかチェック。
     fn check_stack_underflow(&self) {
         if self.regs.s >= u8::MAX {
@@ -506,7 +506,6 @@ impl Cpu {
         }
     }
 
-    #[cfg(debug_assertions)]
     fn print_cpu_state(&self) {
         log::debug!("#### CPU STATE: BEGIN");
         log::debug!("PC = {:#06X}({})", self.regs.pc, self.regs.pc);
