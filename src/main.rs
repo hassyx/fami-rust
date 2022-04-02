@@ -85,6 +85,8 @@ fn main() {
                 image(&texture, c.transform, g);
                 // clear([0.5, 1.0, 0.5, 1.0], g);
             });
+
+            cpu_counter += 1;
         }
 
         // 以下キーイベント処理。
@@ -96,8 +98,6 @@ fn main() {
         if let Some(Button::Keyboard(key)) = e.press_args() {
 
         }
-
-        cpu_counter += 1;
     }
 }
 
