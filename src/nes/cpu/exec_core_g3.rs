@@ -10,6 +10,7 @@ CLC SEC CLI SEI TYA CLV CLD SED TXA TXS TAX TSX DEX NOP
 
 impl Cpu {
 
+    /*
     //////////////////////////////////////////////
     /// JSR (absolute):
     /// スタックから、ステータスフラグと、PCをPullして設定する。
@@ -49,6 +50,7 @@ impl Cpu {
         // 何もしない
         0
     }
+    */
 
     //////////////////////////////////////////////
     /// PHP (Implied/Stack):
