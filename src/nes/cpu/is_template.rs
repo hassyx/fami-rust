@@ -22,7 +22,7 @@ pub const IS_TEMP_INDEXED_INDIRECT_X :IsTemplate = IsTemplate {
     name: "exec_indexed_indirect_x",
     min_clock: 6,
     fn_exec: Cpu::exec_indexed_indirect_x,
-    addr_mode: AddrMode::IndexedIndirect_X,
+    addr_mode: AddrMode::IndexedIndirectX,
 };
 
 pub const IS_TEMP_ZEROPAGE :IsTemplate = IsTemplate {
@@ -50,35 +50,35 @@ pub const IS_TEMP_INDIRECT_INDEXED_Y :IsTemplate = IsTemplate {
     name: "exec_indirect_indexed_y",
     min_clock: 5,
     fn_exec: Cpu::exec_indirect_indexed_y,
-    addr_mode: AddrMode::IndirectIndexed_Y,
+    addr_mode: AddrMode::IndirectIndexedY,
 };
 
 pub const IS_TEMP_INDEXED_ZEROPAGE_Y :IsTemplate = IsTemplate {
     name: "exec_indexed_zeropage_y",
     min_clock: 4,
     fn_exec: Cpu::exec_indexed_zeropage_y,
-    addr_mode: AddrMode::IndexedZeroPage_X,
+    addr_mode: AddrMode::IndexedZeroPageX,
 };
 
 pub const IS_TEMP_INDEXED_ZEROPAGE_X :IsTemplate = IsTemplate {
     name: "exec_indexed_zeropage_x",
     min_clock: 4,
     fn_exec: Cpu::exec_indexed_zeropage_x,
-    addr_mode: AddrMode::IndexedZeroPage_X,
+    addr_mode: AddrMode::IndexedZeroPageX,
 };
 
 pub const IS_TEMP_INDEXED_ABSOLUTE_Y :IsTemplate = IsTemplate {
     name: "exec_indexed_absolute_y",
     min_clock: 4,
     fn_exec: Cpu::exec_indexed_absolute_y,
-    addr_mode: AddrMode::IndexedAbsolute_Y,
+    addr_mode: AddrMode::IndexedAbsoluteY,
 };
 
 pub const IS_TEMP_INDEXED_ABSOLUTE_X :IsTemplate = IsTemplate {
     name: "exec_indexed_absolute_x",
     min_clock: 4,
     fn_exec: Cpu::exec_indexed_absolute_x,
-    addr_mode: AddrMode::IndexedAbsolute_X,
+    addr_mode: AddrMode::IndexedAbsoluteX,
 };
 
 pub const IS_TEMP_ZEROPAGE_RMW :IsTemplate = IsTemplate {
@@ -106,14 +106,14 @@ pub const IS_TEMP_INDEXED_ZEROPAGE_X_RMW :IsTemplate = IsTemplate {
     name: "exec_indexed_zeropage_x_rmw",
     min_clock: 6,
     fn_exec: Cpu::exec_indexed_zeropage_x_rmw,
-    addr_mode: AddrMode::IndexedZeroPage_X,
+    addr_mode: AddrMode::IndexedZeroPageX,
 };
 
 pub const IS_TEMP_INDEXED_ABSOLUTE_X_RMW :IsTemplate = IsTemplate {
     name: "exec_indexed_absolute_x_rmw",
     min_clock: 7,
     fn_exec: Cpu::exec_indexed_absolute_x_rmw,
-    addr_mode: AddrMode::IndexedAbsolute_X,
+    addr_mode: AddrMode::IndexedAbsoluteX,
 };
 
 pub const IS_TEMP_INDIRECT_JMP :IsTemplate = IsTemplate {
