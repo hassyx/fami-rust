@@ -251,11 +251,11 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn bit_action(&mut self, val: u8) -> u8 {
         let new_val = self.regs.a & val;
-        // 演算対象となるメモリ上の値によってフラグレジスタが変動
-        let flags_nv = (val & !Flags::NEGATIVE.bits) | (val & !Flags::OVERFLOW.bits);
-        // Zeroに限っては演算結果の方を見る
+        // NとVのみ、演算対象となるメモリ上の値をそのまま使う。
+        let flags_nv = (val & Flags::NEGATIVE.bits) | (val & Flags::OVERFLOW.bits);
+        // Zeroに限っては演算結果の方を見る。
         let flags_z = ((new_val == 0) as u8) << 1;
-        let flag_origin = self.regs.p & (!Flags::NEGATIVE.bits | !Flags::OVERFLOW.bits | !Flags::ZERO.bits);
+        let flag_origin = self.regs.p & (!Flags::NEGATIVE.bits & !Flags::OVERFLOW.bits & !Flags::ZERO.bits);
         self.regs.p = flag_origin | flags_nv | flags_z;
         0
     }
