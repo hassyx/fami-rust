@@ -18,7 +18,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn ora_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ORA]");
         self.regs.a_set(self.regs.a | val);
         0
     }
@@ -31,7 +30,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn and_action(&mut self, val: u8) -> u8 {
-        log::debug!("[AND]");
         self.regs.a_set(self.regs.a & val);
         0
     }
@@ -44,7 +42,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn eor_action(&mut self, val: u8) -> u8 {
-        log::debug!("[EOR]");
         self.regs.a_set(self.regs.a ^ val);
         0
     }
@@ -57,7 +54,6 @@ impl Cpu {
     //  + + + - - +
     //////////////////////////////////////////////
     pub fn adc_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ADC]");
         self.regs.a_add(val);
         0
     }
@@ -70,7 +66,6 @@ impl Cpu {
     //  - - - - - -
     //////////////////////////////////////////////
     pub fn sta_action(&mut self, _: u8) -> u8 {
-        log::debug!("[STA]");
         self.regs.a
     }
 
@@ -82,7 +77,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn lda_action(&mut self, val: u8) -> u8 {
-        log::debug!("[LDA]");
         self.regs.a_set(val);
         0
     }
@@ -99,7 +93,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn cmp_action(&mut self, val: u8) -> u8 {
-        log::debug!("[CMP]");
         self.regs.cmp(self.regs.a, val);
         0
     }
@@ -112,7 +105,6 @@ impl Cpu {
     //  + + + - - +
     //////////////////////////////////////////////
     pub fn sbc_action(&mut self, val: u8) -> u8 {
-        log::debug!("[SBC]");
         self.regs.a_sub(val);
         0
     }
@@ -127,7 +119,6 @@ impl Cpu {
     //  0 + + - - -
     //////////////////////////////////////////////
     pub fn lsr_action(&mut self, val: u8) -> u8 {
-        log::debug!("[LSR]");
         // valを右シフトして、フラグを操作したあと戻り値として返す。
         let to_carry = val & Flags::CARRY.bits;
         let val = val >> 1;
@@ -147,7 +138,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn asl_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ASL]");
         // valを左シフトして、フラグを操作したあと戻り値として返す。
         let to_carry = val & 0b1000_0000 >> 7;
         let val = val << 1;
@@ -167,7 +157,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn ror_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ROR]");
         // valを右ローテートして、フラグを操作したあと戻り値として返す。
         let from_carry = (self.regs.p & Flags::CARRY.bits) << 7;
         let to_carry = val & Flags::CARRY.bits;
@@ -188,7 +177,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn rol_action(&mut self, val: u8) -> u8 {
-        log::debug!("[ROL]");
         // valを左ローテートして、フラグを操作したあと戻り値として返す。
         let from_carry = self.regs.p & Flags::CARRY.bits;
         let to_carry = val & 0b1000_0000 >> 7;
@@ -207,7 +195,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn dec_action(&mut self, val: u8) -> u8 {
-        log::debug!("[DEC]");
         let val = val.wrapping_sub(1);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
@@ -222,7 +209,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn inc_action(&mut self, val: u8) -> u8 {
-        log::debug!("[INC]");
         let val = val.wrapping_add(1);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
@@ -237,7 +223,6 @@ impl Cpu {
     //  - - - - - -
     //////////////////////////////////////////////
     pub fn stx_action(&mut self, _: u8) -> u8 {
-        log::debug!("[STX]");
         self.regs.x
     }
 
@@ -249,7 +234,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn ldx_action(&mut self, val: u8) -> u8 {
-        log::debug!("[LDX]");
         self.regs.x_set(val);
         0
     }
@@ -266,7 +250,6 @@ impl Cpu {
     //  M7 + - - - M6
     //////////////////////////////////////////////
     pub fn bit_action(&mut self, val: u8) -> u8 {
-        log::debug!("[BIT]");
         let new_val = self.regs.a & val;
         // 演算対象となるメモリ上の値によってフラグレジスタが変動
         let flags_nv = (val & !Flags::NEGATIVE.bits) | (val & !Flags::OVERFLOW.bits);
@@ -285,7 +268,6 @@ impl Cpu {
     //  - - - - - -
     //////////////////////////////////////////////
     pub fn sty_action(&mut self, _: u8) -> u8 {
-        log::debug!("[STY]");
         self.regs.y
     }
     
@@ -297,7 +279,6 @@ impl Cpu {
     //  + + - - - -
     //////////////////////////////////////////////
     pub fn ldy_action(&mut self, val: u8) -> u8 {
-        log::debug!("[LDY]");
         self.regs.y_set(val);
         0
     }
@@ -314,7 +295,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn cpy_action(&mut self, val: u8) -> u8 {
-        log::debug!("[CPY]");
         self.regs.cmp(self.regs.y, val);
         0
     }
@@ -331,7 +311,6 @@ impl Cpu {
     //  + + + - - -
     //////////////////////////////////////////////
     pub fn cpx_action(&mut self, val: u8) -> u8 {
-        log::debug!("[CPX]");
         self.regs.cmp(self.regs.x, val);
         0
     }
@@ -344,7 +323,6 @@ impl Cpu {
     //  - - - - - -
     //////////////////////////////////////////////
     pub fn jmp_action(&mut self, _: u8) -> u8 {
-        log::debug!("[JMP]");
         // 何もしない
         0
     }

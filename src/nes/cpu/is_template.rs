@@ -137,7 +137,6 @@ pub const IS_TEMP_RELATIVE :IsTemplate = IsTemplate {
     addr_mode: AddrMode::Relative,
 };
 
-/// CoreとTempを一体化する
 pub const IS_TEMP_JSR :IsTemplate = IsTemplate {
     name: "exec_jsr",
     min_clock: 6,
@@ -145,7 +144,6 @@ pub const IS_TEMP_JSR :IsTemplate = IsTemplate {
     addr_mode: AddrMode::Absolute,
 };
 
-/// CoreとTempを一体化する
 pub const IS_TEMP_RTI :IsTemplate = IsTemplate {
     name: "exec_rti",
     min_clock: 6,
@@ -153,7 +151,6 @@ pub const IS_TEMP_RTI :IsTemplate = IsTemplate {
     addr_mode: AddrMode::Implied,
 };
 
-/// CoreとTempを一体化する
 pub const IS_TEMP_RTS :IsTemplate = IsTemplate {
     name: "exec_rts",
     min_clock: 6,

@@ -277,6 +277,7 @@ impl Cpu {
         };
     }
 
+    /// 注：この関数内で処理が完結する。
     pub fn exec_rti(&mut self) {
         match self.state.counter {
             2 => (),
@@ -291,14 +292,13 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.pull_stack();
                 self.regs.pc = make_addr(high, low);
-                // 何もしないが呼んでおく。
-                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
         };
     }
 
+    /// 注：この関数内で処理が完結する。
     pub fn exec_rts(&mut self) {
         match self.state.counter {
             2 => (),
@@ -312,14 +312,13 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.state.op_2;
                 self.regs.pc = make_addr(high, low).wrapping_add(1);
-                // 何もしないが呼んでおく。
-                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
         };
     }
 
+    /// 注：この関数内で処理が完結する。
     pub fn exec_jsr(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
@@ -336,8 +335,6 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.fetch();
                 self.regs.pc = make_addr(high, low);
-                // 何もしないが呼んでおく。
-                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             },
             _ => unreachable!(),
@@ -440,6 +437,7 @@ impl Cpu {
         }
     }
 
+    /// 注：この関数内で処理が完結する。
     pub fn exec_absolute_jmp(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
@@ -447,14 +445,13 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.fetch();
                 self.regs.pc = make_addr(high, low);
-                // 何もしないが呼んでおく
-                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             }
             _ => unreachable!(),
         }
     }
 
+    /// 注：この関数内で処理が完結する。
     pub fn exec_indirect_jmp(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
@@ -469,15 +466,13 @@ impl Cpu {
                 let low = self.state.op_1;
                 let high = self.mem.read(self.state.addr.wrapping_add(1));
                 self.regs.pc = make_addr(high, low);
-                // 何もしないが呼んでおく
-                (self.state.executer.inst.fn_core)(self, 0);
                 self.exec_finished();
             }
             _ => unreachable!(),
         }
     }
 
-        /// 相対アドレッシングモード。このモードは分岐命令でのみ使われる。
+    /// 相対アドレッシングモード。このモードは分岐命令でのみ使われる。
     pub fn exec_relative(&mut self) {
         match self.state.counter {
             2 => {
