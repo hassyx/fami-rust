@@ -23,7 +23,7 @@ fn main() {
         .init();
 
     // ROMをロード
-    let path = "./ignores/donkeykong.nes";
+    let path = "./ignores/nestest.nes";
     let rom: Box<NesRom> = load_rom(path);
 
     // PPUを初期化

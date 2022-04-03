@@ -324,10 +324,15 @@ impl Cpu {
         // 割り込み状態の初期化
         self.clear_all_int_trigger();
 
+        /*
         // 電源投入時はReset割り込みから実行開始 
         self.int_requested.kind = IntType::Reset;
         self.int_requested.is_force_delayed = false;
         self.switch_state_int();
+        */
+
+        self.regs.pc = 0xC000;
+        self.switch_state_fetch();
     }
 
     /// 1クロックサイクル進める。
@@ -523,6 +528,12 @@ impl Cpu {
         log::debug!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
         log::debug!("S = {:#04X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
         log::debug!("#### END");
+
+        let mem00 = self.mem.ram[0x00 as usize];
+        log::debug!(">>>> 0x00={:#02X}", mem00);
+        if mem00 != 0 {
+            std::process::exit(0);
+        }
     }
 }
 

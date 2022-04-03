@@ -13,7 +13,7 @@ pub const PHYSICAL_RAM_SIZE: usize = 0x0800;
 pub const LOGICAL_RAM_SPACE: usize = 0x10000;
 
 pub struct MemCon {
-    ram: Box<[u8]>,
+    pub ram: Box<[u8]>,
     pub ppu_databus: Box<DataBus>,
 }
 
