@@ -523,14 +523,14 @@ impl Cpu {
     }
 
     fn print_cpu_state(&self) {
-        log::debug!("#### CPU STATE: BEGIN");
+        log::debug!(">>>> CPU STATE: BEGIN");
         log::debug!("PC = {:#06X}({})", self.regs.pc, self.regs.pc);
         log::debug!("A = {}, X = {}, Y = {}", self.regs.a, self.regs.x, self.regs.y);
         log::debug!("S = {:#04X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
-        log::debug!("#### END");
+        log::debug!("<<<< END");
 
         let mem00 = self.mem.ram[0x00 as usize];
-        log::debug!(">>>> 0x00={:#02X}", mem00);
+        log::debug!("#### 0x00={:#02X}", mem00);
         if mem00 != 0 {
             std::process::exit(0);
         }
