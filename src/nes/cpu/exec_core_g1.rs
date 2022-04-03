@@ -122,7 +122,7 @@ impl Cpu {
         // valを右シフトして、フラグを操作したあと戻り値として返す。
         let to_carry = val & Flags::CARRY.bits;
         let val = val >> 1;
-        self.regs.p |= to_carry;
+        self.regs.p = (self.regs.p & !Flags::CARRY.bits) | to_carry;
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
         val
