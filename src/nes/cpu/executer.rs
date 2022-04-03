@@ -454,13 +454,12 @@ impl Cpu {
     pub fn exec_indirect_jmp(&mut self) {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
-            3 => self.state.op_2 = self.fetch(),
-            4 => {
+            3 => {
                 let low = self.state.op_1;
                 let high = self.fetch();
                 self.state.addr = make_addr(high, low);
-                self.state.op_1 = self.mem.read(self.state.addr);
             },
+            4 => self.state.op_1 = self.mem.read(self.state.addr),
             5 => {
                 let low = self.state.op_1;
                 let high = self.mem.read(self.state.addr.wrapping_add(1));
