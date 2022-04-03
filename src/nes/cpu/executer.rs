@@ -53,12 +53,11 @@ impl Cpu {
         match self.state.counter {
             2 => self.state.op_1 = self.fetch(),
             3 => {
-                let val;
                 if self.state.executer.inst.dst == Destination::Register {
-                    val = self.mem.read(self.state.op_1 as u16);
+                    let val = self.mem.read(self.state.op_1 as u16);
                     (self.state.executer.inst.fn_core)(self, val);
                 } else {
-                    val = (self.state.executer.inst.fn_core)(self, 0);
+                    let val = (self.state.executer.inst.fn_core)(self, 0);
                     self.mem.write(self.state.op_1 as u16, val);
                 }
                 self.exec_finished();
