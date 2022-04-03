@@ -197,10 +197,9 @@ impl Registers {
     /// val1とval2の比較
     fn cmp(&mut self, val1: u8, val2: u8) {
         // 比較処理の実際は、val1 に対して val2 の2の補数を加算し、
-        // 加算の際にCarryを考慮せず、計算後にOverflowが変化しないADC。
-
+        // 加算の際にCarryを考慮せず(=常に+1し)、計算後にOverflowが変化しないADC。
         let (result, carry) = 
-            Self::add_with_carry(val1, val2.wrapping_neg(), false);
+            Self::add_with_carry(val1, !val2, true);
 
         // 桁溢れが発生していたらCarryをOn。そうでなければクリア。
         self.p = (self.p & !Flags::CARRY.bits) | carry as u8;
