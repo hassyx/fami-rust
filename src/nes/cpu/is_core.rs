@@ -90,7 +90,7 @@ pub const IS_ROL :IsCore = IsCore {
 };
 
 pub const IS_LSR :IsCore = IsCore {
-    name: "ISR",
+    name: "LSR",
     fn_core: Cpu::lsr_action,
     dst: Destination::Register,
 };
