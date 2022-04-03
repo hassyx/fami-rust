@@ -122,6 +122,10 @@ impl Registers {
         self.p = (self.p & !Flags::ZERO.bits) | z_flag;
     }
 
+    pub fn change_carry(&mut self, on: bool) {
+        self.p = (self.p & !Flags::CARRY.bits) | (on as u8);
+    }
+
     /// val1 + val2 + carry
     fn add_with_carry(val1: u8, val2: u8, carry: bool) -> (u8, bool) {
         // 全ての値をu8から16bitに拡張した上で加算を行う。

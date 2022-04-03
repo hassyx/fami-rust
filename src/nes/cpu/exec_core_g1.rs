@@ -120,9 +120,9 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn lsr_action(&mut self, val: u8) -> u8 {
         // valを右シフトして、フラグを操作したあと戻り値として返す。
-        let to_carry = val & Flags::CARRY.bits;
+        let carry_out = (val & 0b0000_0001) != 0;
         let val = val >> 1;
-        self.regs.p = (self.regs.p & !Flags::CARRY.bits) | to_carry;
+        self.regs.change_carry(carry_out);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
         val
@@ -139,9 +139,9 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn asl_action(&mut self, val: u8) -> u8 {
         // valを左シフトして、フラグを操作したあと戻り値として返す。
-        let to_carry = val & 0b1000_0000 >> 7;
+        let carry_out = (val & 0b1000_0000) != 0;
         let val = val << 1;
-        self.regs.p |= to_carry;
+        self.regs.change_carry(carry_out);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
         val
@@ -158,10 +158,10 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn ror_action(&mut self, val: u8) -> u8 {
         // valを右ローテートして、フラグを操作したあと戻り値として返す。
-        let from_carry = (self.regs.p & Flags::CARRY.bits) << 7;
-        let to_carry = val & Flags::CARRY.bits;
-        let val = (val >> 1) | from_carry;
-        self.regs.p |= to_carry;
+        let carry_in = (self.regs.p & Flags::CARRY.bits) << 7;
+        let carry_out = (val & 0b0000_0001) != 0;
+        let val = (val >> 1) | carry_in;
+        self.regs.change_carry(carry_out);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
         val
@@ -178,10 +178,10 @@ impl Cpu {
     //////////////////////////////////////////////
     pub fn rol_action(&mut self, val: u8) -> u8 {
         // valを左ローテートして、フラグを操作したあと戻り値として返す。
-        let from_carry = self.regs.p & Flags::CARRY.bits;
-        let to_carry = val & 0b1000_0000 >> 7;
-        let val = (val << 1) | from_carry;
-        self.regs.p |= to_carry;
+        let carry_in = self.regs.p & Flags::CARRY.bits;
+        let carry_out = (val & 0b1000_0000) != 0;
+        let val = (val << 1) | carry_in;
+        self.regs.change_carry(carry_out);
         self.regs.change_negative_by_value(val);
         self.regs.change_zero_by_value(val);
         val
