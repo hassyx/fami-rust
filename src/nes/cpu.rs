@@ -225,7 +225,7 @@ impl Registers {
 
     /// レジスタYに値を設定し、同時にNegativeとZeroフラグを更新する。
     pub fn y_set(&mut self, val: u8) {
-        self.x = val;
+        self.y = val;
         self.change_negative_by_value(val);
         self.change_zero_by_value(val);
     }
