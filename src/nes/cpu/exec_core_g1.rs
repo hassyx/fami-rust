@@ -255,7 +255,7 @@ impl Cpu {
         let flags_nv = (val & Flags::NEGATIVE.bits) | (val & Flags::OVERFLOW.bits);
         // Zeroに限っては演算結果の方を見る。
         let flags_z = ((new_val == 0) as u8) << 1;
-        let flag_origin = self.regs.p & (!Flags::NEGATIVE.bits & !Flags::OVERFLOW.bits & !Flags::ZERO.bits);
+        let flag_origin = self.regs.p & !(Flags::NEGATIVE.bits | Flags::OVERFLOW.bits | Flags::ZERO.bits);
         self.regs.p = flag_origin | flags_nv | flags_z;
         0
     }
