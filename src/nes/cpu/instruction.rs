@@ -60,7 +60,6 @@ pub enum Destination {
 
 pub struct Instruction {
     pub core_name: &'static str,
-    pub template_name: &'static str,
     pub fn_exec: FnExec,
     pub fn_core: FnCore,
     pub dst: Destination,
@@ -72,7 +71,6 @@ macro_rules! new_instruction{
     ($template:expr, $core:expr) => {
         Instruction {
             core_name: $core.name,
-            template_name: $template.name,
             fn_exec: $template.fn_exec,
             fn_core: $core.fn_core,
             dst: $core.dst,
@@ -84,7 +82,7 @@ macro_rules! new_instruction{
 
 impl Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ({})", self.core_name, self.template_name)
+        write!(f, "{}({:?})", self.core_name, self.addr_mode)
     }
 }
 
