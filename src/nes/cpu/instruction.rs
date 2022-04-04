@@ -324,7 +324,7 @@ pub const INSTRUCTION_SET: [Option<&Instruction>; 256] = [
     Some(&INX), // 0xE8:INX impl
     Some(&SBC_IMMEDIATE), // 0xE9:SBC #
     Some(&NOP), // 0xEA:NOP impl
-    None, // 0xEB:---
+    Some(&SBC_IMMEDIATE), // 0xEB: (undocumented) SBC #
     Some(&CPX_ABSOLUTE), // 0xEC:CPX abs
     Some(&SBC_ABSOLUTE), // 0xED:SBC abs
     Some(&INC_ABSOLUTE), // 0xEE:INC abs
