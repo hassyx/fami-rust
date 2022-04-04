@@ -217,9 +217,9 @@ pub const INSTRUCTION_SET: [Option<&Instruction>; 256] = [
     Some(&ADC_INDEXED_ABSOLUTE_X), // 0x7D:ADC abs,X
     Some(&ROR_INDEXED_ABSOLUTE_X), // 0x7E:ROR abs,X
     None, // 0x7F:---
-    None, // 0x80:---
+    Some(&NOP_IMMEDIATE), // 0x80: (undocumented) NOP #
     Some(&STA_INDEXED_INDIRECT_X), // 0x81:STA X,ind
-    None, // 0x82:---
+    Some(&NOP_IMMEDIATE), // 0x82: (undocumented) NOP #
     None, // 0x83:---
     Some(&STY_ZEROPAGE), // 0x84:STY zpg
     Some(&STA_ZEROPAGE), // 0x85:STA zpg
@@ -323,7 +323,7 @@ pub const INSTRUCTION_SET: [Option<&Instruction>; 256] = [
     None, // 0xE7:---
     Some(&INX), // 0xE8:INX impl
     Some(&SBC_IMMEDIATE), // 0xE9:SBC #
-    Some(&NOP), // 0xEA:NOP impl
+    Some(&NOP_IMPLIED), // 0xEA:NOP impl
     Some(&SBC_IMMEDIATE), // 0xEB: (undocumented) SBC #
     Some(&CPX_ABSOLUTE), // 0xEC:CPX abs
     Some(&SBC_ABSOLUTE), // 0xED:SBC abs
@@ -576,4 +576,6 @@ const TSX: Instruction = new_instruction!(&IS_TEMP_IMPLIED, &IS_TSX);
 // *********** DEX ***********
 const DEX: Instruction = new_instruction!(&IS_TEMP_IMPLIED, &IS_DEX);
 // *********** NOP ***********
-const NOP: Instruction = new_instruction!(&IS_TEMP_IMPLIED, &IS_NOP);
+const NOP_IMPLIED: Instruction = new_instruction!(&IS_TEMP_IMPLIED, &IS_NOP);
+const NOP_IMMEDIATE: Instruction = new_instruction!(&IS_TEMP_IMMEDIATE, &IS_NOP);
+
