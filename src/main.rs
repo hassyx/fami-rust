@@ -20,10 +20,14 @@ fn main() {
     env_logger::builder()
         .format_timestamp(None)
         .init();
+    
+    let args = std::env::args().collect::<Vec<String>>();
+    if args.len() < 2 {
+        util::err_exit("Require rom image file.");
+    }
 
     // ROMをロード
-    let path = "./ignores/nestest.nes";
-    let rom: Box<NesRom> = load_rom(path);
+    let rom: Box<NesRom> = load_rom(&args[1]);
 
     // PPUを初期化
     // VRAMにROMのCHR-ROM領域をマッピングする。
@@ -76,7 +80,7 @@ fn main() {
             }
 
             // 試しに点を打ってみる
-            screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
+            // screen.put_pixel(100, 100, image::Rgba([255, 127, 127, 255]));
 
             texture.update(&mut texture_context, &screen).unwrap();
             window.draw_2d(&e, |c, g, device| {

@@ -75,13 +75,23 @@ pub enum CPUTiming {
 }
 
 pub fn load_from_file(path: &str) -> Result<Box<NesRom>, Box<dyn Error>> {
-    let mut file = File::open(path)?;
+    //let mut file = File::open(path)?;
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(err) => {
+            let msg = format!("[{}] {}", path, err);
+            return Err(util::Error::new(msg));
+        }
+    };
     let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;
-    Ok(parse(&buf)?)
+    match parse(&buf) {
+        Ok(rom) => Ok(rom),
+        Err(msg) => Err(util::Error::new(format!("[{}] {}", path, msg))),
+    }
 }
 
-fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
+fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, &str>
  {
     // NESファイルを読み込んで解析する
     // 対応するファイルのフォーマットは NES2.0 とする(つまりiNESもサポート)。
@@ -94,7 +104,7 @@ fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
         if rom_bin.len() >= HEADER_LEN {
             &rom_bin[..HEADER_LEN]
         } else {
-            return Err(Box::new(util::Error::Msg("header size is too short.".to_string())));
+            return Err("Header size is too short.");
         };
 
     if  header[0] != 0x4E ||
@@ -102,7 +112,7 @@ fn parse(rom_bin: &Vec<u8>) -> Result<Box<NesRom>, Box<dyn Error>>
         header[2] != 0x53 ||
         header[3] != 0x1A
     {
-        return Err(Box::new(util::Error::Msg("this file is not NES format.".to_string())));
+        return Err("Invalid format.");
     }
 
     let prg_lower = header[4];

@@ -7,6 +7,12 @@ pub enum Error {
     Msg(String),
 }
 
+impl Error {
+    pub fn new(msg: String) -> Box<dyn std::error::Error> {
+        Box::new(Error::Msg(msg))
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {

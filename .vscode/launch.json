@@ -20,7 +20,7 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": ["./ignores/nestest.nes"],
             "cwd": "${workspaceFolder}"
         },
         {

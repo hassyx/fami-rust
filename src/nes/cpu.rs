@@ -533,12 +533,14 @@ impl Cpu {
         log::debug!("S = {:#04X}({}), P = {:#010b}({})", self.regs.s, self.regs.s, self.regs.p, self.regs.p);
         log::debug!("<<<< END");
 
+        /*
         let mem02 = self.mem.ram[0x02 as usize];
         let mem03 = self.mem.ram[0x03 as usize];
         log::debug!("#### 0x02={:#02X}, 0x03={:#02X}", mem02, mem03);
         if mem02 != 0 || mem03 != 0  {
             std::process::exit(0);
         }
+        */
     }
 }
 
