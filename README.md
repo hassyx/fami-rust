@@ -13,8 +13,9 @@ MIT License
 `cargo build`
 
 ## Usage
-1. Dump the cartridge yourself, Or get a public domain ROM(\*). Supports NES 2.0 format.
-2. Run the rom image files. ex. `cargo run supermario.nes` or `fami-rust supermario.nes`.
-3. An empty window will appear (because graphics are not implemented yet). Application keeps running without graphics.
+1. If you own a NES cartridge and rom-damper, dump it to get a rom image. For your reference, I use [FC DUMPER](https://www.gamebank-web.com/).
+2. If you don't own these, you can use a copyright-friendly ROM images(\*). 
+3. Run the rom image file. ex: `cargo run supermario.nes` or `fami-rust supermario.nes`.
+4. An empty window will appear (because graphics are not implemented yet). Application keeps running without graphics.
 
 (\*) [nestest.nes](http://nickmass.com/images/nestest.nes) is available for comprehensive testing of all 6502 instructions.
