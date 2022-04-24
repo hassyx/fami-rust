@@ -3,7 +3,6 @@ mod nes;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use nes::ppu_databus;
 use nes::rom::NesRom;
 use nes::rom;
 use nes::util;
@@ -32,7 +31,7 @@ fn main() {
     ppu.borrow_mut().power_on();
 
     // RAMを初期化
-    let ppu_databus = Box::new(ppu_databus::DataBus::new(Rc::clone(&ppu)));
+    let ppu_databus = Rc::clone(&ppu);
     let ram = MemCon::new(ppu_databus);
 
     // CPUを初期化

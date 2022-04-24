@@ -4,31 +4,14 @@ mod ppu_state;
 mod vram;
 
 use bitflags::bitflags;
-
 use crate::nes::rom;
-use crate::nes::ppu::ppu_state::*;
+use crate::nes::ppu_databus::*;
+use self::ppu_state::*;
 
 /// スプライト用メモリ容量(bytes)
 pub const SPR_RAM_SIZE: usize = 256;
 /// 起動後、レジスタが外部からの呼びかけに応答を開始するまでのクロック数
-const WARM_UP_TIME: u64 = 29658;
-
-/*
-TODO: 実装に必要な情報
-◯初期化時に何が起こるか？
-◯レジスタの初期値は何か？
-・書き込み/読み込み禁止のレジスタに書き込み/読み込みした場合の振る舞い
-・ラッチの2回書き込みを実装すること
-・スプライトの評価とは？いつ行われるのか？(PPUSTATUS)
-・pre-render-lineとは何か？(PPUSTATUS)
-・Base NameTable Address には何の意味がある？
-・
-*/
-
-/*
-[スプライトと背景の描画]
-
-*/
+const WARM_UP_TIME: u64 = 29658 * 3;
 
 /*
 [背景の描画：大まかな流れ]
@@ -53,17 +36,6 @@ TODO: 実装に必要な情報
   属性テーブルも自動的に決まる。
   なお、属性テーブルは1バイト(8bit)で、1色(のindex)が2bitなので、
   「1バイト=4タイル分」を1まとめで色指定していることに注意。
-*/
-
-/*
-[スプライトの描画：詳細]
-・
-*/
-
-/*
-スプライトについても処理をまとめる。
-BGとスプライトの合成について調べる。
-書き込み専用、読み取り専用レジスタにアクセスした際の振る舞いを調べる。
 */
 
 bitflags! {
@@ -152,24 +124,24 @@ pub struct Registers {
     /// OAMDMA ($4014): 書き込み専用。OAM(SPR-RAM)へのDMA転送に使用する、
     /// source(CPU側のRAM)側のアドレスを指定するレジスタ。  
     pub oam_dma: u8,
-    /*
     /// CPUとPPUのデータ転送に利用するバス。実体は8bitのラッチ。
     /// PPUSCROLLとPPUADDRに 2バイト分の書き込みを行うために存在する。
     pub latch: u8,
-    */
 }
 
 impl Registers {
-    /// PPUSTATUSの読み取り。
-    pub fn read_reg_status() {
+    /// PPUSTATUSの読み取りと、各種情報のリセット
+    pub fn read_status(&self) -> u8 {
         // TODO: 読み込み時に以下が発生。
         // ・ラッチの状態をクリア。    
         // ・statusの7bit目を0にクリア。
+        0
     }
 }
 
 pub struct Ppu {
-    pub regs: Registers,
+    state: &'static PpuState,
+    regs: Registers,
     /// スプライト用のメモリ(256バイト)。
     /// OAM(Object Attribute Memory)ともいう。
     /// VRAMと違い、特別な対応が必要ないのでベタな配列として扱う。
@@ -177,23 +149,18 @@ pub struct Ppu {
     /// VRAMへのアクセスを司るコントローラ
     vram: Box<vram::MemCon>,
     clock_counter: u64,
-    fn_step: FnState,
-    state: TmpState,
-
-    // TODO: ここで持つべきはパターンテーブルではなく、
-    // Pistonに直接渡せるビットマップであるべき。
-    // そのビットマップは、パレットかCHR-RAMが更新された場合に再生成される。
 }
 
 impl Ppu {
     pub fn new(rom: &rom::NesRom) -> Ppu {
         let mut my = Ppu {
+            state: &STATE_IDLING,
             regs: Default::default(),
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
             vram: Box::new(vram::MemCon::new(rom.mirroring_type())),
             clock_counter: 0,
-            fn_step: Ppu::prepare_step,
-            state: Default::default(),
+            //fn_step: Ppu::prepare_step,
+            //state: Default::default(),
         };
         
         // CHR-ROM(パターンテーブル) を VRAM に展開。
@@ -209,16 +176,11 @@ impl Ppu {
         return my
     }
 
-    /// 起動後、29658クロックに「到達した」時点から書き込みを許可する。
-    pub fn is_ready(&self) -> bool {
-        self.clock_counter >= WARM_UP_TIME
-    }
-
     pub fn power_on(&mut self) {
         // 電源ON時のPPU状態
         // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
 
-        // スキャンラインを0に戻す
+        // TODO: 描画位置を0ピクセル目に移動する
 
         // レジスタ等の初期化
         // TODO: 規定クロック経過後はまた違う値を持つ可能性がある
@@ -228,10 +190,10 @@ impl Ppu {
         self.regs.oam_addr = 0;
         // !!!実装中!!!
 
-        // TODO: ROM
+        // TODO: そのままリセット処理まで実行
 
-        self.fn_step = Ppu::prepare_step;
-        self.state = Default::default();
+        //self.fn_step = Ppu::prepare_step;
+        //self.state = Default::default();
     }
     
     /// PPUを1クロック進める。
@@ -239,13 +201,12 @@ impl Ppu {
     pub fn step(&mut self) -> bool {
         self.clock_counter += 1;
         //self.state.counter += 1;
-        (self.fn_step)(self);
-
+        (self.state.step)(self);
         // print_ppu_state!(self);
         false
     }
 
-    pub fn render() {
+    fn render() {
         // TODO: PPUはCPUと独立したクロックカウンターを持ち、
         // そのクロックを基準として動く(CPUに合わせて3倍にはしない)
 
@@ -338,3 +299,16 @@ impl Ppu {
     }
 }
 
+impl PpuDataBus for Ppu {
+    fn write(&mut self, reg_type: PpuRegs, data: u8) {
+        (self.state.write)(self, reg_type, data);
+    }
+    
+    fn read(&mut self, reg_type: PpuRegs) -> u8 {
+        (self.state.read)(self, reg_type)
+    }
+
+    fn dma_write(&mut self, data: u8) {
+        self.dma_write(data);
+    }
+}

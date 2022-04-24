@@ -1,11 +1,14 @@
 //! CPU側の Memory Controller。
 //! ミラー領域への値の反映など、メモリへの読み書きを仲介する。
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use std::ops::RangeInclusive;
 use num_traits::FromPrimitive;
 
 use crate::util;
-use crate::nes::ppu_databus::DataBus;
+use crate::nes::ppu_databus::PpuDataBus;
 
 /// NESに搭載されている物理RAM容量(bytes)
 pub const PHYSICAL_RAM_SIZE: usize = 0x0800;
@@ -14,14 +17,14 @@ pub const LOGICAL_RAM_SPACE: usize = 0x10000;
 
 pub struct MemCon {
     pub ram: Box<[u8]>,
-    pub ppu_databus: Box<DataBus>,
+    pub ppu: Rc<RefCell<dyn PpuDataBus>>,
 }
 
 impl MemCon {
     
-    pub fn new(ppu_databus: Box<DataBus>) -> Self {
+    pub fn new(ppu_databus: Rc<RefCell<dyn PpuDataBus>>) -> Self {
         MemCon {
-            ppu_databus,
+            ppu: ppu_databus,
             ram: Box::new([0; LOGICAL_RAM_SPACE]),
         }
     }
@@ -59,9 +62,12 @@ impl MemCon {
                 self.ram[0x1000+addr] = data;
                 self.ram[0x1800+addr] = data;
             },
-            // PPUのOAMDMAへの書き込み
+            // PPUへのDMA転送開始アドレスの指定
             0x4014 => {
-                self.ppu_databus.write_oamdma(data);
+                // TODO:
+                // ここに書かれたアドレスをsrc, PPUのSPR-RAMをdstとしてDMA転送開始。
+                // 転送が完了するまでCPUは停止する。つまり新規stateが必要？
+                // メモリ上の値もユーザーが指定したデータ(アドレス値)を書き込んでおくこと！
             },
             // PPUのレジスタへの書き込み
             0x2000..=0x3FFF => {
@@ -70,7 +76,7 @@ impl MemCon {
                 // ここで必要なアドレスは最後の3bitだけ。
                 let offset = (addr as usize) & 0x0111;
                 let reg_type = FromPrimitive::from_usize(offset).unwrap();
-                self.ppu_databus.write(reg_type, data);
+                self.ppu.borrow_mut().write(reg_type, data);
 
                 // 改めて、ミラー領域への反映
                 // orignal:($2000-$2007) -> mirror:($2008-$3FFF, repeat evry 8 bytes)
@@ -96,17 +102,13 @@ impl MemCon {
     
     pub fn read(&mut self, addr: u16) -> u8 {
         let data = match addr {
-            // PPUのOAMDMAを読む
-            0x4014 => {
-                self.ppu_databus.read_oamdma()
-            },
             // PPUのレジスタを読む
             0x2000..=0x3FFF => {
                 // 仮にミラー領域を読み込んでいても、オリジナル領域($2000-$2007)からの読み込みとみなす。
                 // ここで必要なアドレスは最後の3bitだけ。
                 let offset = (addr as usize) & 0x0111;
                 let reg_type = FromPrimitive::from_usize(offset).unwrap();
-                self.ppu_databus.read(reg_type)
+                self.ppu.borrow_mut().read(reg_type)
             },
             // TODO: APUの対応が必要
             _ => {
