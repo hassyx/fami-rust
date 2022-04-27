@@ -17,5 +17,6 @@ MIT License
 2. If you don't own these, you can use a copyright-friendly ROM images(\*). 
 3. Run the rom image file. ex: `cargo run supermario.nes` or `fami-rust supermario.nes`.
 4. An empty window will appear (because graphics are not implemented yet). Application keeps running without graphics.
+5. You can see all CPU states are output to the console every clock.
 
 (\*) [nestest.nes](http://nickmass.com/images/nestest.nes) is available for comprehensive testing of all 6502 instructions.
