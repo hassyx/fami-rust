@@ -140,7 +140,6 @@ impl Registers {
 }
 
 pub struct Ppu {
-    state: &'static PpuState,
     regs: Registers,
     /// スプライト用のメモリ(256バイト)。
     /// OAM(Object Attribute Memory)ともいう。
@@ -155,7 +154,6 @@ pub struct Ppu {
 impl Ppu {
     pub fn new(rom: &rom::NesRom) -> Ppu {
         let mut my = Ppu {
-            state: &STATE_IDLING,
             regs: Default::default(),
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
             vram: Box::new(vram::MemCon::new(rom.mirroring_type())),
@@ -233,9 +231,7 @@ impl Ppu {
     /// NMI(vblank)が発生した場合はtrueを返す。
     pub fn step(&mut self) -> bool {
         self.clock_counter += 1;
-        //self.state.counter += 1;
-        (self.state.step)(self);
-        // print_ppu_state!(self);
+        //print_ppu_state!(self);
         false
     }
 
@@ -336,14 +332,36 @@ impl Ppu {
 
 impl PpuDataBus for Ppu {
     fn write(&mut self, reg_type: PpuRegs, data: u8) {
-        (self.state.write)(self, reg_type, data);
+        // バスを介した書き込みを行うと、ラッチも必ず更新される。
+        self.regs.databus = data;
+        // PPUのレジスタへの値の設定、かつミラー領域への反映
+        match reg_type {
+            PpuRegs::Ctrl => self.regs.ctrl = data,
+            PpuRegs::Mask => self.regs.mask = data,
+            PpuRegs::Status => (), // PPUSTATUSは読み込み専用
+            PpuRegs::OamAddr => self.regs.oam_addr = data,
+            PpuRegs::OamData => self.regs.oam_data = data,
+            PpuRegs::Scroll => self.regs.scroll = data,
+            PpuRegs::PpuAddr => self.regs.addr = data,
+            PpuRegs::PpuData => self.regs.data = data,
+        };
     }
     
     fn read(&mut self, reg_type: PpuRegs) -> u8 {
-        (self.state.read)(self, reg_type)
+        self.regs.databus = match reg_type {
+            PpuRegs::Ctrl => self.regs.databus,
+            PpuRegs::Mask => self.regs.databus,
+            PpuRegs::Status => self.regs.read_status(),
+            PpuRegs::OamAddr => self.regs.databus,
+            PpuRegs::OamData => self.regs.oam_data,
+            PpuRegs::Scroll => self.regs.databus,
+            PpuRegs::PpuAddr => self.regs.databus,
+            PpuRegs::PpuData => self.regs.data,
+        };
+        self.regs.databus
     }
 
     fn dma_write(&mut self, data: u8) {
-        self.dma_write(data);
+        todo!();
     }
 }

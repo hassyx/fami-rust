@@ -1,5 +1,6 @@
 //! PPUの内部状態
 
+/*
 use super::{Ppu, WARM_UP_TIME};
 use crate::nes::ppu_databus::*;
 
@@ -99,3 +100,4 @@ impl Ppu {
         self.regs.databus
     }
 }
+*/
