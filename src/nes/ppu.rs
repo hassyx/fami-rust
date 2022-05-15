@@ -125,8 +125,8 @@ pub struct Registers {
     /// source(CPU側のRAM)側のアドレスを指定するレジスタ。  
     pub oam_dma: u8,
     /// CPUとPPUのデータ転送に利用するバス。実体は8bitのラッチ。
-    /// PPUSCROLLとPPUADDRに 2バイト分の書き込みを行うために存在する。
-    pub latch: u8,
+    pub databus: u8,
+    // TODO: PPUSCROLLとPPUADDRのトグルを実現する隠しレジスタを実装する。
 }
 
 impl Registers {
@@ -149,6 +149,7 @@ pub struct Ppu {
     /// VRAMへのアクセスを司るコントローラ
     vram: Box<vram::MemCon>,
     clock_counter: u64,
+    reset_requested: bool,
 }
 
 impl Ppu {
@@ -159,6 +160,7 @@ impl Ppu {
             spr_ram: Box::new([0; SPR_RAM_SIZE]),
             vram: Box::new(vram::MemCon::new(rom.mirroring_type())),
             clock_counter: 0,
+            reset_requested: false,
             //fn_step: Ppu::prepare_step,
             //state: Default::default(),
         };
@@ -180,20 +182,51 @@ impl Ppu {
         // 電源ON時のPPU状態
         // https://wiki.nesdev.org/w/index.php/PPU_power_up_state
 
-        // TODO: 描画位置を0ピクセル目に移動する
-
-        // レジスタ等の初期化
-        // TODO: 規定クロック経過後はまた違う値を持つ可能性がある
+        // レジスタの初期化
         self.regs.ctrl = 0;
         self.regs.mask = 0;
         self.regs.status = 0;
         self.regs.oam_addr = 0;
-        // !!!実装中!!!
+        self.regs.databus = 0;
+        self.regs.scroll = 0;
+        self.regs.addr = 0;
+        self.regs.data = 0;
+        
+        self.signal_reset();
 
-        // TODO: そのままリセット処理まで実行
+        // TODO: 描画位置を左上に設定
+    }
 
-        //self.fn_step = Ppu::prepare_step;
-        //self.state = Default::default();
+    fn signal_reset(&mut self) {
+        // リセットの発生はVBLANKフラグが落ちるタイミングまで遅延される
+        self.reset_requested = true;
+    }
+
+    /// リセット処理。VBLANKフラグが落ちた際に実行される。
+    fn reset(&mut self) {
+        /*
+        リセット時の挙動：
+        - PPUCTRL、PPUMASK、PPUSCROLL、PPUADDR、PPUSCROLL / PPUADDRラッチ、
+          およびPPUDATA読み取りバッファをクリアする内部リセット信号がある。
+          (PPUSCROLLとPPUADDRをクリアすることは、VRAMアドレスラッチ(T)と
+          細かいXスクロールをクリアすることに相当する。VRAMアドレス自体(V)は
+          クリアされないので注意。)
+        - このリセット信号は、リセット時に設定され、VBlank、スプライト0、
+          およびオーバーフローフラグをクリアするのと同じ信号によってVBlankの
+          最後にクリアされる。つまりリセット発生〜VBlank終了時までの、
+          上記レジスタへの書き込みは無視される。
+        */
+        self.regs.ctrl = 0;
+        self.regs.mask = 0;
+        self.regs.status = 0;
+        self.regs.databus = 0;
+        self.regs.scroll = 0;
+        self.regs.data = 0;
+
+        // TODO: アドレス用の隠しレジスタも初期化する。
+        // というか、そもそも「隠しレジスタの内容が$2005, $2006の内容」なのだろうか？
+        
+        self.signal_reset();
     }
     
     /// PPUを1クロック進める。
@@ -207,6 +240,8 @@ impl Ppu {
     }
 
     fn render() {
+        // TODO: CPUとPPUの1クロックあたりに描画可能なピクセル数
+
         // TODO: PPUはCPUと独立したクロックカウンターを持ち、
         // そのクロックを基準として動く(CPUに合わせて3倍にはしない)
 

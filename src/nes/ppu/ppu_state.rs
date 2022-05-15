@@ -36,7 +36,7 @@ impl Ppu {
     /// PPUCTRL, PPUMASK, PPUSCROLL, PPUADDR への書き込みは無視される。
     pub fn write_idling(&mut self, reg_type: PpuRegs, data: u8) {
         // バスを介した書き込みを行うと、ラッチも必ず更新される。
-        self.regs.latch = data;
+        self.regs.databus = data;
         // PPUのレジスタへの値の設定、かつミラー領域への反映
         match reg_type {
             PpuRegs::Status => (), // PPUSTATUSは読み込み専用
@@ -54,7 +54,7 @@ impl Ppu {
     /// 全てのレジスタへの書き込みは正常に動作する。
     pub fn write_ready(&mut self, reg_type: PpuRegs, data: u8) {
         // バスを介した書き込みを行うと、ラッチも必ず更新される。
-        self.regs.latch = data;
+        self.regs.databus = data;
         // PPUのレジスタへの値の設定、かつミラー領域への反映
         match reg_type {
             PpuRegs::Ctrl => self.regs.ctrl = data,
@@ -72,30 +72,30 @@ impl Ppu {
     pub fn read_idling(&mut self, reg_type: PpuRegs) -> u8 {
         // 可能であればレジスタを読み込む。その際ラッチも更新される。
         // 読み込み禁止レジスタの場合は、代わりに現在のラッチの値を返す。
-        self.regs.latch = match reg_type {
-            PpuRegs::Ctrl => self.regs.latch,
-            PpuRegs::Mask => self.regs.latch,
+        self.regs.databus = match reg_type {
+            PpuRegs::Ctrl => self.regs.databus,
+            PpuRegs::Mask => self.regs.databus,
             PpuRegs::Status => self.regs.status,
-            PpuRegs::OamAddr => self.regs.latch,
+            PpuRegs::OamAddr => self.regs.databus,
             PpuRegs::OamData => self.regs.oam_data,
-            PpuRegs::Scroll => self.regs.latch,
-            PpuRegs::PpuAddr => self.regs.latch,
+            PpuRegs::Scroll => self.regs.databus,
+            PpuRegs::PpuAddr => self.regs.databus,
             PpuRegs::PpuData => self.regs.data,
         };
-        self.regs.latch
+        self.regs.databus
     }
 
     pub fn read_ready(&mut self, reg_type: PpuRegs) -> u8 {
-        self.regs.latch = match reg_type {
-            PpuRegs::Ctrl => self.regs.latch,
-            PpuRegs::Mask => self.regs.latch,
+        self.regs.databus = match reg_type {
+            PpuRegs::Ctrl => self.regs.databus,
+            PpuRegs::Mask => self.regs.databus,
             PpuRegs::Status => self.regs.read_status(),
-            PpuRegs::OamAddr => self.regs.latch,
+            PpuRegs::OamAddr => self.regs.databus,
             PpuRegs::OamData => self.regs.oam_data,
-            PpuRegs::Scroll => self.regs.latch,
-            PpuRegs::PpuAddr => self.regs.latch,
+            PpuRegs::Scroll => self.regs.databus,
+            PpuRegs::PpuAddr => self.regs.databus,
             PpuRegs::PpuData => self.regs.data,
         };
-        self.regs.latch
+        self.regs.databus
     }
 }
